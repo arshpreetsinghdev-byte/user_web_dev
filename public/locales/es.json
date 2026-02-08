@@ -1,0 +1,101 @@
+{
+  "common": {
+    "appName": "TaxiBook",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "logout": "Cerrar sesión",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "save": "Guardar",
+    "loading": "Cargando...",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "apply": "Aplicar",
+    "clear": "Limpiar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Hecho",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "view": "Ver"
+  },
+  "auth": {
+    "loginTitle": "Bienvenido de nuevo",
+    "signupTitle": "Crear cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "loginSuccess": "Sesión iniciada correctamente",
+    "signupSuccess": "Cuenta creada correctamente",
+    "logoutSuccess": "Sesión cerrada correctamente",
+    "name": "Nombre completo",
+    "phone": "Número de teléfono",
+    "orContinueWith": "O continuar con",
+    "google": "Google",
+    "facebook": "Facebook",
+    "termsAgree": "Acepto los Términos y Condiciones"
+  },
+  "landing": {
+    "hero": "Reserva tu viaje en segundos",
+    "subtitle": "Viajes rápidos, confiables y asequibles al alcance de tu mano",
+    "pickupPlaceholder": "Ingresa ubicación de recogida",
+    "dropoffPlaceholder": "Ingresa ubicación de destino",
+    "bookNow": "Reservar ahora",
+    "searchRide": "Buscar un viaje"
+  },
+  "booking": {
+    "selectVehicle": "Seleccionar vehículo",
+    "vehicleTypes": "Tipos de vehículos",
+    "estimatedPrice": "Precio estimado",
+    "estimatedTime": "Tiempo estimado",
+    "distance": "Distancia",
+    "selectService": "Seleccionar servicio",
+    "applyCoupon": "Aplicar cupón",
+    "payment": "Pago",
+    "confirmBooking": "Confirmar reserva",
+    "bookingSuccess": "¡Reserva confirmada!",
+    "rideDetails": "Detalles del viaje"
+  },
+  "wallet": {
+    "balance": "Saldo de billetera",
+    "addMoney": "Agregar dinero",
+    "transactions": "Transacciones",
+    "recentTransactions": "Transacciones recientes",
+    "noTransactions": "Sin transacciones aún"
+  },
+  "history": {
+    "rideHistory": "Historial de viajes",
+    "completedRides": "Viajes completados",
+    "cancelledRides": "Viajes cancelados",
+    "noRides": "Sin viajes aún",
+    "viewDetails": "Ver detalles"
+  },
+  "payment": {
+    "paymentMethod": "Método de pago",
+    "selectMethod": "Seleccionar método de pago",
+    "card": "Tarjeta de crédito/débito",
+    "wallet": "Billetera",
+    "cash": "Efectivo",
+    "upi": "UPI"
+  },
+  "profile": {
+    "myProfile": "Mi perfil",
+    "editProfile": "Editar perfil",
+    "name": "Nombre",
+    "phone": "Número de teléfono",
+    "updateSuccess": "Perfil actualizado correctamente"
+  },
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "invalidEmail": "Correo electrónico inválido",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "serverError": "Algo salió mal",
+    "networkError": "Error de red. Inténtalo de nuevo"
+  }
+}

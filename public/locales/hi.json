@@ -1,0 +1,54 @@
+{
+  "common": {
+    "appName": "TaxiBook",
+    "login": "लॉगिन",
+    "signup": "साइन अप",
+    "logout": "लॉगआउट",
+    "submit": "सबमिट करें",
+    "cancel": "रद्द करें",
+    "continue": "जारी रखें",
+    "save": "सहेजें",
+    "loading": "लोड हो रहा है...",
+    "search": "खोजें",
+    "filter": "फ़िल्टर",
+    "apply": "लागू करें",
+    "confirm": "पुष्टि करें"
+  },
+  "auth": {
+    "loginTitle": "वापसी पर स्वागत है",
+    "signupTitle": "खाता बनाएं",
+    "email": "ईमेल पता",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "noAccount": "खाता नहीं है?",
+    "hasAccount": "पहले से खाता है?"
+  },
+  "landing": {
+    "hero": "अपनी सवारी सेकंड में बुक करें",
+    "subtitle": "तेज, विश्वसनीय और किफायती सवारी आपकी उंगलियों पर",
+    "pickupPlaceholder": "पिकअप स्थान दर्ज करें",
+    "dropoffPlaceholder": "ड्रॉपऑफ स्थान दर्ज करें",
+    "bookNow": "अभी बुक करें",
+    "searchRide": "सवारी खोजें",
+    "features": "हमें क्यों चुनें",
+    "feature1Title": "तेज़ बुकिंग",
+    "feature1Desc": "30 सेकंड से कम में सवारी बुक करें",
+    "feature2Title": "सुरक्षित और सुरक्षित",
+    "feature2Desc": "सत्यापित ड्राइवर और सुरक्षित भुगतान",
+    "feature3Title": "24/7 समर्थन",
+    "feature3Desc": "हम किसी भी समय मदद के लिए यहाँ हैं"
+  },
+  "booking": {
+    "selectVehicle": "वाहन चुनें",
+    "confirmBooking": "बुकिंग की पुष्टि करें"
+  },
+  "profile": {
+    "helpSupport": "सहायता और समर्थन"
+  },
+  "errors": {
+    "required": "यह फ़ील्ड आवश्यक है",
+    "invalidEmail": "अमान्य ईमेल पता",
+    "serverError": "कुछ गलत हो गया"
+  }
+}

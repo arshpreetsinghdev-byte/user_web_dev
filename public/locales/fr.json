@@ -1,0 +1,36 @@
+{
+  "common": {
+    "appName": "TaxiBook",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "logout": "Déconnexion",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "save": "Enregistrer",
+    "loading": "Chargement...",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "apply": "Appliquer",
+    "confirm": "Confirmer"
+  },
+  "auth": {
+    "loginTitle": "Bon retour",
+    "signupTitle": "Créer un compte",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "noAccount": "Vous n'avez pas de compte?",
+    "hasAccount": "Vous avez déjà un compte?"
+  },
+  "booking": {
+    "selectVehicle": "Sélectionner un véhicule",
+    "confirmBooking": "Confirmer la réservation"
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "invalidEmail": "Adresse e-mail invalide",
+    "serverError": "Une erreur s'est produite"
+  }
+}
