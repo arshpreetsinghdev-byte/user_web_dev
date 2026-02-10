@@ -44,6 +44,11 @@ export function useFindADrivers() {
 		setRouteData,
 		setAvailableVehicles,
 		setIsLoading,
+		setPromotions,
+		setAutosPromotions,
+		setAutosCoupons,
+		appliedCoupon,
+		allPromotions,
 	} = useBookingStore();
 
 	// Fetch configuration whenever pickup coordinates change
@@ -89,12 +94,27 @@ export function useFindADrivers() {
 	}, [pickup?.lat, pickup?.lng, setPickupCityCurrency, setPickupCityOffset, setSelectedService, setServiceData]);
 
 	const calculateFareAndFindDrivers = useCallback(async (): Promise<FindDriversResult> => {
+		// Get latest state directly from store to avoid dependency loop
+		const state = useBookingStore.getState();
+		const {
+			pickup: currentPickup,
+			dropoff: currentDropoff,
+			stops: currentStops,
+			scheduledDateTime: currentScheduledDateTime,
+			pickupLocation: currentPickupLocation,
+			dropoffLocation: currentDropoffLocation,
+			selectedService: currentSelectedService,
+			pickupCityOffset: currentPickupCityOffset,
+			allPromotions: currentAllPromotions,
+			appliedCoupon: currentAppliedCoupon,
+		} = state;
+
 		// Validate input
 		const validation = bookingValidator.validateBookingForm({
-			pickup,
-			destination: dropoff,
-			stops,
-			scheduledDateTime,
+			pickup: currentPickup,
+			destination: currentDropoff,
+			stops: currentStops,
+			scheduledDateTime: currentScheduledDateTime,
 		});
 
 		if (!validation.isValid) {
@@ -106,13 +126,13 @@ export function useFindADrivers() {
 
 		try {
 			// Calculate route
-			const waypoints = stops
+			const waypoints = currentStops
 				.filter((stop) => stop.latitude && stop.longitude)
 				.map((stop) => ({ lat: stop.latitude, lng: stop.longitude }));
 
 			const routeData = await bookingService.calculateRoute({
-				origin: { lat: pickup!.lat, lng: pickup!.lng },
-				destination: { lat: dropoff!.lat, lng: dropoff!.lng },
+				origin: { lat: currentPickup!.lat, lng: currentPickup!.lng },
+				destination: { lat: currentDropoff!.lat, lng: currentDropoff!.lng },
 				waypoints: waypoints.length ? waypoints : undefined,
 			});
 
@@ -129,51 +149,69 @@ export function useFindADrivers() {
 				durationText: routeData.durationText,
 			};
 
+			// Find appropriate promo/coupon fields
+			const appliedPromo = currentAllPromotions.find(p => p.id === currentAppliedCoupon);
+			const couponData = appliedPromo?.type === 'autos_coupon' ? (appliedPromo.originalData as any) : null;
+			const hasAccountId = couponData && couponData.account_id !== undefined && couponData.account_id !== null;
+
+			console.log("🎫 Applied Coupon Info:", {
+				appliedCoupon: currentAppliedCoupon,
+				type: appliedPromo?.type,
+				hasAccountId,
+				account_id: couponData?.account_id,
+				account_no: couponData?.account_no
+			});
+
 			// Find drivers
 			const result = await findAvailableDrivers(
-				pickupLocation,
-				dropoffLocation,
+				currentPickupLocation,
+				currentDropoffLocation,
 				distanceTimeResult,
 				{
-					serviceId: selectedService?.id,
-					scheduledFareFlow: !!scheduledDateTime,
-					rideDateTime: scheduledDateTime || undefined,
-					timezoneOffset: pickupCityOffset || 330,
+					serviceId: currentSelectedService?.id,
+					scheduledFareFlow: !!currentScheduledDateTime,
+					rideDateTime: currentScheduledDateTime || undefined,
+					timezoneOffset: currentPickupCityOffset || 330,
+					promoToApply: hasAccountId ? undefined : (currentAppliedCoupon ?? undefined),
+					couponToApply: hasAccountId ? couponData.account_id : undefined,
 				}
 			);
-			const vehicles = result?.regions;
-			console.log("FETCHED VEHICLES +++++++",vehicles)
+			const vehicles = result?.regions || [];
+			const promotions = result?.promotions || [];
+			const autosPromotions = result?.autos_promotions || [];
+			const autosCoupons = result?.autos_coupons || [];
+
+			setPromotions(promotions);
+			setAutosPromotions(autosPromotions);
+			setAutosCoupons(autosCoupons);
+
+			console.log("FETCHED VEHICLES +++++++", vehicles)
 			// Filter by supported ride types (gracefully fallback to all)
-			const supportedRideTypes = (selectedService?.supported_ride_type || [])
+			const supportedRideTypes = (currentSelectedService?.supported_ride_type || [])
 				.map((rt: number | string) => Number(rt))
 				.filter((rt: number) => !Number.isNaN(rt));
 
 			const filtered = filterVehiclesByRideType(vehicles, supportedRideTypes);
-			console.log("fine till here -->",filtered)
+			console.log("fine till here -->", filtered)
 			setAvailableVehicles(filtered);
 			console.log("Returning");
 			return {
 				vehicles: filtered,
 				route: routeData,
 			};
-		} catch(err){
+		} catch (err) {
 			console.log("ERROR IN CALCULTING FARE ", err);
 		} finally {
 			setIsFinding(false);
 			setIsLoading(false);
 		}
 	}, [
-		dropoff,
-		dropoffLocation,
-		pickup,
-		pickupCityOffset,
-		pickupLocation,
-		scheduledDateTime,
-		selectedService,
 		setAvailableVehicles,
 		setIsLoading,
+		setPromotions,
+		setAutosPromotions,
+		setAutosCoupons,
 		setRouteData,
-		stops,
 	]);
 
 	return {

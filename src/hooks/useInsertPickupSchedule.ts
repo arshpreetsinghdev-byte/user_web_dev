@@ -29,6 +29,8 @@ export function useInsertPickupSchedule() {
     selectedCardId,
     selectedSquareCardId,
     scheduledDateTime,
+    appliedCoupon,
+    allPromotions,
   } = useBookingStore();
 
   const submitPickupSchedule = useCallback(async (): Promise<InsertPickupScheduleResponse> => {
@@ -66,6 +68,10 @@ export function useInsertPickupSchedule() {
       }
     }
 
+    const appliedPromo = allPromotions.find(p => p.id === appliedCoupon);
+    const couponData = appliedPromo?.type === 'autos_coupon' ? (appliedPromo.originalData as any) : null;
+    const accountId = couponData && couponData.account_id !== undefined && couponData.account_id !== null ? couponData.account_id : undefined;
+
     const payload: InsertPickupScheduleRequest = {
       sessionId,
       sessionIdentifier,
@@ -91,6 +97,8 @@ export function useInsertPickupSchedule() {
             selectedPaymentMethod === "square_card" ? 73 : 1, // Default to cash if unknown
       cardId: selectedPaymentMethod === "stripe_card" ? selectedCardId :
         selectedPaymentMethod === "square_card" ? selectedSquareCardId : undefined,
+      promoToApply: appliedCoupon ?? undefined,
+      couponToApply: accountId,
     };
 
     setIsSubmitting(true);
@@ -113,6 +121,8 @@ export function useInsertPickupSchedule() {
     selectedPaymentMethod,
     selectedCardId,
     selectedSquareCardId,
+    appliedCoupon,
+    allPromotions,
     selectedRegion,
     selectedService?.id,
     sessionId,

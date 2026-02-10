@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchWalletBalance, getTransactionHistory, rechargeWallet } from '@/lib/api/wallet.api';
 import { useAuthStore } from '@/stores/auth.store';
 import { useGeolocation } from './useGeolocation';
+import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 import { toast } from 'sonner';
 
 export interface StripeCard {
@@ -71,9 +72,13 @@ export function useWallet() {
         ? responseData.square_cards
         : (squareConfig?.cards_data || []);
 
+    const operatorCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+        useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
+        '₹';
+
     return {
         balance: responseData?.jugnoo_balance || 0,
-        currency: responseData?.currency || '₹',
+        currency: operatorCurrency || '₹',
         transactions: transactionsQuery.data?.transactions || [],
         stripeCards,
         squareCards,
@@ -98,7 +103,7 @@ export function useWallet() {
                 toast.error("Minimum recharge amount is 50");
                 return;
             }
-            
+
             return rechargeWallet({
                 driver_phone_no: user.phone_no.replace(/^\+/, ''),
                 amount,

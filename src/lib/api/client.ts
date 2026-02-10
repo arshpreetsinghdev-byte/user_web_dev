@@ -21,7 +21,7 @@ const handleSessionExpired = () => {
   if (typeof window !== 'undefined') {
     // Open login modal instead of redirecting
     useUIStore.getState().openAuthModal('login');
-    
+
     // Only redirect if not already on home page
     const currentPath = window.location.pathname;
     if (!currentPath.includes('/home') && !currentPath.includes('/book')) {
@@ -49,7 +49,7 @@ apiClient.interceptors.request.use(
       '/open/v1/fetch_configuration_user_web',
       '/open/v1/generate_customer_login_otp',
       '/open/v1/verify_customer_otp',
-      '/open/v1/find_a_driver',
+      // Removed '/open/v1/find_a_driver' - should use user session when authenticated
 
       '/open/v1/add_card_3d',
       '/open/v1/confirm_card_3d',
@@ -63,7 +63,7 @@ apiClient.interceptors.request.use(
       '/open/v1/update_user_profile',
       '/open/v1/insert_pickup_schedule',
       '/open/v1/add_sqaure_card',
-      '/open/v1/fetch_wallet_balance',  
+      '/open/v1/fetch_wallet_balance',
     ];
     const isSystemEndpoint = systemEndpoints.some(endpoint => config.url?.includes(endpoint));
     const isUserEndpoint = userEndpoints.some(endpoint => config.url?.includes(endpoint));

@@ -15,6 +15,7 @@ import type {
   UpdateProfileRequest,
   VerifyOtpResponse,
   GetUserProfileResponse,
+  UpdateProfileResponse,
 } from '@/types';
 
 // Session validation cache to prevent excessive API calls
@@ -23,7 +24,7 @@ const VALIDATION_CACHE_DURATION = 5 * 60 * 1000; // 30 seconds
 
 interface AuthState {
   user: User | null;
-  token: string | null; 
+  token: string | null;
   phone_no?: string;
   sessionId: string | null; // Global session from runInitTasks - never cleared
   sessionIdentifier: string | null; // Global session from runInitTasks - never cleared
@@ -46,7 +47,7 @@ interface AuthState {
   updateUser: (user: Partial<User>) => void;
 
   generateOtp: (data: GenerateOtpRequest) => Promise<void>;
-  updateProfile: (data: UpdateProfileRequest) => Promise<void>;
+  updateProfile: (data: UpdateProfileRequest) => Promise<UpdateProfileResponse>;
   fetchProfile: () => Promise<GetUserProfileResponse>;
   validateSession: () => Promise<boolean>;
   clearValidationCache: () => void;
@@ -241,12 +242,14 @@ export const useAuthStore = create<AuthState>()(
                   }
                   : null,
                 isAuthenticated: currentState.userSessionId ? true : state.isAuthenticated,
-                isLoading: false,
-                error: null,
               }));
+            } else if (response.flag === 144) {
+              console.warn('⚠️ Profile update warning:', response.message);
+              set({ isLoading: false, error: response.error || response.message });
             } else {
               throw new Error(response.error || response.message || 'Failed to update profile');
             }
+            return response;
           } catch (error: any) {
             set({
               isLoading: false,
@@ -259,7 +262,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true, error: null });
           try {
             const response = await getUserProfile();
-        
+
             console.log('📥 Fetch Profile Response:', response);
 
             if (response.flag === 143 && response.data) {
@@ -268,7 +271,7 @@ export const useAuthStore = create<AuthState>()(
               // Update user in store with fetched profile data
               set((state) => ({
                 user: {
-                  user_id:  profileData.user_id || state.user?.user_id || '', // Keep existing ID or use empty string
+                  user_id: profileData.user_id || state.user?.user_id || '', // Keep existing ID or use empty string
                   name: profileData.user_name || state.user?.name || '',
                   email: profileData.user_email || state.user?.email || '',
                   phone_no: profileData.phone_no || state.user?.phone_no || '',
@@ -310,14 +313,14 @@ export const useAuthStore = create<AuthState>()(
 
         validateSession: async (): Promise<boolean> => {
           const state = get();
-          
+
           // If not authenticated, no need to validate
           if (!state.isAuthenticated || !state.userSessionId || !state.userSessionIdentifier) {
             return false;
           }
 
           const now = Date.now();
-          
+
           // Use cached result if validation was recent (prevents excessive API calls)
           if (now - lastValidationTime < VALIDATION_CACHE_DURATION) {
             console.log('✅ Using cached session validation');
@@ -350,11 +353,11 @@ export const useAuthStore = create<AuthState>()(
             }
           } catch (error: any) {
             console.error('❌ Session validation error:', error);
-            
+
             // If authentication error, logout
-            if (error.response?.data?.flag === 101 || 
-                error.message?.toLowerCase().includes('authentication') ||
-                error.message?.toLowerCase().includes('session')) {
+            if (error.response?.data?.flag === 101 ||
+              error.message?.toLowerCase().includes('authentication') ||
+              error.message?.toLowerCase().includes('session')) {
               console.warn('⚠️ Session error detected - Logging out');
               toast.error('Your session has expired. Please login again.');
               get().logout();
@@ -367,7 +370,7 @@ export const useAuthStore = create<AuthState>()(
               }
               return false;
             }
-            
+
             return false;
           }
         },

@@ -20,6 +20,7 @@ import { AddSquareCardModal } from "@/components/payment/AddSquareCardModal";
 import HeaderActions from "@/components/shared/HeaderActions";
 import { useSessionGuard } from "@/hooks/useSessionGuard";
 import { navigateWithLoader } from "@/lib/utils/navigationLoader";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 import {
   TitleBlock,
@@ -63,6 +64,8 @@ export default function RideSummaryPage() {
     selectedSquareCardId,
     setSelectedSquareCardId,
     setBookingResult,
+    appliedCoupon,
+    allPromotions,
   } = useBookingStore();
   const { submitPickupSchedule, isSubmitting } = useInsertPickupSchedule();
 
@@ -100,7 +103,10 @@ export default function RideSummaryPage() {
   }
 
   const region = selectedRegion;
-  const currencySymbol = region.region_fare?.currency || "₹";
+  const operatorCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+    useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
+    '₹';
+  const currencySymbol = operatorCurrency || region.region_fare?.currency;
 
   const subProgress = useMemo(() => {
     return selectedPaymentMethod ? 100 : 0;
@@ -117,6 +123,10 @@ export default function RideSummaryPage() {
       })
       .filter((svc): svc is { id: number; name: string; price: number } => svc !== null);
   }, [selectedServices, region.vehicle_services]);
+
+  const appliedCouponData = useMemo(() => {
+    return allPromotions.find(p => p.id === appliedCoupon);
+  }, [appliedCoupon, allPromotions]);
 
   const baseFare = region.region_fare?.fare_float ?? 0;
   const additionalTotal = additionalServices.reduce(
@@ -351,6 +361,7 @@ export default function RideSummaryPage() {
               subtotal={subtotal}
               total={total}
               onProceed={handleProceed}
+              couponCode={appliedCouponData?.title}
             />
           </div>
 
