@@ -70,11 +70,23 @@ export const findAvailableDrivers = async (
     body.set('pickup_time', formatDateTime(options.rideDateTime, options.timezoneOffset));
   }
 
+  // Add promo to apply
+  if (options.promoToApply !== undefined) {
+    body.set('promo_to_apply', String(options.promoToApply));
+  }
+
+  // Add coupon to apply
+  if (options.couponToApply !== undefined) {
+    console.log("🎟️ Setting coupon_to_apply:", options.couponToApply);
+    body.set('coupon_to_apply', String(options.couponToApply));
+  }
+
   try {
     console.log('🚗 Finding drivers (form)...', Object.fromEntries(body.entries()));
+    // Session headers are automatically added by API client interceptor based on auth state
 
     const data = await bookingService.findDrivers(body, operatorToken);
-    console.log('🚗 Find drivers response:', data );
+    console.log('🚗 Find drivers response:', data);
     // Check for success (flag 175)
     if (data.flag === 175) {
       console.log('✅ Drivers found:', data?.regions || 0);
@@ -82,7 +94,7 @@ export const findAvailableDrivers = async (
     } else {
       throw new Error('Failed to find drivers');
     }
-  } catch (error: any) {  
+  } catch (error: any) {
     console.error('❌ Find driver error:', error);
     throw new Error(error.message || 'Failed to find available vehicles');
   }

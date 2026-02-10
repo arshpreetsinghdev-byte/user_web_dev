@@ -518,7 +518,88 @@ export interface VehicleRegion {
   instant_ride_disable?: number;
   [key: string]: any;
 }
-export type FindDriversResponse = any;
+// export type FindDriversResponse = any;
+
+export interface Promotion {
+  promo_id: number;
+  title: string;
+  promo_type: number;
+  benefit_type: number;
+  is_active: number;
+  city: number;
+  start_from: string;
+  end_on: string;
+  terms_n_conds: string;
+  per_user_limit: number;
+  per_day_limit: number;
+  allowed_vehicles: number[];
+}
+
+export interface AutosPromotion {
+  promo_id: number;
+  title: string;
+  is_active: number;
+  benefit_type: number;
+  allowed_vehicles: number[];
+  promo_type: number;
+  start_from: string;
+  end_on: string;
+  terms_n_conds: string;
+  per_user_limit: number;
+  per_day_limit: number;
+}
+
+export interface AutosCoupon {
+  coupon_id: number;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  discount: number;
+  discount_percentage: number;
+  discount_maximum: number;
+  maximum: number;
+  benefit_type: number;
+  allowed_vehicles: number[];
+  coupon_type: number;
+  status: number;
+  expiry_date: string;
+  start_time: string;
+  end_time: string;
+  type: number;
+  account_id?: number;
+  account_no?: string;
+}
+
+export interface FareStructureSummary {
+  vehicle_type: number;
+  base_fare: number;
+  fare_per_km: number;
+  fare_per_min: number;
+  minimum_fare: number;
+  display_base_fare: string;
+}
+
+export interface RegionsSummary {
+  region_id: number;
+  region_name: string;
+  vehicle_type: number;
+  max_people: number;
+  fare_range: string;
+  distance_unit: string;
+}
+
+export interface FindDriversResponse {
+  flag: number;
+  drivers?: any[]; // Keep as any if not fully defined
+  regions?: VehicleRegion[]; // Usually mapped to this
+  promotions?: Promotion[];
+  coupons?: any[];
+  autos_promotions?: AutosPromotion[];
+  autos_coupons?: AutosCoupon[];
+  fare_structure_summary?: FareStructureSummary[];
+  regions_summary?: RegionsSummary[];
+  [key: string]: any;
+}
 
 export interface FindDriverRequest {
   latitude: number;
@@ -544,6 +625,8 @@ export interface FindDriverOptions {
   rideDateTime?: Date;
   timezoneOffset?: number;
   scheduledFareFlow?: boolean;
+  promoToApply?: number;
+  couponToApply?: string | number;
 }
 
 export interface InsertPickupScheduleRequest {
@@ -569,6 +652,8 @@ export interface InsertPickupScheduleRequest {
   flightNumber?: string; // for flight services
   customerName?: string; // Book for someone else
   customerPhoneNo?: string; // Book for someone else
+  promoToApply?: number;
+  couponToApply?: number;
 }
 
 export interface InsertPickupScheduleResponse {

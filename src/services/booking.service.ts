@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { mapsService } from "@/lib/google-maps/GoogleMapsService";
 import type { FindDriversResponse, InsertPickupScheduleResponse } from "@/types";
 import { toast } from "sonner";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 export interface FetchConfigurationParams {
   latitude: number;
@@ -45,7 +46,7 @@ export const bookingService = {
       }
     );
     // console.log("config response::", response?.data.flag);
-    if(response?.data?.flag === 144){
+    if (response?.data?.flag === 144) {
       toast.error('Selected city is outside the service area');
       return response?.data;
     }
@@ -54,6 +55,15 @@ export const bookingService = {
         (s: any) => s.type !== "rental" && s.type !== "car_rental"
       );
     }
+
+    // Force operator currency as priority
+    const operatorCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+      useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol;
+
+    if (operatorCurrency && response.data?.data) {
+      response.data.data.currency = operatorCurrency;
+    }
+
     return response.data;
   },
 
@@ -85,6 +95,8 @@ export const bookingService = {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           operator_token: operatorToken,
+          // Session headers (x-jugnoo-session-id, x-jugnoo-session-identifier) 
+          // are automatically added by the API client interceptor based on auth state
         },
       }
     );

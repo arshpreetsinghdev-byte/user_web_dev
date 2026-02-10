@@ -45,14 +45,14 @@ export function useProfile() {
   const fetchProfile = useCallback(async () => {
     try {
       console.log('📥 Fetching user profile...');
-      
+
       // Validate session before fetching
       const isValid = await validateSession();
       if (!isValid) {
         console.warn('⚠️ Session invalid, skipping profile fetch');
         return;
       }
-      
+
       await fetchProfileAPI();
       console.log('✅ Profile fetched successfully');
     } catch (error: any) {
@@ -64,25 +64,46 @@ export function useProfile() {
   /**
    * Update user profile
    */
+  /**
+   * Validate email format
+   */
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  /**
+   * Update user profile
+   */
   const updateProfile = useCallback(async (t: (key: string) => string) => {
     if (!fullName.trim() || !email.trim()) {
       toast.error(t('profile.fillRequired') || 'Please fill required fields');
       return;
     }
+
+    if (!validateEmail(email)) {
+      toast.error(t('profile.invalidEmail') || 'Please enter a valid email address');
+      return;
+    }
+
     try {
       console.log('💾 Updating profile:', { fullName, email });
 
-      await updateProfileAPI({
+      const response = await updateProfileAPI({
         updated_user_name: fullName,
         updated_user_email: email,
         image_file: avatarFile || undefined
       });
+      console.log("Profile response!!!!!!!!!", response);
+      if (response && response.flag === 144) {
+        // Handle warning case
+        toast.warning(response.error || response.message || t('profile.emailTaken') || 'The email address provided is already registered with us.');
+      } else {
+        // Fetch updated profile to refresh the avatar URL
+        await fetchProfileAPI();
 
-      // Fetch updated profile to refresh the avatar URL
-      await fetchProfileAPI();
-
-      toast.success(t('profile.updateSuccess') || 'Profile updated successfully');
-      resetEditing();
+        toast.success(t('profile.updateSuccess') || 'Profile updated successfully');
+        resetEditing();
+      }
     } catch (error: any) {
       console.error('❌ Profile update error:', error);
       toast.error(error.message || t('profile.updateFailed') || 'Failed to update profile');
@@ -104,7 +125,8 @@ export function useProfile() {
   /**
    * Check if form is valid
    */
-  const isFormValid = !!(fullName.trim() && email.trim());
+  const isEmailValid = validateEmail(email);
+  const isFormValid = !!(fullName.trim() && isEmailValid);
 
   return {
     // State
@@ -125,5 +147,6 @@ export function useProfile() {
     fetchProfile,
     updateProfile,
     handleAvatarChange,
+    isEmailValid,
   };
 }

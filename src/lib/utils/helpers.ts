@@ -100,5 +100,13 @@ export function buildInsertPickupScheduleBody(req: InsertPickupScheduleRequest):
 		body.set('customer_phone_no', req.customerPhoneNo);
 	}
 
+	if (req.promoToApply !== undefined) {
+		body.set('promo_to_apply', String(req.promoToApply));
+	}
+
+	if (req.couponToApply !== undefined) {
+		body.set('coupon_to_apply', String(req.couponToApply));
+	}
+
 	return body;
 }

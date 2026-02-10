@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronUp, ChevronDown, Check } from "lucide-react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -18,15 +18,18 @@ import { useBookingForm } from "./useBookingForm";
 import { bookingValidator } from "@/lib/validators/bookingValidator";
 import { bookingService } from "@/services/booking.service";
 import IncrementDecrement from "@/components/IncrementDecrement";
+import AutosCouponCard from "@/components/AutosCouponCard";
 
 import { useBookingStore } from "@/stores/booking.store";
 import { useUIStore } from "@/stores/ui.store";
 import { useFindADrivers } from "@/hooks/useFindADrivers";
 
-const RideBookingForm =   ({ className, variant }: { className?: string; variant?: "outline" | "filled" }) => {
+const RideBookingForm = ({ className, variant }: { className?: string; variant?: "outline" | "filled" }) => {
   const [mounted, setMounted] = useState(false);
   const [isBookForOtherOpen, setIsBookForOtherOpen] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(true);
+  const [couponsOpen, setCouponsOpen] = useState(true);
   const router = useRouter();
   const params = useParams() as { locale?: string };
   const pathname = usePathname() || "";
@@ -51,6 +54,9 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
     setCustomerPhone,
     customerCountryCode,
     setCustomerCountryCode,
+    allPromotions,
+    appliedCoupon,
+    setAppliedCoupon,
   } = useBookingStore();
   const { showToast } = useUIStore();
   const { isFinding, calculateFareAndFindDrivers } = useFindADrivers();
@@ -75,9 +81,8 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
   // Handle Book Now button click
   const handleBookNow = useCallback(async () => {
     setSelectedRegion(null);
-    setSelectedServices([]);
     setAvailableVehicles([]);
-    console.log("validation data:::::::::::",pickup, destination, stops, scheduledDateTime);
+    console.log("validation data:::::::::::", pickup, destination, stops, scheduledDateTime);
     const validation = bookingValidator.validateBookingForm({
       pickup,
       destination,
@@ -129,7 +134,6 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
 
   const handleCalculateFare = useCallback(async () => {
     setSelectedRegion(null);
-    setSelectedServices([]);
     setAvailableVehicles([]);
     setCurrentStepIndex(0);
 
@@ -178,18 +182,21 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
     setCurrentStepIndex,
   ]);
 
-  // Auto-calculate fare when service changes and we are on the book page
+  // Auto-calculate fare when service changes, coupon changes, and we are on the book page
   useEffect(() => {
     if (pathname.includes("/book") && selectedService && pickup?.address && destination?.address) {
-      handleCalculateFare();
+      const timer = setTimeout(() => {
+        handleCalculateFare();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [selectedService, pickup?.address, destination?.address, handleCalculateFare, pathname]);
+  }, [selectedService, pickup?.address, destination?.address, handleCalculateFare, pathname, appliedCoupon]);
 
   const isBookPage = pathname.includes("/book");
   // console.log("is book page::", isBookPage);
   const handleSubmit = isBookPage ? handleCalculateFare : handleBookNow;
   const showAdditionalOptions = showOtherOptions;
-  
+
   // console.log("selectedService", selectedService?.type)
   return (
     <div
@@ -198,7 +205,7 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
       <h2
         className={`text-base lg:text-xl font-semibold text-white mb-2 lg:mb-4 shrink-0 ${variant === "outline" ? "text-black!" : ""}`}
       >
-        Where do you want to Go?
+        Book A Ride
       </h2>
 
       <div className={`flex flex-col flex-1 ${!isBookPage ? "overflow-y-auto" : ""} lg:pr-2 space-y-0.5 lg:space-y-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-white/30`}>
@@ -233,7 +240,7 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
             type="button"
             onClick={() => setShowOtherOptions(!showOtherOptions)}
             variant="ghost"
-            className={`w-full justify-between h-auto p-3 ${variant === "outline" ? "text-gray-700 hover:bg-gray-50" : "text-white hover:bg-white/10"}`}
+            className={`w-full justify-between h-auto p-3 ${variant === "outline" ? "text-gray-700 hover:bg-gray-50" : "text-white bg-white/10"}`}
           >
             <span className="font-medium">Other Options</span>
             {showOtherOptions ? (
@@ -241,92 +248,194 @@ const RideBookingForm =   ({ className, variant }: { className?: string; variant
             ) : (
               <ChevronDown className="h-4 w-4" />
             )}
-          </Button> 
+          </Button>
         )}
 
         {/* Additional Options - shown when Other Options is toggled */}
-        {showAdditionalOptions && (
-          <div className="space-y-2 pt-1">
-            {/* Luggage */}
-            <Card className={`p-3 ${variant === "outline" ? "border-gray-200" : "bg-white/10 border-white/20"}`}>
-              <div className="flex justify-between items-center">
-                <h3 className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-white"}`}>
-                  Add Luggage
-                </h3>
-                <IncrementDecrement
-                  value={luggageCount}
-                  onIncrement={() => setLuggageCount(luggageCount + 1)}
-                  onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
-                />
-              </div>
-            </Card>
-
-            {/* Driver Note - Moved to book page below booking details */}
-            {/* <Card className={`p-4 ${variant === "outline" ? "border-gray-200" : "bg-white/10 border-white/20"}`}>
-              <label className={`text-sm font-semibold mb-2 block ${variant === "outline" ? "text-gray-900" : "text-white"}`}>
-                Note For Driver
-              </label>
-              <textarea
-                value={driverNote}
-                onChange={(e) => setDriverNote(e.target.value)}
-                placeholder="Write here..."
-                maxLength={500}
-                rows={3}
-                className={`w-full p-2 border rounded-lg resize-none focus:outline-none focus:ring ${
-                  variant === "outline" 
-                    ? "border-gray-300 bg-white text-gray-900 focus:ring-primary/20" 
-                    : "border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:ring-white/20"
-                }`}
-              />
-            </Card> */}
-
-            {/* Additional Services */}
-            {isBookPage && selectedRegion && (
-              <Card className={`p-3 ${variant === "outline" ? "border-gray-200" : "bg-white/10 border-white/20"}`}>
-                <label className={`text-sm font-semibold mb-2 block ${variant === "outline" ? "text-gray-900" : "text-white"}`}>
-                  Additional Services
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {selectedRegion.vehicle_services && selectedRegion.vehicle_services.length > 0 ? (
-                    selectedRegion.vehicle_services.map((svc: any) => (
-                      <label
-                        key={svc.id}
-                        className={`inline-flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors ${
-                          variant === "outline"
-                            ? "border-gray-200 hover:bg-gray-50"
-                            : "border-white/30 hover:bg-white/5"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedServices.includes(svc.id)}
-                          onChange={() => {
-                            const updatedServices = selectedServices.includes(svc.id)
-                              ? selectedServices.filter((id) => id !== svc.id)
-                              : [...selectedServices, svc.id];
-                            setSelectedServices(updatedServices);
-                          }}
-                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
-                        />
-                        <span className={`text-sm font-medium whitespace-nowrap ${
-                          variant === "outline" ? "text-gray-900" : "text-white"
-                        }`}>
-                          {svc.name}
-                        </span>
-                      </label>
-                    ))
-                    ) : (
-                    <p className={`text-sm ${
-                      variant === "outline" ? "text-gray-500" : "text-white/60"
-                    }`}>
-                      No additional services available
-                    </p>
-                  )}
+        <AnimatePresence initial={false}>
+          {showAdditionalOptions && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-[#FCFCFC] rounded-xl p-3 space-y-3">
+                {/* Luggage */}
+                <div className="p-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                      Add Luggage
+                    </h3>
+                    <IncrementDecrement
+                      value={luggageCount}
+                      onIncrement={() => setLuggageCount(luggageCount + 1)}
+                      onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                    />
+                  </div>
                 </div>
-              </Card>
-            )}
-          </div>
-        )}
+
+                {/* Additional Services (collapsible) */}
+                {isBookPage && selectedRegion && (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setServicesOpen(!servicesOpen)}
+                      className="w-full flex items-center justify-between p-3"
+                    >
+                      <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                        Additional Services
+                      </span>
+                      {servicesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {servicesOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          <div className="p-3">
+                            <div className="flex flex-wrap gap-2">
+                              {selectedRegion.vehicle_services && selectedRegion.vehicle_services.length > 0 ? (
+                                selectedRegion.vehicle_services.map((svc: any) => (
+                                  <label
+                                    key={svc.id}
+                                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${variant === "outline"
+                                      ? "hover:bg-gray-50"
+                                      : "hover:bg-white/5"
+                                      }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedServices.includes(svc.id)}
+                                      onChange={() => {
+                                        const updatedServices = selectedServices.includes(svc.id)
+                                          ? selectedServices.filter((id) => id !== svc.id)
+                                          : [...selectedServices, svc.id];
+                                        setSelectedServices(updatedServices);
+                                      }}
+                                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                                    />
+                                    <span className={`text-sm font-medium whitespace-nowrap ${variant === "outline" ? "text-gray-900" : "text-gray-900"
+                                      }`}>
+                                      {svc.name}
+                                    </span>
+                                  </label>
+                                ))
+                              ) : (
+                                <p className={`text-sm ${variant === "outline" ? "text-gray-500" : "text-gray-700"
+                                  }`}>
+                                  No additional services available
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
+                {/* Promotions (collapsible) */}
+                {isBookPage && allPromotions.length > 0 && (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setCouponsOpen(!couponsOpen)}
+                      className="w-full flex items-center justify-between p-3"
+                    >
+                      <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                        Apply Coupon
+                      </span>
+                      {couponsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {couponsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          <div className="p-3">
+                            <div className="flex flex-col gap-2">
+                              {allPromotions.map((promo) => {
+                                const isAutosCoupon = promo.type === 'autos_coupon';
+                                const couponData = isAutosCoupon ? promo.originalData as any : null;
+
+                                if (isAutosCoupon && couponData) {
+                                  return (
+                                    <AutosCouponCard
+                                      key={promo.uniqueKey}
+                                      coupon={couponData}
+                                      selected={appliedCoupon === promo.id}
+                                      onClick={() => {
+                                        if (appliedCoupon === promo.id) {
+                                          setAppliedCoupon(null);
+                                        } else {
+                                          setAppliedCoupon(promo.id);
+                                        }
+                                      }}
+                                      variant={variant}
+                                      bordered={false}
+                                    />
+                                  );
+                                }
+
+                                return (
+                                  <label
+                                    key={promo.uniqueKey}
+                                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${variant === "outline"
+                                      ? "hover:bg-gray-50"
+                                      : "hover:bg-white/5"
+                                      } ${appliedCoupon === promo.id ? (variant === "outline" ? "bg-primary/5" : "bg-white/20") : ""}`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name="promo"
+                                      checked={appliedCoupon === promo.id}
+                                      onChange={() => {
+                                        if (appliedCoupon === promo.id) {
+                                          setAppliedCoupon(null);
+                                        } else {
+                                          setAppliedCoupon(promo.id);
+                                        }
+                                      }}
+                                      onClick={(e) => {
+                                        if (appliedCoupon === promo.id) {
+                                          e.preventDefault();
+                                          setAppliedCoupon(null);
+                                        }
+                                      }}
+                                      className="hidden"
+                                    />
+                                    <div className="flex-1">
+                                      <p className={`text-sm font-medium ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                                        {promo.title}
+                                      </p>
+                                    </div>
+                                    {appliedCoupon === promo.id && (
+                                      <Check className={`w-4 h-4 ${variant === "outline" ? "text-primary" : "text-gray-900"}`} />
+                                    )}
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <motion.div
         className="mt-3 lg:mt-4 shrink-0"

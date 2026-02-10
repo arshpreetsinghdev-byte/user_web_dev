@@ -34,7 +34,8 @@ export function PriceOverviewCard({
   onProceed,
   buttonLabel = "Proceed to Pay",
   className = "",
-}: PriceOverviewCardProps) {
+  couponCode,
+}: PriceOverviewCardProps & { couponCode?: string }) {
   return (
     <Card
       className={`
@@ -62,6 +63,16 @@ export function PriceOverviewCard({
               {formatCurrency(baseFare, currencySymbol)}
             </span>
           </div>
+
+          {/* Coupon */}
+          {couponCode && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-base text-green-600">
+                <span>Coupon Applied</span>
+                <span className="font-medium">{couponCode}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Divider */}

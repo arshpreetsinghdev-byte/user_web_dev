@@ -3,7 +3,6 @@
 import { Button } from "../ui/button";
 import { useTranslations } from '@/lib/i18n/TranslationsProvider';
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { Menu, X, User } from "lucide-react";
@@ -57,7 +56,7 @@ export default function Navbar() {
     (state) => state.data.operatorDetails?.[0]?.logo_url || null
   );
   const userWebLogo = useOperatorParamsStore(state => state.data.user_web_config?.logo_url || null);
-  console.log("user web logo::::->", userWebLogo);
+  // console.log("user web logo::::->", userWebLogo);
   // Handle hydration and custom events
   useEffect(() => {
     setMounted(true);
@@ -182,7 +181,18 @@ export default function Navbar() {
         <header className="border-b bg-white shadow-l">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6 flex items-center justify-between">
             <div className="flex items-center">
-              <Link href="/home" className="block">
+              <div
+                onClick={() => {
+                  const locale = params?.locale || 'en';
+                  const target = `/${locale}/home`;
+                  if (pathname === target) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    navigateWithLoader(router, target);
+                  }
+                }}
+                className="block cursor-pointer hover:opacity-90 transition-opacity"
+              >
                 <Image
                   src={logoUrl}
                   alt="Jugnoo Logo"
@@ -191,7 +201,7 @@ export default function Navbar() {
                   className="h-10 w-[150%] max-w-none"
                   priority
                 />
-              </Link>
+              </div>
             </div>
 
             {/* Desktop Menu */}

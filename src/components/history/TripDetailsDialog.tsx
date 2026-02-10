@@ -14,6 +14,7 @@ import { useTranslations } from "@/lib/i18n/TranslationsProvider";
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useGoogleMapsLoaded } from "@/stores/googleMaps.store";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 import { fetchRideSummary } from "@/lib/api/history.api";
 import { mapApiRideToRideHistoryItem } from "@/hooks/useHistory";
 import { ApiRideHistoryItem } from "@/types";
@@ -88,7 +89,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
         };
 
         if (open) {
-            loadSummary();
+            // loadSummary();
         }
 
         return () => {
@@ -141,15 +142,20 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
         window.location.reload();
     };
 
+    // Operator currency from store
+    const operatorCurrency = useOperatorParamsStore(
+        state => state.data?.user_web_config?.currency || state.data?.user_web_config?.currency_symbol || '₹'
+    );
+
     if (!displayRide) return null;
 
     // Animation variants for mobile (slide up from bottom)
     const mobileVariants = {
-        hidden: { 
+        hidden: {
             y: "100%",
             opacity: 0
         },
-        visible: { 
+        visible: {
             y: 0,
             opacity: 1,
             transition: {
@@ -162,11 +168,11 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
 
     // Animation variants for desktop (scale + fade)
     const desktopVariants = {
-        hidden: { 
+        hidden: {
             scale: 0.95,
             opacity: 0
         },
-        visible: { 
+        visible: {
             scale: 1,
             opacity: 1,
             transition: {
@@ -282,8 +288,8 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                             <span className="text-sm font-semibold text-gray-700">{displayRide.status === "Scheduled" ? t("Scheduled") : displayRide.duration}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-primary font-bold text-lg">₹</span>
-                                            <span className="text-sm font-semibold text-gray-700">₹{displayRide.price.toFixed(2)}</span>
+                                            <span className="text-primary font-bold text-lg">{operatorCurrency}</span>
+                                            <span className="text-sm font-semibold text-gray-700">{operatorCurrency}{displayRide.price.toFixed(2)}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <CreditCard className="h-5 w-5 text-primary" />
@@ -299,8 +305,8 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                     </button>
                                     {showPriceBreakdown && (
                                         <div className="space-y-3 px-1">
-                                            <div className="flex justify-between text-sm"><span>{t("Base Fare")}</span><span className="font-semibold text-gray-900">₹{(displayRide.price * 0.8).toFixed(2)}</span></div>
-                                            <div className="flex justify-between text-sm"><span>{t("Taxes")}</span><span className="font-semibold text-gray-900">₹{(displayRide.price * 0.2).toFixed(2)}</span></div>
+                                            <div className="flex justify-between text-sm"><span>{t("Base Fare")}</span><span className="font-semibold text-gray-900">{operatorCurrency}{(displayRide.price * 0.8).toFixed(2)}</span></div>
+                                            <div className="flex justify-between text-sm"><span>{t("Taxes")}</span><span className="font-semibold text-gray-900">{operatorCurrency}{(displayRide.price * 0.2).toFixed(2)}</span></div>
                                         </div>
                                     )}
                                 </div>
@@ -351,7 +357,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                             )}
 
                             {/* Get Help Card */}
-                                {/* <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer active:bg-gray-50 mb-8">
+                            {/* <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer active:bg-gray-50 mb-8">
                                     <div className="flex items-center gap-4">
                                         <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                             <User className="h-5 w-5" />
@@ -495,9 +501,9 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                         <div className="p-1.5 bg-primary/10 rounded text-primary">
                                             {/* Cash Icon/Wallet Icon */}
-                                            <span className="text-xs font-bold p-1.5">₹</span>
+                                            <span className="text-xs font-bold p-1.5">{operatorCurrency}</span>
                                         </div>
-                                            ₹{displayRide.price.toFixed(2)}
+                                        {operatorCurrency}{displayRide.price.toFixed(2)}
                                     </div>
                                 </div>
 
@@ -515,15 +521,15 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                         <div className="p-4 bg-gray-50 mt-1 rounded-lg text-sm space-y-2 text-gray-600">
                                             <div className="flex justify-between">
                                                 <span>{t("Base Fare")}</span>
-                                                <span>₹{(displayRide.price * 0.8).toFixed(2)}</span>
+                                                <span>{operatorCurrency}{(displayRide.price * 0.8).toFixed(2)}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>{t("Taxes")}</span>
-                                                <span>₹{(displayRide.price * 0.2).toFixed(2)}</span>
+                                                <span>{operatorCurrency}{(displayRide.price * 0.2).toFixed(2)}</span>
                                             </div>
                                             <div className="flex justify-between font-bold text-gray-900 border-t pt-2 mt-2">
                                                 <span>{t("Total")}</span>
-                                                <span>₹{displayRide.price.toFixed(2)}</span>
+                                                <span>{operatorCurrency}{displayRide.price.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     )}
