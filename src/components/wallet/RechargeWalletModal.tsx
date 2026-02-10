@@ -104,7 +104,7 @@ export function RechargeWalletModal({
           <Dialog open={true} onOpenChange={() => setIsVisible(false)}>
             <DialogContent
               showCloseButton={false}
-              className="max-w-md w-full p-0 gap-0 border-none overflow-hidden bg-primary rounded-2xl z-[100]"
+              className="max-w-md w-full p-0 gap-0 border-none overflow-hidden bg-primary rounded-2xl z-100"
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -122,7 +122,7 @@ export function RechargeWalletModal({
                     <div>
                       <h2 className="text-xl font-bold">Recharge Wallet</h2>
                       <p className="text-sm text-white/80 mt-1">
-                        Amount: ${rechargeAmount.toFixed(2)}
+                        Amount: {operatorCurrency}{rechargeAmount.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -208,7 +208,7 @@ export function RechargeWalletModal({
                         </>
                       ) : (
                         <>
-                          Recharge ${rechargeAmount.toFixed(2)}
+                          Recharge {operatorCurrency}{rechargeAmount.toFixed(2)}
                         </>
                       )}
                     </Button>

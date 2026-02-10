@@ -3,8 +3,73 @@ import { devtools, persist } from 'zustand/middleware';
 import { Location, Vehicle, PriceEstimate } from '@/types';
 import type { Stop, BookingLocation, DistanceTimeResult } from '@/components/booking/types';
 import { createEmptyLocation, placeToBookingLocation } from '@/components/booking/types';
-import type { VehicleRegion } from '@/types';
+import type { VehicleRegion, Promotion, AutosPromotion, AutosCoupon } from '@/types';
 import type { PlaceResult } from '@/types';
+import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
+
+// Unified promotion type for UI display
+export type UnifiedPromotion = {
+  id: number; // promo_id or coupon_id (original ID from API)
+  uniqueKey: string; // Unique key for React rendering (type + id)
+  title: string;
+  type: 'promotion' | 'autos_promotion' | 'autos_coupon';
+  originalData: Promotion | AutosPromotion | AutosCoupon;
+};
+
+// Helper function to merge all promotion types
+function mergePromotions(
+  promotions: Promotion[],
+  autosPromotions: AutosPromotion[],
+  autosCoupons: AutosCoupon[]
+): UnifiedPromotion[] {
+  const unified: UnifiedPromotion[] = [];
+  const seenPromoIds = new Set<number>();
+  const seenCouponIds = new Set<number>();
+
+  // Add regular promotions first (they take priority)
+  promotions.forEach(promo => {
+    if (!seenPromoIds.has(promo.promo_id)) {
+      unified.push({
+        id: promo.promo_id,
+        uniqueKey: `promotion-${promo.promo_id}`,
+        title: promo.title,
+        type: 'promotion',
+        originalData: promo,
+      });
+      seenPromoIds.add(promo.promo_id);
+    }
+  });
+
+  // Add autos promotions (skip if already added from regular promotions)
+  autosPromotions.forEach(promo => {
+    if (!seenPromoIds.has(promo.promo_id)) {
+      unified.push({
+        id: promo.promo_id,
+        uniqueKey: `autos_promotion-${promo.promo_id}`,
+        title: promo.title,
+        type: 'autos_promotion',
+        originalData: promo,
+      });
+      seenPromoIds.add(promo.promo_id);
+    }
+  });
+
+  // Add autos coupons (use separate ID tracking since coupon_id is different from promo_id)
+  autosCoupons.forEach(coupon => {
+    if (!seenCouponIds.has(coupon.coupon_id)) {
+      unified.push({
+        id: coupon.coupon_id,
+        uniqueKey: `autos_coupon-${coupon.coupon_id}`,
+        title: coupon.title,
+        type: 'autos_coupon',
+        originalData: coupon,
+      });
+      seenCouponIds.add(coupon.coupon_id);
+    }
+  });
+
+  return unified;
+}
 
 interface BookingState {
   // Enhanced Locations with coordinates
@@ -40,6 +105,10 @@ interface BookingState {
   selectedService: any | null; // Selected service
   selectedServices: number[];
   appliedCoupon: number | null;
+  promotions: Promotion[];
+  autosPromotions: AutosPromotion[];
+  autosCoupons: AutosCoupon[];
+  allPromotions: UnifiedPromotion[]; // Merged array for UI
 
   // Passenger and luggage
   passengerCount: number;
@@ -98,6 +167,9 @@ interface BookingState {
   setPriceEstimate: (estimate: PriceEstimate | null) => void;
   setSelectedServices: (services: number[]) => void;
   setAppliedCoupon: (coupon: number | null) => void;
+  setPromotions: (promotions: Promotion[]) => void;
+  setAutosPromotions: (promotions: AutosPromotion[]) => void;
+  setAutosCoupons: (coupons: AutosCoupon[]) => void;
   setPassengerCount: (count: number) => void;
   setLuggageCount: (count: number) => void;
   setDriverNote: (note: string) => void;
@@ -148,6 +220,10 @@ export const useBookingStore = create<BookingState>()(
         selectedService: null,
         selectedServices: [],
         appliedCoupon: null,
+        promotions: [],
+        autosPromotions: [],
+        autosCoupons: [],
+        allPromotions: [],
         passengerCount: 1,
         luggageCount: 0,
         driverNote: '',
@@ -160,7 +236,8 @@ export const useBookingStore = create<BookingState>()(
         selectedSquareCardId: null, // Initialize Square card ID
         bookingResult: null,
         isLoading: false,
-        pickupCityCurrency: null,
+        pickupCityCurrency: useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+          useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || null,
         pickupCityOffset: null,
         routeDistance: null,
         routeDuration: null,
@@ -201,8 +278,8 @@ export const useBookingStore = create<BookingState>()(
             false,
             'booking/setScheduledDateTime'
           ),
-          setIsScheduleDateTouched: (touched) =>
-            set({ isScheduleDateTouched: touched }, false, 'booking/setIsScheduleDateTouched'),
+        setIsScheduleDateTouched: (touched) =>
+          set({ isScheduleDateTouched: touched }, false, 'booking/setIsScheduleDateTouched'),
 
         setDropoffFromPlace: (place) => {
           const bookingLocation = placeToBookingLocation(place);
@@ -227,8 +304,11 @@ export const useBookingStore = create<BookingState>()(
         setSelectedService: (service) =>
           set({ selectedService: service }, false, 'booking/setSelectedService'),
 
-        setPickupCityCurrency: (currency) =>
-          set({ pickupCityCurrency: currency }, false, 'booking/setPickupCityCurrency'),
+        setPickupCityCurrency: (currency) => {
+          const operatorCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+            useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol;
+          set({ pickupCityCurrency: operatorCurrency || currency }, false, 'booking/setPickupCityCurrency');
+        },
 
         setPickupCityOffset: (offset) =>
           set({ pickupCityOffset: offset }, false, 'booking/setPickupCityOffset'),
@@ -274,6 +354,24 @@ export const useBookingStore = create<BookingState>()(
 
         setAppliedCoupon: (coupon) =>
           set({ appliedCoupon: coupon }, false, 'booking/setAppliedCoupon'),
+
+        setPromotions: (promotions) => {
+          const { autosPromotions, autosCoupons } = get();
+          const allPromotions = mergePromotions(promotions, autosPromotions, autosCoupons);
+          set({ promotions, allPromotions }, false, 'booking/setPromotions');
+        },
+
+        setAutosPromotions: (autosPromotions) => {
+          const { promotions, autosCoupons } = get();
+          const allPromotions = mergePromotions(promotions, autosPromotions, autosCoupons);
+          set({ autosPromotions, allPromotions }, false, 'booking/setAutosPromotions');
+        },
+
+        setAutosCoupons: (autosCoupons) => {
+          const { promotions, autosPromotions } = get();
+          const allPromotions = mergePromotions(promotions, autosPromotions, autosCoupons);
+          set({ autosCoupons, allPromotions }, false, 'booking/setAutosCoupons');
+        },
 
         setPassengerCount: (count) =>
           set({ passengerCount: count }, false, 'booking/setPassengerCount'),
@@ -387,6 +485,8 @@ export const useBookingStore = create<BookingState>()(
               selectedService: null,
               selectedServices: [],
               appliedCoupon: null,
+              promotions: [],
+              autosPromotions: [],
               passengerCount: 1,
               luggageCount: 0,
               driverNote: '',
@@ -397,7 +497,8 @@ export const useBookingStore = create<BookingState>()(
               selectedPaymentMethod: null,
               selectedCardId: null, // Reset Stripe card selection
               bookingResult: null,
-              pickupCityCurrency: null,
+              pickupCityCurrency: useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+                useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || null,
               pickupCityOffset: null,
               isLoading: false,
               currentStepIndex: 0,
@@ -426,6 +527,10 @@ export const useBookingStore = create<BookingState>()(
           selectedRegion: state.selectedRegion,
           selectedServices: state.selectedServices,
           appliedCoupon: state.appliedCoupon,
+          promotions: state.promotions,
+          autosPromotions: state.autosPromotions,
+          autosCoupons: state.autosCoupons,
+          allPromotions: state.allPromotions,
           passengerCount: state.passengerCount,
           luggageCount: state.luggageCount,
           driverNote: state.driverNote,

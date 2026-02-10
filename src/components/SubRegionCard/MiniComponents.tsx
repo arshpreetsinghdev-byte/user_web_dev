@@ -1,5 +1,6 @@
 import { UserRound, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 interface TitleBlockProps {
     title: string;
@@ -37,16 +38,20 @@ function DescriptionBlock({ text }: { text: string }) {
     );
 }
 
-function PriceBlock({ price, oldPrice, currencySymbol = "₹", className }: { price: number; oldPrice?: number; currencySymbol?: string; className?: string }) {
+function PriceBlock({ price, oldPrice, currencySymbol, className }: { price: number; oldPrice?: number; currencySymbol?: string; className?: string }) {
+    const defaultSymbol = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+        useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
+        '₹';
+    const symbol = currencySymbol || defaultSymbol;
     return (
         <div className={cn(className, "text-right")}>
             {oldPrice && (
                 <div className="text-xs text-gray-400 line-through">
-                    {currencySymbol}{oldPrice?.toFixed(2)}
+                    {symbol}{oldPrice?.toFixed(2)}
                 </div>
             )}
             <div className="H3 text-primary!">
-                {currencySymbol}{price?.toFixed(2)}
+                {symbol}{price?.toFixed(2)}
             </div>
         </div>
     );

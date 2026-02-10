@@ -21,6 +21,7 @@ import { getCouponsPromos, type Coupon } from "@/lib/api/coupons";
 import { toast } from 'sonner';
 import { Skeleton } from "@/components/ui/skeleton";
 import { PhoneInput } from "@/components/auth/phoneInput";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 const VehicleCardSkeleton = () => (
   <div className="flex items-center gap-4 rounded-lg bg-white p-3 ring-1 ring-border shadow-sm h-25">
@@ -154,7 +155,7 @@ export default function BookingPage() {
       }));
       setVehicleServices(servicesWithEta);
       setSelectedServices([]);
-      
+
       // Scroll to booking details section after brief delay
       setTimeout(() => {
         const bookingDetailsSection = document.getElementById('booking-details-section');
@@ -205,18 +206,18 @@ export default function BookingPage() {
         toast.error('Please select a vehicle first');
         return;
       }
-      
+
       // Validate flight number for airport rides
       if (selectedService?.type === "airport_taxi" && !flightNumber.trim()) {
         toast.error('Flight number is required for airport rides');
         return;
       }
-      
+
       if (!isAuthenticated) {
         openAuthModal();
         return;
       }
-      
+
       router.push(`/${locale}/ride-summary`);
       return;
     }
@@ -252,13 +253,13 @@ export default function BookingPage() {
         toast.error('Please select a vehicle to proceed');
         return;
       }
-      
+
       // Validate flight number for airport rides
       if (selectedService?.type === "airport_taxi" && !flightNumber.trim()) {
         toast.error('Flight number is required for airport rides');
         return;
       }
-      
+
       if (!isAuthenticated) {
         openAuthModal();
         return;
@@ -306,7 +307,7 @@ export default function BookingPage() {
           <div className={`w-full ${isMobileFormActive && currentStepIndex <= 1 ? "hidden md:block" : "block"}`}>
             <Card className="items-center mb-6 max-sm:-px-1">
               <Stepper
-                steps={steps} 
+                steps={steps}
                 currentStep={currentStepIndex}
                 subProgress={subProgress}
                 onStepChange={handleStepChange}
@@ -317,8 +318,8 @@ export default function BookingPage() {
               <div className="flex justify-between items-center">
                 <h2 className="H2">
                   {currentStepIndex === 0 ? "Complete the form to continue" :
-                   currentStepIndex === 1 ? "Choose a ride" :
-                   "Coupons & Promotions"}
+                    currentStepIndex === 1 ? "Choose a ride" :
+                      "Coupons & Promotions"}
                 </h2>
               </div>
 
@@ -355,7 +356,7 @@ export default function BookingPage() {
                         }
                         subComponent2={
                           <PriceBlock
-                            currencySymbol={region.region_fare?.currency_symbol || "₹"}
+                            currencySymbol={useOperatorParamsStore.getState().data?.user_web_config?.currency || useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || region.region_fare?.currency_symbol || "₹"}
                             price={region.region_fare?.fare_float}
                             oldPrice={
                               region.region_fare?.original_fare_float !==
@@ -423,48 +424,47 @@ export default function BookingPage() {
                   <div className="space-y-4">
                     {/* Book for someone else - Accordion */}
                     <div className="border border-gray-200 rounded-lg">
-                    <button
-                      onClick={() => setIsBookingDetailsOpen(!isBookingDetailsOpen)}
-                      className="w-full flex items-center justify-between p-5 sm:p-5 text-left hover:bg-gray-50 transition-colors rounded-lg"
-                    >
-                      <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Book for someone else (Optional)</h3>
-                      <svg
-                        className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isBookingDetailsOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <button
+                        onClick={() => setIsBookingDetailsOpen(!isBookingDetailsOpen)}
+                        className="w-full flex items-center justify-between p-5 sm:p-5 text-left hover:bg-gray-50 transition-colors rounded-lg"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isBookingDetailsOpen ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
-                      }`}
-                    >
-                      <div className="px-4 pb-4 space-y-3 mt-3">
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                          <input
-                            type="text"
-                            value={customerName}
-                            onChange={(e) => setCustomerName(e.target.value)}
-                            placeholder="Passenger name"
-                            className="w-full sm:w-[40%] p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          />
-                          <div className="w-full sm:w-[55%]">
-                            <PhoneInput
-                              phoneNumber={customerPhone}
-                              countryCode={customerCountryCode || 'US'}
-                              onPhoneNumberChange={setCustomerPhone}
-                              onCountryCodeChange={setCustomerCountryCode}
-                              placeholder="Passenger phone number"  
+                        <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Book for someone else (Optional)</h3>
+                        <svg
+                          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isBookingDetailsOpen ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isBookingDetailsOpen ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
+                          }`}
+                      >
+                        <div className="px-4 pb-4 space-y-3 mt-3">
+                          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <input
+                              type="text"
+                              value={customerName}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                              placeholder="Passenger name"
+                              className="w-full sm:w-[40%] p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                             />
+                            <div className="w-full sm:w-[55%]">
+                              <PhoneInput
+                                phoneNumber={customerPhone}
+                                countryCode={customerCountryCode || 'US'}
+                                onPhoneNumberChange={setCustomerPhone}
+                                onCountryCodeChange={setCustomerCountryCode}
+                                placeholder="Passenger phone number"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
                     {/* Flight Number - only for airport taxi */}
                     {selectedService?.type === "airport_taxi" && (

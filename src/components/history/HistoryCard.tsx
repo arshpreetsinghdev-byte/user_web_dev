@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 export type RideStatus = "Completed" | "Cancelled" | "Scheduled" | "Missed Schedule";
 
@@ -72,6 +73,10 @@ export function HistoryCard({ ride, onClick, onCancel }: HistoryCardProps) {
         onCancel?.(ride);
     };
 
+    const operatorCurrency = useOperatorParamsStore(
+        state => state.data?.user_web_config?.currency || state.data?.user_web_config?.currency_symbol || '₹'
+    );
+
     return (
         <div
             onClick={() => isClickable && onClick?.(ride)}
@@ -100,13 +105,13 @@ export function HistoryCard({ ride, onClick, onCancel }: HistoryCardProps) {
                         </p>
                     </div>
                     <span className="font-bold text-gray-900 whitespace-nowrap text-sm sm:text-base shrink-0">
-                        ₹{ride.price.toFixed(2)}
+                        {operatorCurrency}{ride.price.toFixed(2)}
                     </span>
                 </div>
 
                 <div className="mt-3 flex justify-between items-end">
                     <p className="text-[10px] sm:text-xs text-gray-400 font-medium">
-                        {ride.date && !isNaN(new Date(ride.date).getTime()) 
+                        {ride.date && !isNaN(new Date(ride.date).getTime())
                             ? format(new Date(ride.date), "MMM dd (h:mm a)")
                             : "Date unavailable"}
                     </p>

@@ -4,9 +4,12 @@ import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 /**
  * Format currency value
  */
-const operatorCurrency = useOperatorParamsStore(state => state.data.user_web_config?.currency || state.data.user_web_config?.currency_symbol);
-export function formatCurrency(amount: number, currency = CURRENCY.SYMBOL): string {
-  return `${currency}${amount.toFixed(2)}`;
+export function formatCurrency(amount: number, currency?: string): string {
+  const storeCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+    useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
+    CURRENCY.SYMBOL;
+  const selectedCurrency = currency || storeCurrency;
+  return `${selectedCurrency}${amount.toFixed(2)}`;
 }
 
 /**
@@ -14,14 +17,14 @@ export function formatCurrency(amount: number, currency = CURRENCY.SYMBOL): stri
  */
 export function formatDate(date: Date | string, format: string = DATE_FORMATS.DISPLAY): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  
+
   // Simple date formatting (you can use date-fns or dayjs for more advanced formatting)
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   };
-  
+
   return d.toLocaleDateString('en-US', options);
 }
 
@@ -30,12 +33,12 @@ export function formatDate(date: Date | string, format: string = DATE_FORMATS.DI
  */
 export function formatTime(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  
+
   const options: Intl.DateTimeFormatOptions = {
     hour: '2-digit',
     minute: '2-digit',
   };
-  
+
   return d.toLocaleTimeString('en-US', options);
 }
 
@@ -45,11 +48,11 @@ export function formatTime(date: Date | string): string {
 export function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-  
+
   if (match) {
     return `(${match[1]}) ${match[2]}-${match[3]}`;
   }
-  
+
   return phone;
 }
 
@@ -71,14 +74,14 @@ export function formatDistance(meters: number, unit: 'km' | 'mi' = 'km'): string
  */
 export function formatDuration(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
-  
+
   if (minutes < 60) {
     return `${minutes} min`;
   }
-  
+
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  
+
   return `${hours}h ${remainingMinutes}m`;
 }
 
@@ -95,4 +98,28 @@ export function capitalize(str: string): string {
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
   return str.slice(0, length) + '...';
+}
+/**
+ * Format fare text string that might contain currency codes or symbols
+ */
+export function formatFareText(text: string | null | undefined): string {
+  if (!text) return '';
+  const storeCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+    useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
+    CURRENCY.SYMBOL;
+
+  const fareStr = String(text);
+  // Match symbols (₹, $, €), currency codes (INR, USD, EUR), or "Rs."
+  const currencyPattern = /[₹$€]|Rs\.?|[A-Z]{3}/g;
+
+  // Replace all occurrences of symbols/codes with the operator currency
+  const replaced = fareStr.replace(currencyPattern, storeCurrency);
+
+  if (replaced === fareStr) {
+    // If no currency detected, prepend it (avoid duplicates if already starting with it)
+    if (fareStr.trim().startsWith(storeCurrency)) return fareStr;
+    return `${storeCurrency}${fareStr}`;
+  }
+
+  return replaced;
 }
