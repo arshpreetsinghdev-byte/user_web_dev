@@ -698,7 +698,7 @@ export interface ApiRideHistoryItem {
   pickup_longitude: number;
   drop_latitude: number;
   drop_longitude: number;
-  driver_rating: number;
+  // driver_rating: number;
   currency_symbol: string;
   pool_fare_id: number;
   schedule_pickup_id: number;
@@ -725,6 +725,17 @@ export interface ApiRideHistoryItem {
   modifiable?: number;
   address_modifiable?: number;
   scheduler_alarm_time?: number;
+
+  // Driver fields
+  driver_name?: string;
+  driver_number?: string;
+  driver_image?: string;
+  driver_vehicle_name?: string;
+  driver_vehicle_brand?: string;
+  driver_vehicle_color?: string;
+  driver_vehicle_image?: string;
+  vehicle_no?: string;
+  driver_rating?: any;
 }
 
 export interface HistoryRequest {
@@ -781,6 +792,7 @@ export interface ModifyScheduledRideRequest {
   drop_address: string;
   preferred_payment_mode: number;
   customer_note?: string;
+  flight_number?: string;
 }
 
 export interface ModifyScheduledRideResponse {

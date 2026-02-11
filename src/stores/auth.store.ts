@@ -170,11 +170,11 @@ export const useAuthStore = create<AuthState>()(
               const token = response.access_token || response.data?.access_token;
               const signupOnboarding = response.signup_onboarding ?? response.data?.signup_onboarding;
 
-              console.log('✅ OTP Verified - Final session used:', {
-                newUserSessionId,
-                newUserSessionIdentifier,
-                userIdentifier
-              });
+              // console.log('✅ OTP Verified - Final session used:', {
+              //   newUserSessionId,
+              //   newUserSessionIdentifier,
+              //   userIdentifier
+              // });
 
               if (signupOnboarding === 1) {
                 console.log('⏸️ Onboarding required - deferring authentication');
