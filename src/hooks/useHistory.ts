@@ -24,13 +24,15 @@ export const mapApiRideToRideHistoryItem = (apiRide: ApiRideHistoryItem): RideHi
     } else if (apiRide.autos_status === 3 || apiRide.autos_status === 5) {
         status = "Completed";
     }
-    const statusMessage =
-        status === "Cancelled" && apiRide.autos_status === 5
-            ? "Missed Schedule"
-            : status;
+    let statusMessage: string = status;
+    if (status === "Cancelled" && apiRide.autos_status === 5) {
+        statusMessage = "Missed Schedule";
+    } else if (isScheduled && apiRide.driver_id && apiRide.driver_id > 0) {
+        statusMessage = "Accepted Scheduled";
+    }
     const pickupAddr = apiRide.pickup_location_address || apiRide.pickup_address;
     const dropAddr = apiRide.drop_location_address || apiRide.drop_address;
-
+    console.log("API RIDE------------>", apiRide);
     return {
         id: apiRide.pickup_id?.toString() ||
             apiRide.engagement_id?.toString() ||
@@ -49,12 +51,21 @@ export const mapApiRideToRideHistoryItem = (apiRide: ApiRideHistoryItem): RideHi
         dropLng: apiRide.op_drop_longitude || apiRide.drop_longitude || 0,
         pickupAddress: pickupAddr || "",
         dropAddress: dropAddr || "",
-        driverName: "Driver",
+        driver_id: apiRide.driver_id,
+        driverName: apiRide.driver_name || "Driver",
+        driver_name: apiRide.driver_name,
+        driver_number: apiRide.driver_number,
+        driver_image: apiRide.driver_image,
+        driver_vehicle_name: apiRide.driver_vehicle_name,
+        driver_vehicle_brand: apiRide.driver_vehicle_brand,
+        driver_vehicle_color: apiRide.driver_vehicle_color,
+        driver_vehicle_image: apiRide.driver_vehicle_image,
+        vehicle_no: apiRide.vehicle_no,
         distance: (apiRide.estimated_distance || apiRide.distance) ? `${apiRide.estimated_distance || apiRide.distance} ${apiRide.distance_unit || "km"}` : "0 km",
         duration: apiRide.ride_time ? `${apiRide.ride_time} min` : "0 min",
         paymentMethod: apiRide.preferred_payment_mode === 9 ? "Stripe Card" :
-                      apiRide.preferred_payment_mode === 73 ? "Square Card" :
-                      "Cash",
+            apiRide.preferred_payment_mode === 73 ? "Square Card" :
+                "Cash",
         product_type: apiRide.product_type,
         ride_type: apiRide.ride_type,
         historyIcon: apiRide.history_icon,
@@ -177,7 +188,7 @@ export function useHistory(errorMessage: string, rideType?: string) {
 
                 if (response.data && Array.isArray(response.data)) {
                     const mappedRides = response.data.map(mapApiRideToRideHistoryItem);
-
+                    console.log("mappedRides ---->>>>>>>", response.data);
                     // On mobile, append to existing rides; on desktop, replace
                     if (isMobile && currentPage > 0) {
                         setRides(prev => [...prev, ...mappedRides]);
@@ -223,7 +234,21 @@ export function useHistory(errorMessage: string, rideType?: string) {
     // Handle card click
     const handleCardClick = (ride: RideHistoryItem) => {
         if (ride.status === "Completed" || ride.status === "Scheduled") {
-            setSelectedRide(ride);
+            // Ensure all driver fields are present in selectedRide
+            setSelectedRide({
+                ...ride,
+                driver_id: ride.driver_id,
+                driverName: ride.driverName || ride.driver_name || "Driver",
+                driver_name: ride.driver_name,
+                driver_number: ride.driver_number,
+                driver_image: ride.driver_image,
+                driver_vehicle_name: ride.driver_vehicle_name,
+                driver_vehicle_brand: ride.driver_vehicle_brand,
+                driver_vehicle_color: ride.driver_vehicle_color,
+                driver_vehicle_image: ride.driver_vehicle_image,
+                vehicle_no: ride.vehicle_no,
+                driver_rating: ride.driver_rating,
+            });
             setDetailsOpen(true);
         }
     };

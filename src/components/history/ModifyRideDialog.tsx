@@ -50,6 +50,10 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     });
     const [customerNote, setCustomerNote] = useState(ride?.customerNote || "");
+    const [flightNumber, setFlightNumber] = useState(ride?.flightNumber || "");
+    // Only show flight number for airport rides (type 4)
+    // console.log("ride type::::", ride);
+    const isAirportRide = ride && (ride.ride_type === 11 || ride.product_type === 11);
 
     // Handle pickup address selection from Google Maps
     const handlePickupPlaceSelect = useCallback((place: PlaceResult) => {
@@ -113,8 +117,20 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
     }, [open, isGoogleMapsLoaded, handlePickupPlaceSelect, handleDropPlaceSelect]);
 
     const handleSubmit = async () => {
-        if (!ride || !pickupTime) {
+        if (!ride) {
             toast.error(t("Please fill all required fields"));
+            return;
+        }
+        if (!pickupTime || pickupTime.trim() === "") {
+            toast.error(t("Pickup date/time cannot be empty"));
+            return;
+        }
+        if (!pickupAddress || pickupAddress.trim() === "") {
+            toast.error(t("Pickup address cannot be empty"));
+            return;
+        }
+        if (!dropAddress || dropAddress.trim() === "") {
+            toast.error(t("Drop address cannot be empty"));
             return;
         }
 
@@ -143,7 +159,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
             const dateObj = new Date(pickupTime);
             const pickupTimeMs = dateObj.getTime().toString();
 
-            await modifyScheduledRide({
+            const reqBody: any = {
                 pickup_id: Number(ride.pickupId) || 0,
                 pool_fare_id: Number(ride.poolFareId) || 0,
                 pickup_latitude: pickupLat,
@@ -154,8 +170,14 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
                 drop_longitude: dropLng,
                 drop_address: dropAddress,
                 preferred_payment_mode: Number(ride.paymentModeId) || 1,
-                customer_note: customerNote,
-            });
+            };
+            if (isAirportRide) {
+                reqBody.flight_number = flightNumber;
+            }
+            if (customerNote && customerNote.trim() !== "") {
+                reqBody.customer_note = customerNote;
+            }
+            await modifyScheduledRide(reqBody);
 
             toast.success(t("Ride modified successfully"));
             onModifySuccess?.();
@@ -181,7 +203,12 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
             setDropLat(ride.dropLat);
             setDropLng(ride.dropLng);
             setCustomerNote(ride.customerNote || "");
-            
+            // Only set flight number for airport rides (type 11)
+            if (ride.ride_type === 11 || ride.product_type === 11) {
+                setFlightNumber(ride.flightNumber || "");
+            } else {
+                setFlightNumber("");
+            }
             const date = new Date(ride.date);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -197,7 +224,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent 
-                className="sm:max-w-[500px] max-w-[calc(100%-2rem)] p-0 gap-0"
+                className="sm:max-w-125 max-w-[calc(100%-2rem)] p-0 gap-0"
                 onInteractOutside={(event) => {
                     // Prevent dialog from closing when clicking on Google Maps autocomplete dropdown
                     if ((event.target as Element).closest('.pac-container')) {
@@ -228,6 +255,21 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
                                 required
                             />
                         </div>
+                        {/* Flight Number (only for airport rides) */}
+                        {isAirportRide && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-700">
+                                    {t("Flight Number")}
+                                </label>
+                                <Input
+                                    type="text"
+                                    value={flightNumber}
+                                    onChange={(e) => setFlightNumber(e.target.value)}
+                                    placeholder={t("Enter flight number (if any)")}
+                                    className="w-full"
+                                />
+                            </div>
+                        )}
 
                         {/* Pickup Address */}
                         <div className="space-y-2">
