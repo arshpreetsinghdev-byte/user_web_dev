@@ -20,6 +20,9 @@ import { mapApiRideToRideHistoryItem } from "@/hooks/useHistory";
 import { ApiRideHistoryItem } from "@/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { generateReceiptHTML } from "@/components/ui/ReceiptTemplate";
+import { saveAs } from 'file-saver';
+import { Download } from "lucide-react";
 
 interface TripDetailsDialogProps {
     open: boolean;
@@ -147,6 +150,25 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
     const operatorCurrency = useOperatorParamsStore(
         state => state.data?.user_web_config?.currency || state.data?.user_web_config?.currency_symbol || '₹'
     );
+
+    const storeLogoUrl = useOperatorParamsStore(
+        (state) => state.data.operatorDetails?.[0]?.logo_url || null
+    );
+    const userWebLogo = useOperatorParamsStore(state => state.data.user_web_config?.logo_url || null);
+    const logoUrl = userWebLogo || storeLogoUrl || '/black-badge-assets/ic_launcher.png';
+
+    const handleDownloadReceipt = () => {
+        if (!displayRide) return;
+        try {
+            const html = generateReceiptHTML(displayRide, logoUrl, operatorCurrency);
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            saveAs(blob, `receipt-${displayRide.id}.html`);
+            toast.success("Receipt downloaded successfully");
+        } catch (error) {
+            console.error("Failed to download receipt:", error);
+            toast.error("Failed to download receipt");
+        }
+    };
 
     if (!displayRide) return null;
 
@@ -310,6 +332,17 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                             <div className="flex justify-between text-sm"><span>{t("Taxes")}</span><span className="font-semibold text-gray-900">{operatorCurrency}{(displayRide.price * 0.2).toFixed(2)}</span></div>
                                         </div>
                                     )}
+
+                                    {/* Download Receipt Button - Mobile */}
+                                    {displayRide.status === "Completed" && (
+                                        <button
+                                            onClick={handleDownloadReceipt}
+                                            className="w-full flex justify-center items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary h-12 rounded-xl mt-4 border border-primary/20"
+                                        >
+                                            <Download className="h-4 w-4" />
+                                            <span className="font-bold text-sm">{t("Download Receipt")}</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -360,7 +393,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                             )}
 
                             {/* Driver Details Card */}
-                            {displayRide.driver_id && displayRide.driver_id > 0 && (
+                            {displayRide.driver_id && displayRide.driver_id > 0 && displayRide.status === "Scheduled" && (
                                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-3 mt-4">
                                     <button
                                         onClick={() => setShowDriverDetails(!showDriverDetails)}
@@ -456,7 +489,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                         </button> */}
                     </div>
 
-                    <div className="flex flex-col md:flex-row h-[80vh] overflow-y-auto">
+                    <div className="flex flex-col md:flex-row h-[80vh]">
                         {/* Left Column: Map & Driver Info */}
                         <div className="w-full md:w-3/5 p-4 flex flex-col gap-4 bg-white md:border-r">
                             {/* Map Area */}
@@ -501,7 +534,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                         </div>
 
                         {/* Right Column: Actions & Details */}
-                        <div className="w-full md:w-2/5 p-4 flex flex-col gap-4 bg-[#F9FAFB]">
+                        <div className="w-full md:w-2/5 p-4 flex flex-col gap-4 bg-[#F9FAFB] overflow-y-auto">
 
                             {/* Rate Your Trip Card - Only for Completed rides */}
                             {displayRide.status === "Completed" && (
@@ -605,6 +638,20 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Download Receipt Button - Desktop */}
+                                {displayRide.status === "Completed" && (
+                                    <div className="pt-2">
+                                        <Button
+                                            onClick={handleDownloadReceipt}
+                                            className="w-full flex justify-center items-center gap-2 bg-primary/5 hover:bg-primary/10 text-primary border border-primary/20 h-14 rounded-lg shadow-sm"
+                                            variant="ghost"
+                                        >
+                                            <Download className="h-5 w-5" />
+                                            <span className="font-bold">{t("Download Receipt")}</span>
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Scheduled Ride Booking Details - Desktop */}
@@ -646,7 +693,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                             )}
 
                             {/* Driver Details Card - Desktop */}
-                            {displayRide.driver_id && displayRide.driver_id > 0 && (
+                            {displayRide.driver_id && displayRide.driver_id > 0 && displayRide.status === "Scheduled" && (
                                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 space-y-3">
                                     <button
                                         onClick={() => setShowDriverDetails(!showDriverDetails)}
