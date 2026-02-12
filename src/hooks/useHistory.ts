@@ -28,7 +28,7 @@ export const mapApiRideToRideHistoryItem = (apiRide: ApiRideHistoryItem): RideHi
     if (status === "Cancelled" && apiRide.autos_status === 5) {
         statusMessage = "Missed Schedule";
     } else if (isScheduled && apiRide.driver_id && apiRide.driver_id > 0) {
-        statusMessage = "Accepted Scheduled";
+        statusMessage = "Driver Accepted";
     }
     const pickupAddr = apiRide.pickup_location_address || apiRide.pickup_address;
     const dropAddr = apiRide.drop_location_address || apiRide.drop_address;

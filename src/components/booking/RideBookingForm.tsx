@@ -17,7 +17,6 @@ import StopItem from "./StopItem";
 import { useBookingForm } from "./useBookingForm";
 import { bookingValidator } from "@/lib/validators/bookingValidator";
 import { bookingService } from "@/services/booking.service";
-import IncrementDecrement from "@/components/IncrementDecrement";
 import AutosCouponCard from "@/components/AutosCouponCard";
 
 import { useBookingStore } from "@/stores/booking.store";
@@ -30,7 +29,6 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   const isInitialMount = useRef(true);
   const [isBookForOtherOpen, setIsBookForOtherOpen] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(true);
   const [couponsOpen, setCouponsOpen] = useState(true);
   const router = useRouter();
   const params = useParams() as { locale?: string };
@@ -246,7 +244,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   // console.log("selectedService", selectedService?.type)
   return (
     <div
-      className={`w-full max-w-105 p-3 lg:p-4 bg-primary rounded-lg lg:rounded-xl flex flex-col ${!isBookPage ? "lg:max-h-125" : ""} ${className}  ${variant === "outline" ? "bg-white border border-border" : ""}`}
+      className={`w-full max-w-105 p-3 lg:p-4 bg-primary rounded-lg lg:rounded-xl flex flex-col ${className ? className : ""} ${variant === "outline" ? "bg-white border border-border" : ""}`}
     >
       <h2
         className={`text-base lg:text-xl font-semibold text-white mb-2 lg:mb-4 shrink-0 ${variant === "outline" ? "text-black!" : ""}`}
@@ -254,7 +252,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
         Book A Ride
       </h2>
 
-      <div className={`flex flex-col flex-1 ${!isBookPage ? "overflow-y-auto" : ""} lg:pr-2 space-y-0.5 lg:space-y-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-white/30`}>
+      <div className="flex flex-col flex-1 lg:pr-2 space-y-0.5 lg:space-y-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-white/30">
         <PickupLocationField value={pickup} onChange={setPickup} variant={variant} />
 
         {mounted && (
@@ -309,83 +307,9 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
                   className="overflow-hidden"
                 >
                   <div className="rounded-xl p-3 space-y-3">
-                    {/* Luggage */}
-                    <div className="p-3">
-                      <div className="flex justify-between items-center">
-                        <h3 className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
-                          Add Luggage
-                        </h3>
-                        <IncrementDecrement
-                          value={luggageCount}
-                          onIncrement={() => setLuggageCount(luggageCount + 1)}
-                          onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
-                        />
-                      </div>
-                    </div>
+                    {/* Luggage section removed - now on right side */}
 
-                    {/* Additional Services (collapsible) */}
-                    {isBookPage && selectedRegion && (
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => setServicesOpen(!servicesOpen)}
-                          className="w-full flex items-center justify-between p-3"
-                        >
-                          <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
-                            Additional Services
-                          </span>
-                          {servicesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        </button>
-
-                        <AnimatePresence initial={false}>
-                          {servicesOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.18 }}
-                            >
-                              <div className="p-3">
-                                <div className="flex flex-wrap gap-2">
-                                  {selectedRegion.vehicle_services && selectedRegion.vehicle_services.length > 0 ? (
-                                    selectedRegion.vehicle_services.map((svc: any) => (
-                                      <label
-                                        key={svc.id}
-                                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${variant === "outline"
-                                          ? "hover:bg-gray-50"
-                                          : "hover:bg-white/5"
-                                          }`}
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          checked={selectedServices.includes(svc.id)}
-                                          onChange={() => {
-                                            const updatedServices = selectedServices.includes(svc.id)
-                                              ? selectedServices.filter((id) => id !== svc.id)
-                                              : [...selectedServices, svc.id];
-                                            setSelectedServices(updatedServices);
-                                          }}
-                                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
-                                        />
-                                        <span className={`text-sm font-medium whitespace-nowrap ${variant === "outline" ? "text-gray-900" : "text-gray-900"
-                                          }`}>
-                                          {svc.name}
-                                        </span>
-                                      </label>
-                                    ))
-                                  ) : (
-                                    <p className={`text-sm ${variant === "outline" ? "text-gray-500" : "text-gray-700"
-                                      }`}>
-                                      No additional services available
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
+                    {/* Additional Services section removed - now on right side */}
 
                     {/* Promotions (collapsible) */}
                     {isBookPage && allPromotions.length > 0 && (
@@ -498,15 +422,17 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
         whileHover={mounted ? { scale: 1.02 } : undefined}
         whileTap={mounted ? { scale: 0.98 } : undefined}
       >
+       {!isBookPage && ( 
         <Button
           onClick={handleSubmit}
           disabled={isFinding || !pickup?.address || !destination?.address}
           variant="outline"
           className={`w-full h-9 lg:h-10 bg-white text-primary hover:bg-white hover:scale-102 hover:text-primary font-semibold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ${variant === "outline" ? "bg-primary text-white! hover:text-primary!" : ""}`}
         >
-          {isFinding ? "Loading..." : isBookPage ? "Calculate Fare" : "Book Now"}
+          {(isFinding && !isBookPage) ? "Loading..." : isBookPage ? "Calculate Fare" : "Book Now"}
           <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
+      )}
       </motion.div>
     </div>
   );

@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { Skeleton } from "@/components/ui/skeleton";
 import { PhoneInput } from "@/components/auth/phoneInput";
 import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
+import IncrementDecrement from "@/components/IncrementDecrement";
 
 const VehicleCardSkeleton = () => (
   <div className="flex items-center gap-4 rounded-lg bg-white p-3 ring-1 ring-border shadow-sm h-25">
@@ -70,6 +71,8 @@ export default function BookingPage() {
     setCustomerCountryCode,
     driverNote,
     setDriverNote,
+    luggageCount,
+    setLuggageCount,
   } = useBookingStore();
   const { isAuthenticated } = useAuthStore();
   const { openAuthModal } = useUIStore();
@@ -416,6 +419,48 @@ export default function BookingPage() {
               </div>
             </Card>
 
+            {/* Vehicle Services Section - shown on step 1 after vehicle selection */}
+            {currentStepIndex === 1 && selectedRegion && (
+              <Card className="px-6 mt-6 max-sm:border-none max-sm:shadow-none max-sm:px-1" id="vehicle-services-section">
+                {/* Header with Additional Services title and Luggage */}
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="H2">Additional Services</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-900">Add Luggage</span>
+                    <IncrementDecrement
+                      value={luggageCount}
+                      onIncrement={() => setLuggageCount(luggageCount + 1)}
+                      onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 p-1">
+                  {vehicleServices.length > 0 ? (
+                    vehicleServices.map((svc) => (
+                      <label
+                        key={svc.id}
+                        className="inline-flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes(svc.id)}
+                          onChange={() => toggleService(svc.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                        />
+                        <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                          {svc.name}
+                        </span>
+                      </label>
+                    ))
+                  ) : (
+                    <div className="text-center py-2 text-muted-foreground border-none w-full">
+                      <p>No additional services available for this vehicle</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            )}
+
             {/* Booking Details - shown on step 1 after vehicle selection */}
             {currentStepIndex === 1 && selectedRegion && (
               <>
@@ -503,39 +548,19 @@ export default function BookingPage() {
                     </p>
                   </div>
                 </Card>
+
+                {/* Next Button - Desktop only, bottom of right column, aligned to right */}
+                {selectedRegion && currentStepIndex === 1 && (
+                  <div className="hidden md:flex justify-end mt-6">
+                    <ActionButton onClick={onNext} className="px-8 py-3 text-base justify-center flex h-12 bg-primary hover:bg-primary/90 shadow-lg rounded-lg">
+                      {"Next"}
+                    </ActionButton>
+                  </div>
+                )}
               </>
             )}
 
-            {/* Vehicle Services Section - shown on step 1 after vehicle selection */}
-            {currentStepIndex === 1 && selectedRegion && isAuthenticated && false && (
-              <Card className="px-6 mt-6 max-sm:border-none max-sm:shadow-none max-sm:px-1" id="vehicle-services-section">
-                <h2 className="H2 mb-3">Additional Services</h2>
-                <div className="flex flex-wrap gap-2 p-1">
-                  {vehicleServices.length > 0 ? (
-                    vehicleServices.map((svc) => (
-                      <label
-                        key={svc.id}
-                        className="inline-flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedServices.includes(svc.id)}
-                          onChange={() => toggleService(svc.id)}
-                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
-                        />
-                        <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                          {svc.name}
-                        </span>
-                      </label>
-                    ))
-                  ) : (
-                    <div className="text-center py-2 text-muted-foreground border-none w-full">
-                      <p>No additional services available for this vehicle</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            )}
+            {/* Vehicle Services Section moved - now under Additional Services below */}
 
 
             {/* {(currentStepIndex >= 1 && selectedRegion) && (
@@ -569,14 +594,14 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* Desktop hanging sticky button - shown when ride is selected */}
-      {selectedRegion && (
+      {/* Desktop hanging sticky button - removed - now inside Card */}
+      {/* {selectedRegion && (
         <div className="hidden sm:block fixed bottom-20 right-6 z-10">
           <ActionButton onClick={onNext} className="px-8 py-3 text-base justify-center flex h-12 bg-primary hover:bg-primary/90 shadow-lg rounded-lg">
             {"Next"}
           </ActionButton>
         </div>
-      )}
+      )} */}
 
       <div className="fixed bottom-0 left-0 right-0 z-10 w-full py-3 px-4 block sm:hidden bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.12)]">
         <ActionButton onClick={onNext} className="w-[90%] px-2 text-lg justify-center mx-auto flex h-9.50!">

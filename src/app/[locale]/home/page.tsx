@@ -40,7 +40,7 @@ export default function HomePage() {
       {/* Main Content */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-0 relative z-10">
         <div className="flex flex-col lg:flex-row w-full justify-between gap-10 md:gap-6 lg:gap-8 xl:gap-10">
-          
+
           {/* Hero Section */}
           <div className="w-full lg:w-1/2 2xl:w-[60%] mt-6 md:mt-2 lg:mt-5 2xl:mt-10 order-1">
             <HeroSection
@@ -76,7 +76,7 @@ export default function HomePage() {
           {/* Booking Form */}
           <div className="w-full lg:w-[80%] xl:w-[48%] order-3 lg:order-3 mt-6 md:mt-2 lg:mt-0">
             <div className="w-full max-w-100 mx-auto lg:mx-0 lg:ml-auto">
-              <RideBookingForm className="max-h-[calc(100vh-240px)] overflow-hidden" />
+              <RideBookingForm />
             </div>
           </div>
         </div>

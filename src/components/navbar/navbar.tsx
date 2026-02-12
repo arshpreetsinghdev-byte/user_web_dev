@@ -208,16 +208,22 @@ export default function Navbar() {
             <div className="hidden md:flex items-center justify-end gap-2 lg:gap-4">
               {/* Nav Links */}
               <div className="flex gap-3 lg:gap-6">
-                {NAV_ITEMS.map((item) => (
-                  <Button
-                    key={item.key}
-                    variant="ghost"
-                    onClick={() => handleNavClick(item)}
-                    className="text-sm lg:text-base leading-[25.89px] tracking-normal hover:bg-background hover:cursor-pointer hover:scale-105 px-2 lg:px-4"
-                  >
-                    {t(item.label)}
-                  </Button>
-                ))}
+                  {NAV_ITEMS.filter(item => {
+                    // Hide 'history' and 'wallet' if not authenticated
+                    if (!isAuthenticated && (item.key === 'history' || item.key === 'wallet')) {
+                      return false;
+                    }
+                    return true;
+                  }).map((item) => (
+                    <Button
+                      key={item.key}
+                      variant="ghost"
+                      onClick={() => handleNavClick(item)}
+                      className="text-sm lg:text-base leading-[25.89px] tracking-normal hover:bg-background hover:cursor-pointer hover:scale-105 px-2 lg:px-4"
+                    >
+                      {t(item.label)}
+                    </Button>
+                  ))}
               </div>
               <div className="flex gap-1.5 lg:gap-2">
                 {isAuthenticated ? (
@@ -290,7 +296,13 @@ export default function Navbar() {
 
                 {/* Menu Items */}
                 <div className="flex flex-col p-4 gap-4">
-                  {NAV_ITEMS.map((item) => (
+                  {NAV_ITEMS.filter(item => {
+                    // Hide 'history' and 'wallet' if not authenticated
+                    if (!isAuthenticated && (item.key === 'history' || item.key === 'wallet')) {
+                      return false;
+                    }
+                    return true;
+                  }).map((item) => (
                     <Button
                       key={item.key}
                       variant="ghost"
