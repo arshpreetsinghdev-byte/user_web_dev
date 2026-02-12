@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronUp, ChevronDown, Check } from "lucide-react";
 import { useRouter, useParams, usePathname } from "next/navigation";
@@ -24,8 +24,10 @@ import { useBookingStore } from "@/stores/booking.store";
 import { useUIStore } from "@/stores/ui.store";
 import { useFindADrivers } from "@/hooks/useFindADrivers";
 
-const RideBookingForm = ({ className, variant }: { className?: string; variant?: "outline" | "filled" }) => {
+const RideBookingForm = ({ className, variant, currentStepIndex }: { className?: string; variant?: "outline" | "filled"; currentStepIndex?: number }) => {
   const [mounted, setMounted] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const isInitialMount = useRef(true);
   const [isBookForOtherOpen, setIsBookForOtherOpen] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(true);
@@ -170,6 +172,8 @@ const RideBookingForm = ({ className, variant }: { className?: string; variant?:
       );
     } catch (err) {
       toast.error("Failed to calculate fare. Please try again.");
+    } finally {
+      setIsFormDirty(false);
     }
   }, [
     calculateFareAndFindDrivers,
@@ -182,15 +186,57 @@ const RideBookingForm = ({ className, variant }: { className?: string; variant?:
     setCurrentStepIndex,
   ]);
 
-  // Auto-calculate fare when service changes, coupon changes, and we are on the book page
+  // Reset isFormDirty when the /book page mounts
   useEffect(() => {
-    if (pathname.includes("/book") && selectedService && pickup?.address && destination?.address) {
-      const timer = setTimeout(() => {
-        handleCalculateFare();
-      }, 500);
-      return () => clearTimeout(timer);
+    if (pathname.includes("/book")) {
+      setIsFormDirty(false);
+      isInitialMount.current = true;
     }
-  }, [selectedService, pickup?.address, destination?.address, handleCalculateFare, pathname, appliedCoupon]);
+  }, [pathname]);
+
+  // Mark form as dirty when relevant inputs change
+  useEffect(() => {
+    if (!pathname.includes("/book")) return;
+
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (pickup || destination || stops?.length || scheduledDateTime || selectedService || appliedCoupon) {
+      setIsFormDirty(true);
+    }
+  }, [
+    pickup,
+    destination,
+    stops,
+    scheduledDateTime,
+    selectedService,
+    appliedCoupon,
+    pathname,
+  ]);
+
+  // Auto-calculate fare when service changes, coupon changes, and we are on the book page (only if dirty)
+  useEffect(() => {
+    if (!pathname.includes("/book")) return;
+    if (!isFormDirty) return;
+    if (!selectedService) return;
+    if (!pickup?.address || !destination?.address) return;
+
+    const timer = setTimeout(() => {
+      handleCalculateFare();
+    }, 500); // debounce
+
+    return () => clearTimeout(timer);
+  }, [
+    isFormDirty,
+    selectedService,
+    pickup?.address,
+    destination?.address,
+    appliedCoupon,
+    pathname,
+    handleCalculateFare,
+  ]);
 
   const isBookPage = pathname.includes("/book");
   // console.log("is book page::", isBookPage);
@@ -233,209 +279,219 @@ const RideBookingForm = ({ className, variant }: { className?: string; variant?:
         <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} />
 
         <ServiceSelector variant={variant} />
-
-        {/* Other Options Toggle Button */}
         {isBookPage && (
-          <Button
-            type="button"
-            onClick={() => setShowOtherOptions(!showOtherOptions)}
-            variant="ghost"
-            className={`w-full justify-between h-auto p-3 ${variant === "outline" ? "text-gray-700 hover:bg-gray-50" : "text-white bg-white/10"}`}
-          >
-            <span className="font-medium">Other Options</span>
-            {showOtherOptions ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
+          <div className="bg-[#f6f6f6] border border-[#d7d6d6] rounded-[10px]">
+            {/* Other Options Toggle Button */}
+            {isBookPage && (
+              <Button
+                type="button"
+                onClick={() => setShowOtherOptions(!showOtherOptions)}
+                variant="ghost"
+                className={`w-full justify-between h-auto p-3 ${variant === "outline" ? "text-gray-700" : "text-white bg-white/10"}`}
+              >
+                <span className="font-medium">Other Options</span>
+                {showOtherOptions ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
             )}
-          </Button>
-        )}
 
-        {/* Additional Options - shown when Other Options is toggled */}
-        <AnimatePresence initial={false}>
-          {showAdditionalOptions && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-[#FCFCFC] rounded-xl p-3 space-y-3">
-                {/* Luggage */}
-                <div className="p-3">
-                  <div className="flex justify-between items-center">
-                    <h3 className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
-                      Add Luggage
-                    </h3>
-                    <IncrementDecrement
-                      value={luggageCount}
-                      onIncrement={() => setLuggageCount(luggageCount + 1)}
-                      onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
-                    />
-                  </div>
-                </div>
+            {/* Additional Options - shown when Other Options is toggled */}
+            <AnimatePresence initial={false}>
+              {showAdditionalOptions && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.22 }}
+                  className="overflow-hidden"
+                >
+                  <div className="rounded-xl p-3 space-y-3">
+                    {/* Luggage */}
+                    <div className="p-3">
+                      <div className="flex justify-between items-center">
+                        <h3 className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                          Add Luggage
+                        </h3>
+                        <IncrementDecrement
+                          value={luggageCount}
+                          onIncrement={() => setLuggageCount(luggageCount + 1)}
+                          onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                        />
+                      </div>
+                    </div>
 
-                {/* Additional Services (collapsible) */}
-                {isBookPage && selectedRegion && (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setServicesOpen(!servicesOpen)}
-                      className="w-full flex items-center justify-between p-3"
-                    >
-                      <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
-                        Additional Services
-                      </span>
-                      {servicesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-
-                    <AnimatePresence initial={false}>
-                      {servicesOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.18 }}
+                    {/* Additional Services (collapsible) */}
+                    {isBookPage && selectedRegion && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setServicesOpen(!servicesOpen)}
+                          className="w-full flex items-center justify-between p-3"
                         >
-                          <div className="p-3">
-                            <div className="flex flex-wrap gap-2">
-                              {selectedRegion.vehicle_services && selectedRegion.vehicle_services.length > 0 ? (
-                                selectedRegion.vehicle_services.map((svc: any) => (
-                                  <label
-                                    key={svc.id}
-                                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${variant === "outline"
-                                      ? "hover:bg-gray-50"
-                                      : "hover:bg-white/5"
-                                      }`}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedServices.includes(svc.id)}
-                                      onChange={() => {
-                                        const updatedServices = selectedServices.includes(svc.id)
-                                          ? selectedServices.filter((id) => id !== svc.id)
-                                          : [...selectedServices, svc.id];
-                                        setSelectedServices(updatedServices);
-                                      }}
-                                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
-                                    />
-                                    <span className={`text-sm font-medium whitespace-nowrap ${variant === "outline" ? "text-gray-900" : "text-gray-900"
+                          <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                            Additional Services
+                          </span>
+                          {servicesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                          {servicesOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.18 }}
+                            >
+                              <div className="p-3">
+                                <div className="flex flex-wrap gap-2">
+                                  {selectedRegion.vehicle_services && selectedRegion.vehicle_services.length > 0 ? (
+                                    selectedRegion.vehicle_services.map((svc: any) => (
+                                      <label
+                                        key={svc.id}
+                                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${variant === "outline"
+                                          ? "hover:bg-gray-50"
+                                          : "hover:bg-white/5"
+                                          }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedServices.includes(svc.id)}
+                                          onChange={() => {
+                                            const updatedServices = selectedServices.includes(svc.id)
+                                              ? selectedServices.filter((id) => id !== svc.id)
+                                              : [...selectedServices, svc.id];
+                                            setSelectedServices(updatedServices);
+                                          }}
+                                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                                        />
+                                        <span className={`text-sm font-medium whitespace-nowrap ${variant === "outline" ? "text-gray-900" : "text-gray-900"
+                                          }`}>
+                                          {svc.name}
+                                        </span>
+                                      </label>
+                                    ))
+                                  ) : (
+                                    <p className={`text-sm ${variant === "outline" ? "text-gray-500" : "text-gray-700"
                                       }`}>
-                                      {svc.name}
-                                    </span>
-                                  </label>
-                                ))
-                              ) : (
-                                <p className={`text-sm ${variant === "outline" ? "text-gray-500" : "text-gray-700"
-                                  }`}>
-                                  No additional services available
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
+                                      No additional services available
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
 
-                {/* Promotions (collapsible) */}
-                {isBookPage && allPromotions.length > 0 && (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setCouponsOpen(!couponsOpen)}
-                      className="w-full flex items-center justify-between p-3"
-                    >
-                      <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
-                        Apply Coupon
-                      </span>
-                      {couponsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-
-                    <AnimatePresence initial={false}>
-                      {couponsOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.18 }}
+                    {/* Promotions (collapsible) */}
+                    {isBookPage && allPromotions.length > 0 && (
+                      <div  >
+                        <button
+                          type="button"
+                          onClick={() => setCouponsOpen(!couponsOpen)}
+                          className="w-full flex items-center justify-between p-3"
                         >
-                          <div className="p-3">
-                            <div className="flex flex-col gap-2">
-                              {allPromotions.map((promo) => {
-                                const isAutosCoupon = promo.type === 'autos_coupon';
-                                const couponData = isAutosCoupon ? promo.originalData as any : null;
+                          <span className={`text-sm font-semibold ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
+                            Apply Coupon
+                          </span>
+                          {couponsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
 
-                                if (isAutosCoupon && couponData) {
-                                  return (
-                                    <AutosCouponCard
-                                      key={promo.uniqueKey}
-                                      coupon={couponData}
-                                      selected={appliedCoupon === promo.id}
-                                      onClick={() => {
-                                        if (appliedCoupon === promo.id) {
-                                          setAppliedCoupon(null);
-                                        } else {
-                                          setAppliedCoupon(promo.id);
-                                        }
-                                      }}
-                                      variant={variant}
-                                      bordered={false}
-                                    />
-                                  );
-                                }
+                        <AnimatePresence initial={false}>
+                          {couponsOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.18 }}
+                            >
+                              <div className="p-3">
+                                <div className="flex flex-col gap-2">
+                                  {allPromotions.map((promo) => {
+                                    const isAutosCoupon = promo.type === 'autos_coupon';
+                                    const couponData = isAutosCoupon ? promo.originalData as any : null;
 
-                                return (
-                                  <label
-                                    key={promo.uniqueKey}
-                                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${variant === "outline"
-                                      ? "hover:bg-gray-50"
-                                      : "hover:bg-white/5"
-                                      } ${appliedCoupon === promo.id ? (variant === "outline" ? "bg-primary/5" : "bg-white/20") : ""}`}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="promo"
-                                      checked={appliedCoupon === promo.id}
-                                      onChange={() => {
-                                        if (appliedCoupon === promo.id) {
-                                          setAppliedCoupon(null);
-                                        } else {
-                                          setAppliedCoupon(promo.id);
-                                        }
-                                      }}
-                                      onClick={(e) => {
-                                        if (appliedCoupon === promo.id) {
-                                          e.preventDefault();
-                                          setAppliedCoupon(null);
-                                        }
-                                      }}
-                                      className="hidden"
-                                    />
-                                    <div className="flex-1">
-                                      <p className={`text-sm font-medium ${variant === "outline" ? "text-gray-900" : "text-gray-900"}`}>
-                                        {promo.title}
-                                      </p>
-                                    </div>
-                                    {appliedCoupon === promo.id && (
-                                      <Check className={`w-4 h-4 ${variant === "outline" ? "text-primary" : "text-gray-900"}`} />
-                                    )}
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                                    if (isAutosCoupon && couponData) {
+                                      return (
+                                        <AutosCouponCard
+                                          key={promo.uniqueKey}
+                                          coupon={couponData}
+                                          selected={appliedCoupon === promo.id}
+                                          onClick={() => {
+                                            if (appliedCoupon === promo.id) {
+                                              setAppliedCoupon(null);
+                                            } else {
+                                              setAppliedCoupon(promo.id);
+                                            }
+                                          }}
+                                          variant={variant}
+                                          bordered={true}
+                                        />
+                                      );
+                                    }
+
+                                    return (
+                                      <button
+                                        key={promo.uniqueKey}
+                                        type="button"
+                                        onClick={() => {
+                                          if (appliedCoupon === promo.id) {
+                                            setAppliedCoupon(null);
+                                          } else {
+                                            setAppliedCoupon(promo.id);
+                                          }
+                                        }}
+                                        className={`w-full relative overflow-hidden rounded-lg p-4 transition-all duration-200 border ${appliedCoupon === promo.id ? (variant === "outline" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-white/50 bg-white/20 ring-1 ring-white/50") : (variant === "outline" ? "border-gray-200 bg-white hover:border-gray-300" : "border-white/30 bg-white/10 hover:bg-white/15")}`}
+                                      >
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div className="flex-1 text-left">
+                                            <div className="flex items-center gap-3">
+                                              <div className="h-8 w-8 relative shrink-0">
+                                                <img src="/bxs_offer.png" alt="offer" className="object-contain w-8 h-8" />
+                                              </div>
+                                              <div>
+                                                <div className="flex items-baseline gap-1">
+                                                  <span className={variant === "outline" ? "text-primary font-bold text-lg" : "text-white font-bold text-lg"}>
+                                                    Get Discount
+                                                  </span>
+                                                  <span className={variant === "outline" ? "text-gray-600 text-xs" : "text-white/70 text-xs"}>
+                                                    &nbsp;on your ride
+                                                  </span>
+                                                </div>
+                                                <p className={variant === "outline" ? "text-gray-600 text-xs mt-1" : "text-white/70 text-xs mt-1"}>
+                                                  Enjoy a special offer on your next booking!
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          {appliedCoupon === promo.id && (
+                                            <div className={variant === "outline" ? "bg-primary text-white rounded-full p-1" : "bg-white/30 text-white rounded-full p-1"}>
+                                              <Check className="w-4 h-4" />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        {/* </div> */}
+                      </div>
+                    )}
+
                   </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
       <motion.div
         className="mt-3 lg:mt-4 shrink-0"

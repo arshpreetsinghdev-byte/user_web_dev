@@ -275,11 +275,11 @@ export default function BookingPage() {
 
         <div className="w-full grid grid-cols-1 lg:grid-cols-[420px_minmax(0,1fr)] md:grid-cols-[280px_minmax(0,1fr)] gap-6 lg:gap-8 xl:gap-10 items-start">
           <div className={`${isMobileFormActive && currentStepIndex <= 1 ? "block" : "hidden"} md:block w-full lg:min-w-105 lg:max-w-110 md:max-w-70 lg:sticky lg:top-6 space-y-4`}>
-            <RideBookingForm className="mx-0! min-w-full" variant="outline" />
+            <RideBookingForm className="mx-0! min-w-full" variant="outline" currentStepIndex={currentStepIndex} />
             {/* {selectedRegion && <h2 className="H1">Selected Items</h2>}
 
-            {selectedRegion && (
-              <SelectedItems
+            {selectedRegion && (  
+              <SelectedItems  
                 imgSrc={selectedRegion.images.tab_normal}
                 additionalServices={selectedAdditionalServices}
                 titleComponent={

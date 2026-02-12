@@ -44,6 +44,7 @@ const mapOptions = {
 export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialogProps) {
     const { t } = useTranslations();
     const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
+    const [showDriverDetails, setShowDriverDetails] = useState(false);
     const [detailedRide, setDetailedRide] = useState<RideHistoryItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [routePath, setRoutePath] = useState<{ lat: number; lng: number }[]>([]);
@@ -61,7 +62,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
             if (!open || !ride) return;
 
             try {
-                setIsLoading(true);
+                // setIsLoading(true);
                 // Reset detailed ride when opening a new one, or keep previous if needed? 
                 // Better to start fresh or keep 'ride' as placeholder.
                 setDetailedRide(null);
@@ -99,7 +100,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
 
     // Use detailed ride if available, otherwise fall back to passed ride prop
     const displayRide = detailedRide || ride;
-
+    console.log("Display ride --> ", displayRide);
     // Use the global store to check if maps are loaded instead of trying to load it again
     const isLoaded = useGoogleMapsLoaded();
 
@@ -314,45 +315,115 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
 
                             {/* Scheduled Ride Booking Details */}
                             {displayRide.status === "Scheduled" && (
-                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-                                    <h3 className="font-bold text-gray-900 text-base">{t("Booking Details")}</h3>
+                                <>
+                                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                                        <h3 className="font-bold text-gray-900 text-base">{t("Booking Details")}</h3>
 
-                                    {/* Modify Ride Button */}
+                                        {/* Modify Ride Button */}
+                                        <button
+                                            onClick={() => setModifyDialogOpen(true)}
+                                            className="w-full bg-primary hover:bg-primary/90 text-white p-4 rounded-xl font-semibold transition-colors"
+                                        >
+                                            {t("Modify Ride")}
+                                        </button>
+
+                                        {displayRide.flightNumber && (
+                                            <div className="bg-blue-50 rounded-lg p-4">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">{t("Flight Number")}:</span>
+                                                    <span className="text-sm font-semibold text-blue-900">{displayRide.flightNumber}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {displayRide.customerNote && (
+                                            <div className="bg-amber-50 rounded-lg p-4">
+                                                <h4 className="text-sm font-medium text-gray-700 mb-1">{t("Customer Note")}</h4>
+                                                <p className="text-sm text-gray-600">{displayRide.customerNote}</p>
+                                            </div>
+                                        )}
+
+                                        {displayRide.vehicleName && (
+                                            <div className="flex justify-between items-center py-2">
+                                                <span className="text-sm text-gray-600">{t("Vehicle Type")}:</span>
+                                                <span className="text-sm font-medium text-gray-900">{displayRide.vehicleName}</span>
+                                            </div>
+                                        )}
+
+                                        {/* {displayRide.isModifiable && (
+                                            <div className="bg-green-50 rounded-lg p-3">
+                                                <p className="text-xs text-green-700 text-center">{t("This booking can be modified")}</p>
+                                            </div>
+                                        )} */}
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Driver Details Card */}
+                            {displayRide.driver_id && displayRide.driver_id > 0 && (
+                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-3 mt-4">
                                     <button
-                                        onClick={() => setModifyDialogOpen(true)}
-                                        className="w-full bg-primary hover:bg-primary/90 text-white p-4 rounded-xl font-semibold transition-colors"
+                                        onClick={() => setShowDriverDetails(!showDriverDetails)}
+                                        className="w-full flex justify-between items-center"
                                     >
-                                        {t("Modify Ride")}
+                                        <h3 className="font-bold text-gray-900 text-base">
+                                            {displayRide.status === "Scheduled" ? t("Accepted Scheduled") : t("Ride Accepted By Driver")}
+                                        </h3>
+                                        <ChevronDown className={`h-5 w-5 text-gray-400 transform transition-transform ${showDriverDetails ? "rotate-180" : ""}`} />
                                     </button>
 
-                                    {displayRide.flightNumber && (
-                                        <div className="bg-blue-50 rounded-lg p-4">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-600">{t("Flight Number")}:</span>
-                                                <span className="text-sm font-semibold text-blue-900">{displayRide.flightNumber}</span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {displayRide.customerNote && (
-                                        <div className="bg-amber-50 rounded-lg p-4">
-                                            <h4 className="text-sm font-medium text-gray-700 mb-1">{t("Customer Note")}</h4>
-                                            <p className="text-sm text-gray-600">{displayRide.customerNote}</p>
-                                        </div>
-                                    )}
-
-                                    {displayRide.vehicleName && (
-                                        <div className="flex justify-between items-center py-2">
-                                            <span className="text-sm text-gray-600">{t("Vehicle Type")}:</span>
-                                            <span className="text-sm font-medium text-gray-900">{displayRide.vehicleName}</span>
-                                        </div>
-                                    )}
-
-                                    {/* {displayRide.isModifiable && (
-                                        <div className="bg-green-50 rounded-lg p-3">
-                                            <p className="text-xs text-green-700 text-center">{t("This booking can be modified")}</p>
-                                        </div>
-                                    )} */}
+                                    <AnimatePresence>
+                                        {showDriverDetails && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="flex flex-col gap-2 text-sm pt-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-600">{t("Name")}:</span>
+                                                        <span className="font-medium text-gray-900">{displayRide.driverName || displayRide.driver_name}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-600">{t("Phone Number")}:</span>
+                                                        <span className="font-medium text-gray-900">{displayRide.driver_number}</span>
+                                                    </div>
+                                                    {displayRide.driver_vehicle_name && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Name")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_vehicle_name}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.driver_vehicle_brand && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Brand")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_vehicle_brand}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.driver_vehicle_color && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Color")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_vehicle_color}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.vehicle_no && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Number")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.vehicle_no}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.driver_rating && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Driver Rating")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_rating}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             )}
 
@@ -571,12 +642,74 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                             <span className="text-sm font-medium text-gray-900">{displayRide.vehicleName}</span>
                                         </div>
                                     )}
+                                </div>
+                            )}
 
-                                    {/* {displayRide.isModifiable && (
-                                        <div className="bg-green-50 rounded-lg p-2">
-                                            <p className="text-xs text-green-700 text-center">{t("This booking can be modified")}</p>
-                                        </div>
-                                    )} */}
+                            {/* Driver Details Card - Desktop */}
+                            {displayRide.driver_id && displayRide.driver_id > 0 && (
+                                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 space-y-3">
+                                    <button
+                                        onClick={() => setShowDriverDetails(!showDriverDetails)}
+                                        className="w-full flex justify-between items-center"
+                                    >
+                                        <h3 className="font-bold text-gray-900">
+                                            {displayRide.status === "Scheduled" ? t("Accepted Scheduled") : t("Driver Details")}
+                                        </h3>
+                                        <ChevronDown className={`h-5 w-5 text-gray-400 transform transition-transform ${showDriverDetails ? "rotate-180" : ""}`} />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {showDriverDetails && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="flex flex-col gap-2 text-sm pt-2">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-600">{t("Name")}:</span>
+                                                        <span className="font-medium text-gray-900">{displayRide.driverName || displayRide.driver_name}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-600">{t("Phone Number")}:</span>
+                                                        <span className="font-medium text-gray-900">{displayRide.driver_number}</span>
+                                                    </div>
+                                                    {displayRide.driver_vehicle_name && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Name")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_vehicle_name}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.driver_vehicle_brand && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Brand")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_vehicle_brand}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.driver_vehicle_color && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Color")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_vehicle_color}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.vehicle_no && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Vehicle Number")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.vehicle_no}</span>
+                                                        </div>
+                                                    )}
+                                                    {displayRide.driver_rating && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600">{t("Driver Rating")}:</span>
+                                                            <span className="font-medium text-gray-900">{displayRide.driver_rating}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             )}
 
@@ -614,6 +747,6 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                     window.location.reload();
                 }}
             />
-        </Dialog>
+        </Dialog >
     );
 }

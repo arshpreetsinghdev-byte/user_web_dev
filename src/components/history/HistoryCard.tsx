@@ -21,7 +21,18 @@ export interface RideHistoryItem {
     dropLng: number;
     pickupAddress: string;
     dropAddress: string;
+    // Driver fields
+    driver_id?: number;
     driverName: string;
+    driver_name?: string;
+    driver_number?: string;
+    driver_image?: string;
+    driver_vehicle_name?: string;
+    driver_vehicle_brand?: string;
+    driver_vehicle_color?: string;
+    driver_vehicle_image?: string;
+    vehicle_no?: string;
+    // End driver fields
     distance: string;
     duration: string;
     paymentMethod: string;

@@ -195,7 +195,26 @@ export default function RideSummaryPage() {
         />
 
         <Card className="items-center mb-6 sm:mb-8">
-          <Stepper steps={steps} currentStep={2} subProgress={subProgress} />
+          <Stepper
+            steps={steps}
+            currentStep={2}
+            subProgress={subProgress}
+            onStepChange={(stepIdx) => {
+              // Only allow going back to previous steps
+              if (stepIdx === 0 || stepIdx === 1) {
+                // Step 0 or 1: imitate back button
+                // Step 1: go to /book with selected ride
+                // Step 0: go to /book form
+                if (stepIdx === 0) {
+                  router.push(`/${locale}/book`);
+                } else if (stepIdx === 1) {
+                  // Go to /book with selected ride (step 1)
+                  router.push(`/${locale}/book`);
+                }
+              }
+              // Do nothing for step 2 (current)
+            }}
+          />
         </Card>
 
         <div className="grid w-full grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 xl:gap-8 max-sm:gap-2">

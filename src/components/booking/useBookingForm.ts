@@ -64,10 +64,13 @@ export const useBookingForm = () => {
         : stop
     );
 
-    const validation = bookingValidator.validateStops(updatedStops, pickup, dropoff);
-    if (!validation.isValid) {
-      toast.error(validation.error || "Invalid stop");
-      return;
+    // Only validate stops if destination (dropoff) is set
+    if (dropoff) {
+      const validation = bookingValidator.validateStops(updatedStops, pickup, dropoff);
+      if (!validation.isValid) {
+        toast.error(validation.error || "Invalid stop");
+        return;
+      }
     }
 
     setStops(updatedStops);

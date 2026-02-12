@@ -86,7 +86,16 @@ export function WalletDialog({ open, onOpenChange }: WalletDialogProps) {
                                                 type="number"
                                                 placeholder={t("Enter amount")}
                                                 value={amount}
-                                                onChange={(e) => setAmount(e.target.value)}
+                                                min={0}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    // Only allow non-negative values
+                                                    if (val === "" || parseFloat(val) >= 0) {
+                                                        setAmount(val);
+                                                    } else {
+                                                        setAmount("0");
+                                                    }
+                                                }}
                                                 className="bg-white border-0 text-gray-900 placeholder:text-gray-400 h-11"
                                             />
                                             <Button
