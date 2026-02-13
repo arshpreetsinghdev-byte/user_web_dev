@@ -44,7 +44,7 @@ The source code is organized to separate concerns effectively.
 
 ## 3. Data Flow & Architecture
 
-### 3.1. Request Lifecycle (The "Middleware" Layer)
+### 3.1. Request Lifecycle (The "Middleware" Layer) //middleware proxy.ts not being used as of now
 **Entry Point:** `src/proxy.ts` (or `middleware.ts`)
 1.  **Incoming Request:** A user requests `https://domain.com/`.
 2.  **Locale Detection:** The middleware checks the URL.

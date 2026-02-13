@@ -54,9 +54,12 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
     const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
     const [modifyDialogOpen, setModifyDialogOpen] = useState(false);
 
+    // Use detailed ride if available, otherwise fall back to passed ride prop
+    const displayRide = detailedRide || ride;
+
     useEffect(() => {
-        setRoutePath([]); // Reset path when ride changes
-    }, [ride]);
+        setRoutePath([]); // Reset path when displayRide changes (including when detailedRide updates)
+    }, [displayRide]);
 
     useEffect(() => {
         let active = true;
@@ -101,9 +104,6 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
         };
     }, [open, ride]);
 
-    // Use detailed ride if available, otherwise fall back to passed ride prop
-    const displayRide = detailedRide || ride;
-    console.log("Display ride --> ", displayRide);
     // Use the global store to check if maps are loaded instead of trying to load it again
     const isLoaded = useGoogleMapsLoaded();
 
@@ -233,6 +233,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                 <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden mb-4">
                                     {isLoaded ? (
                                         <GoogleMap
+                                            key={`mobile-map-${displayRide.id}`}
                                             mapContainerStyle={mapContainerStyle}
                                             center={center}
                                             zoom={13}
@@ -242,6 +243,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                             <Marker position={{ lat: displayRide.dropLat, lng: displayRide.dropLng }} />
                                             {path.length > 0 && (
                                                 <Polyline
+                                                    key={`mobile-polyline-${displayRide.id}-${path.length}`}
                                                     path={path}
                                                     options={{
                                                         strokeColor: "var(--primary)",
@@ -496,6 +498,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                             <div className="relative w-full aspect-square md:aspect-4/5 bg-gray-100 rounded-xl overflow-hidden shadow-inner">
                                 {isLoaded ? (
                                     <GoogleMap
+                                        key={`desktop-map-${displayRide.id}`}
                                         mapContainerStyle={mapContainerStyle}
                                         center={center}
                                         zoom={13}
@@ -505,6 +508,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                                         <Marker position={{ lat: displayRide.dropLat, lng: displayRide.dropLng }} />
                                         {path.length > 0 && (
                                             <Polyline
+                                                key={`desktop-polyline-${displayRide.id}-${path.length}`}
                                                 path={path}
                                                 options={{
                                                     strokeColor: "var(--primary)",
@@ -789,9 +793,10 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                 open={modifyDialogOpen}
                 onOpenChange={setModifyDialogOpen}
                 ride={displayRide}
-                onModifySuccess={() => {
-                    // Refresh the page or refetch data after modification
-                    window.location.reload();
+                onModifySuccess={(updatedRide) => {
+                    // Update the detailed ride with modified data
+                    setDetailedRide(updatedRide);
+                    setModifyDialogOpen(false);
                 }}
             />
         </Dialog >
