@@ -21,7 +21,7 @@ export default function AddCardForm({ clientSecret }: { clientSecret: string }) 
       payment_method: { card: card! },
     });
 
-    console.log(result);
+    // console.log(result);
   }
 
   return (

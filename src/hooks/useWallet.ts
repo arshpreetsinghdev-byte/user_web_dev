@@ -61,7 +61,7 @@ export function useWallet() {
         (item: any) => item.name === "square_cards"
     );
 
-    const isStripeEnabled = Number(stripeConfig?.enabled) === 1 || Number(stripeConfig?.stripe_3d_enabled) === 1;
+    const isStripeEnabled = Number(stripeConfig?.enabled) === 1;
     const isSquareEnabled = Number(squareConfig?.enabled) === 1;
 
     const stripeCards = responseData?.stripe_cards?.length
@@ -76,6 +76,7 @@ export function useWallet() {
         useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
         '₹';
 
+    const config = useOperatorParamsStore.getState().getUserWebConfig();
     return {
         balance: responseData?.jugnoo_balance || 0,
         currency: operatorCurrency || '₹',
@@ -84,9 +85,9 @@ export function useWallet() {
         squareCards,
         isStripeEnabled,
         isSquareEnabled,
-        stripePublishableKey: stripeConfig?.stripe_publishable_key || responseData?.stripe_publishable_key || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_8RZQ6vistTt7kqiEveFVjQMT",
-        squareApplicationId: process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID || "sandbox-sq0idb-9OnwGVf-NtDYWh43j-0mJA",
-        squareLocationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID || "L0GKESYQ1QTXT",
+        stripePublishableKey: config?.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+        squareApplicationId: config?.NEXT_PUBLIC_SQUARE_APPLICATION_ID || process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID,
+        squareLocationId: config?.NEXT_PUBLIC_SQUARE_LOCATION_ID || process.env.NEXT_PUBLIC_SQUARE_lOCATION_ID,
         isLoading: walletQuery.isLoading || transactionsQuery.isLoading || geoLoading,
         error: walletQuery.error || transactionsQuery.error,
         refetch: useCallback(() => {
