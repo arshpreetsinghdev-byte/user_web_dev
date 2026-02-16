@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import RideBookingForm from "@/components/booking/RideBookingForm";
 import ActionButton from "@/components/shared/ActionButton";
 import HeaderActions from "@/components/shared/HeaderActions";
@@ -84,6 +84,7 @@ export default function BookingPage() {
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
   const [isMobileFormActive, setIsMobileFormActive] = useState(true);
   const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
+  const hasAutoSelected = useRef(false);
 
   // Fetch coupons on mount
   // useEffect(() => {
@@ -108,6 +109,21 @@ export default function BookingPage() {
       setCurrentStepIndex(1);
     }
   }, [availableVehicles, currentStepIndex, setCurrentStepIndex]);
+
+  // Auto-select first vehicle by default without scrolling
+  useEffect(() => {
+    if (regions.length > 0 && !selectedRegion && currentStepIndex === 1 && !hasAutoSelected.current) {
+      handleRegionSelect(regions[0].region_id, false);
+      hasAutoSelected.current = true;
+    }
+  }, [regions, selectedRegion, currentStepIndex]);
+
+  // Reset auto-selection flag when going back to step 0
+  useEffect(() => {
+    if (currentStepIndex === 0) {
+      hasAutoSelected.current = false;
+    }
+  }, [currentStepIndex]);
 
   const subProgress = useMemo(() => {
     if (currentStepIndex === 1) {
@@ -144,7 +160,7 @@ export default function BookingPage() {
     return () => window.clearTimeout(t);
   }, [targetView, renderView]);
 
-  const handleRegionSelect = (regionId: number) => {
+  const handleRegionSelect = (regionId: number, shouldScroll: boolean = true) => {
     const region = regions.find((r) => r.region_id === regionId);
     if (region) {
       setSelectedRegion(region);
@@ -159,13 +175,15 @@ export default function BookingPage() {
       setVehicleServices(servicesWithEta);
       setSelectedServices([]);
 
-      // Scroll to booking details section after brief delay
-      setTimeout(() => {
-        const bookingDetailsSection = document.getElementById('booking-details-section');
-        if (bookingDetailsSection) {
-          bookingDetailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
+      // Scroll to booking details section only when manually selected
+      if (shouldScroll) {
+        setTimeout(() => {
+          const bookingDetailsSection = document.getElementById('booking-details-section');
+          if (bookingDetailsSection) {
+            bookingDetailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
     }
   };
 
@@ -425,13 +443,21 @@ export default function BookingPage() {
                 {/* Header with Additional Services title and Luggage */}
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="H2">Additional Services</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">Add Luggage</span>
-                    <IncrementDecrement
-                      value={luggageCount}
-                      onIncrement={() => setLuggageCount(luggageCount + 1)}
-                      onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
-                    />
+                  <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-900">Add Luggage</span>
+                      <IncrementDecrement
+                        value={luggageCount}
+                        onIncrement={() => setLuggageCount(luggageCount + 1)}
+                        onDecrement={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                      />
+                    </div>
+                    {selectedRegion?.region_fare?.applicable_fare?.fare_per_baggage !== undefined && 
+                     selectedRegion.region_fare.applicable_fare.fare_per_baggage > 0 && (
+                      <span className="text-xs text-red-500 font-medium">
+                        * {selectedRegion.region_fare?.currency_symbol || '₹'}{selectedRegion.region_fare.applicable_fare.fare_per_baggage} per bag
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 p-1">
@@ -471,7 +497,7 @@ export default function BookingPage() {
                     <div className="border border-gray-200 rounded-lg">
                       <button
                         onClick={() => setIsBookingDetailsOpen(!isBookingDetailsOpen)}
-                        className="w-full flex items-center justify-between p-5 sm:p-5 text-left hover:bg-gray-50 transition-colors rounded-lg"
+                        className="w-full flex items-center justify-between px-5 py-2 sm:px-5 sm-py-2 text-left hover:bg-gray-50 transition-colors rounded-lg"
                       >
                         <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Book for someone else (Optional)</h3>
                         <svg
@@ -488,7 +514,7 @@ export default function BookingPage() {
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isBookingDetailsOpen ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
                           }`}
                       >
-                        <div className="px-4 pb-4 space-y-3 mt-3">
+                        <div className="px-4 pb-4 space-y-1  mt-1">
                           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <input
                               type="text"

@@ -427,7 +427,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
           onClick={handleSubmit}
           disabled={isFinding || !pickup?.address || !destination?.address}
           variant="outline"
-          className={`w-full h-9 lg:h-10 bg-white text-primary hover:bg-white hover:scale-102 hover:text-primary font-semibold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ${variant === "outline" ? "bg-primary text-white! hover:text-primary!" : ""}`}
+          className={`w-full h-9 lg:h-10 bg-white text-primary hover:bg-white hover:scale-102 hover:text-primary font-semibold text-sm lg:text-base rounded-[8px] shadow-lg hover:shadow-xl transition-all duration-300 ${variant === "outline" ? "bg-primary text-white! hover:text-primary!" : ""}`}
         >
           {(isFinding && !isBookPage) ? "Loading..." : isBookPage ? "Calculate Fare" : "Book Now"}
           <ArrowRight className="w-4 h-4 ml-1" />

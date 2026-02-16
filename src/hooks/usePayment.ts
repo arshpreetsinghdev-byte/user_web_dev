@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import apiClient from "@/lib/api/client";
 import { toast } from "sonner";
 import { SquareCardData } from "@/lib/api/payment/square-card.api";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 /* -------------------- Types -------------------- */
 
@@ -92,6 +93,8 @@ export function usePayment() {
 
       const data = response.data;
 
+      
+
       if (data.flag !== 143 && data.flag !== 200) {
         throw new Error(data.message || "Failed to fetch payment details");
       }
@@ -105,7 +108,8 @@ export function usePayment() {
       const squareConfig = responseData.payment_mode_config_data?.find(
         (i: any) => i.name === "square_cards"
       );
-      console.log("square config", squareConfig);
+      const config = useOperatorParamsStore.getState().getUserWebConfig();
+
       setPaymentDetails({
         stripeCards: normalizeStripeCards(
           responseData.stripe_cards || stripeConfig?.cards_data || []
@@ -118,10 +122,15 @@ export function usePayment() {
         walletBalance: responseData.jugnoo_balance || 0,
         paymentModeLoaded: true,
         stripePublishableKey:
+          config?.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
           stripeConfig?.stripe_publishable_key ||
           process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-        squareApplicationId: process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID,
-        squareLocationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
+        squareApplicationId: 
+          config?.NEXT_PUBLIC_SQUARE_APPLICATION_ID ||
+          process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID,
+        squareLocationId: 
+          config?.NEXT_PUBLIC_SQUARE_LOCATION_ID ||
+          process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
       });
     } catch (err: any) {
       toast.error(err.message || "Failed to load payment methods");
