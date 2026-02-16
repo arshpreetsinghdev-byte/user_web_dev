@@ -98,7 +98,7 @@ export default function HomePage() {
         transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
       >
         <div 
-          className="relative w-40 sm:w-50 md:w-52 lg:w-100 h-50 sm:h-24 md:h-28 lg:h-40 bg-cover bg-center bg-no-repeat" 
+          className="relative w-60 sm:w-50 md:w-52 lg:w-100 h-20 sm:h-24 md:h-28 lg:h-40 bg-cover bg-center bg-no-repeat" 
             style={carImageUrl ? { backgroundImage: `url('${carImageUrl}')` } : { backgroundImage: "url('/images/vehicles/mainCar.png')" }}
         />
       </motion.div>
