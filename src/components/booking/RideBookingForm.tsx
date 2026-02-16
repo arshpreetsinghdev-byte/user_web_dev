@@ -275,7 +275,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
         <DestinationField value={destination} onChange={setDestination} variant={variant} />
 
         <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} />
-
+        
         <ServiceSelector variant={variant} />
         {isBookPage && (
           <div className="bg-[#f6f6f6] border border-[#d7d6d6] rounded-[10px]">
