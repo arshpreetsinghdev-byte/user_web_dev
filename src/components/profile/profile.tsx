@@ -259,7 +259,7 @@ export function ProfileDialog({
                 <Button
                   onClick={handleLogoutClick}
                   variant="ghost"
-                  className="w-full h-10 text-black border border-gray-200 rounded-lg text-lg font-medium hover:bg-red-50 hover:text-red-600"
+                  className="w-full h-10 text-black border border-gray-200 rounded-lg text-lg font-medium hover:bg-red-50 hover:text-primary"
                 >
                   {t("common.logout") || "Logout"}
                 </Button>
@@ -299,7 +299,7 @@ export function ProfileDialog({
                 <Button
                   variant="destructive"
                   onClick={confirmLogout}
-                  className="flex-1 bg-black text-white"
+                  className="flex-1 bg-primary text-white"
                 >
                   {t("common.logout") || "Logout"}
                 </Button>

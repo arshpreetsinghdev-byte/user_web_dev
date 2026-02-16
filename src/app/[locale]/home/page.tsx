@@ -21,6 +21,8 @@ export default function HomePage() {
   const config = getUserWebConfig();
   const configHeading = config?.heading || "Welcome to,BlackBadge Transportation";
   const configSubHeading = config?.sub_heading || "";
+  const carImageUrl = config?.car_image_url;
+  console.log("Car image url::", carImageUrl);
   const [heading, headingHighlight] = configHeading.split(',').map((part: string) => part.trim());
 
   useEffect(() => {
@@ -95,7 +97,10 @@ export default function HomePage() {
         animate={mounted ? { x: 0 } : { x: -1000 }}
         transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
       >
-        <div className="relative w-40 sm:w-50 md:w-52 lg:w-90 h-30 sm:h-24 md:h-28 lg:h-40 bg-[url('/images/vehicles/mainCar.png')] bg-contain bg-left bg-no-repeat" />
+        <div 
+          className="relative w-40 sm:w-50 md:w-52 lg:w-100 h-50 sm:h-24 md:h-28 lg:h-40 bg-cover bg-center bg-no-repeat" 
+            style={carImageUrl ? { backgroundImage: `url('${carImageUrl}')` } : { backgroundImage: "url('/images/vehicles/mainCar.png')" }}
+        />
       </motion.div>
     </div>
   );

@@ -19,7 +19,7 @@ interface ModifyRideDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     ride: RideHistoryItem | null;
-    onModifySuccess?: () => void;
+    onModifySuccess?: (updatedRide: RideHistoryItem) => void;
 }
 
 export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: ModifyRideDialogProps) {
@@ -180,11 +180,23 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
             await modifyScheduledRide(reqBody);
 
             toast.success(t("Ride modified successfully"));
-            onModifySuccess?.();
+            
+            // Build updated ride object with new data
+            const updatedRide: RideHistoryItem = {
+                ...ride,
+                pickupAddress,
+                dropAddress,
+                pickupLat,
+                pickupLng,
+                dropLat,
+                dropLng,
+                customerNote,
+                flightNumber,
+                date: new Date(pickupTime).toISOString(),
+            };
+            
+            onModifySuccess?.(updatedRide);
             onOpenChange(false);
-
-            // Refresh the page to show updated data
-            setTimeout(() => window.location.reload(), 500);
         } catch (error: any) {
             console.error("Failed to modify ride:", error);
             toast.error(error?.message || t("Failed to modify ride"));

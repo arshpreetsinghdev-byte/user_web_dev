@@ -62,6 +62,7 @@ export function LoginDialog({
                   {t("auth.loginToAccount")}
                 </DialogTitle>
               </DialogHeader>
+              <hr className="bg-[#EEEEEE] mt-2"/>
 
               <div className="mt-2 space-y-2">
                 {/* Phone Number Label */}

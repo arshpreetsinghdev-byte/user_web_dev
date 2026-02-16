@@ -155,7 +155,7 @@ export function SignupDialog({
             {t("auth.createNewAccount")}
           </DialogTitle>
         </DialogHeader>
-
+        <hr className="bg-[#EEEEEE] my-2"/>
         <div className="space-y-1 overflow-y-auto px-1">
           {/* Name Input */}
           <label className="block">

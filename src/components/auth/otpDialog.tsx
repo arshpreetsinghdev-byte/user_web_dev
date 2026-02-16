@@ -148,7 +148,7 @@ export function OtpDialog({
             {t("auth.loginToAccount")}
           </DialogTitle>
         </DialogHeader>
-
+        <hr className="bg-[#EEEEEE] mt-2"/>
         <div className="mt-2 space-y-2 overflow-y-auto flex-1">
           {/* OTP Label */}
           <label className="block">
