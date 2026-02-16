@@ -66,8 +66,7 @@ export async function generateHmacHash(data: string): Promise<string> {
 export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultResponse> {
   try {
     var reqObj = {
-      param_names: ['user_web_config','map_browser_key', 'autos_panel_theme', 'default_country_code', 'default_country_iso', 'show_operator_logo_on_panel'],
-      get_operator_data: 1,
+      param_names: ['user_web_config']
     }
 
     const headers = {
@@ -95,7 +94,7 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       // Parse user_web_config if it exists
       if (data.user_web_config) {
         const parsedConfig = getUserWebConfig(data.user_web_config);
-        // console.log("Parsed Config:::", parsedConfig);
+        console.log("Parsed Config:::", parsedConfig);
         data.user_web_config = parsedConfig;
       }
       

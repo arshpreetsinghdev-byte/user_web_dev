@@ -455,7 +455,7 @@ export default function BookingPage() {
                     {selectedRegion?.region_fare?.applicable_fare?.fare_per_baggage !== undefined && 
                      selectedRegion.region_fare.applicable_fare.fare_per_baggage > 0 && (
                       <span className="text-xs text-red-500 font-medium">
-                        * {selectedRegion.region_fare?.currency_symbol || '₹'}{selectedRegion.region_fare.applicable_fare.fare_per_baggage} per bag
+                        * {useOperatorParamsStore.getState().data?.user_web_config?.currency || '₹'}{selectedRegion.region_fare.applicable_fare.fare_per_baggage} per bag
                       </span>
                     )}
                   </div>

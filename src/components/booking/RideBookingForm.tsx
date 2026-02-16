@@ -82,7 +82,6 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   const handleBookNow = useCallback(async () => {
     setSelectedRegion(null);
     setAvailableVehicles([]);
-    console.log("validation data:::::::::::", pickup, destination, stops, scheduledDateTime);
     const validation = bookingValidator.validateBookingForm({
       pickup,
       destination,
@@ -108,7 +107,6 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
       toast.error("Failed to validate service area. Please try again.");
       return;
     }
-    console.log("redirecting to the book page");
     try {
       const data = await calculateFareAndFindDrivers();
       // console.log("🚙 Vehicles ready:", data?.regions.vehicles.length);
@@ -275,7 +273,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
         <DestinationField value={destination} onChange={setDestination} variant={variant} />
 
         <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} />
-        
+
         <ServiceSelector variant={variant} />
         {isBookPage && (
           <div className="bg-[#f6f6f6] border border-[#d7d6d6] rounded-[10px]">
