@@ -497,7 +497,7 @@ export default function BookingPage() {
                     <div className="border border-gray-200 rounded-lg">
                       <button
                         onClick={() => setIsBookingDetailsOpen(!isBookingDetailsOpen)}
-                        className="w-full flex items-center justify-between p-5 sm:p-5 text-left hover:bg-gray-50 transition-colors rounded-lg"
+                        className="w-full flex items-center justify-between px-5 py-2 sm:px-5 sm-py-2 text-left hover:bg-gray-50 transition-colors rounded-lg"
                       >
                         <h3 className="text-xs sm:text-sm font-semibold text-gray-900">Book for someone else (Optional)</h3>
                         <svg
@@ -514,7 +514,7 @@ export default function BookingPage() {
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isBookingDetailsOpen ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
                           }`}
                       >
-                        <div className="px-4 pb-4 space-y-3 mt-3">
+                        <div className="px-4 pb-4 space-y-1  mt-1">
                           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <input
                               type="text"

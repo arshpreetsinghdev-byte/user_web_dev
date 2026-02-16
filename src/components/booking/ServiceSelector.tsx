@@ -43,7 +43,7 @@ const ServiceSelector = memo(({ variant }: ServiceSelectorProps) => {
           "w-full h-7 lg:h-7 px-4 py-5 bg-white text-gray-900 placeholder:text-gray-400 border-0 focus-visible:ring-2 focus-visible:ring-white/50 text-base rounded-lg",
           variant === "outline" && "shadow-md"
         )}>
-          <SelectValue placeholder="Choose a service" />
+        <SelectValue placeholder="Choose a service" />
         </SelectTrigger>
         <SelectContent className="bg-white rounded-lg shadow-lg border border-gray-200 max-h-75 overflow-auto">
           {serviceData.map((service) => (
@@ -52,8 +52,8 @@ const ServiceSelector = memo(({ variant }: ServiceSelectorProps) => {
               value={service.id?.toString() || service.name}
               className="cursor-pointer hover:bg-orange-50 focus:bg-orange-50 px-3 py-3 text-base"
             >
-              <div className="flex flex-col">
-                <span className="font-medium text-gray-900">{service.name || service.service_name}</span>
+              <div className="flex flex-col text-sm">
+                <span className="text-gray-900">{service.name || service.service_name}</span>
                 {/* {service.description && (
                   <span className="text-xs text-gray-500 mt-0.5">{service.description}</span>
                 )} */}

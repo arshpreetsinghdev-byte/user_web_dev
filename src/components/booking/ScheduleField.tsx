@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import TimelineRow from "./TimelineRow";
 import { cn } from '@/lib/utils';
 import { Calendar } from "@/components/ui/calendar";
+import { toast } from "sonner";
 import {
   Popover,
   PopoverContent,
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
 interface ScheduleFieldProps {
   value: Date | null;
@@ -32,6 +34,23 @@ const minutes = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50
 
 const ScheduleField = memo(({ value, onChange, className, variant }: ScheduleFieldProps) => {
   const [internalDate, setInternalDate] = useState<Date | undefined>(value || new Date());
+  const [toastShown, setToastShown] = useState(false);
+  const { getUserWebConfig } = useOperatorParamsStore();
+  const config = getUserWebConfig();
+  const maxDateSchedules = config?.max_date_schedules;
+  // Calculate maximum date based on max_date_schedules (in days)
+  const getMaxDate = () => {
+    if (!maxDateSchedules) return undefined;
+    const days = parseInt(maxDateSchedules);
+    if (isNaN(days) || days <= 0) return undefined;
+    
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + days);
+    maxDate.setHours(23, 59, 59, 999); // End of that day
+    return maxDate;
+  };
+
+  const maxDate = getMaxDate();
 
   const getInitialTime = () => {
     const d = value || new Date();
@@ -72,6 +91,14 @@ const ScheduleField = memo(({ value, onChange, className, variant }: ScheduleFie
   }, [value]);
 
   const handleSelectDate = (date: Date | undefined) => {
+    // Check if date is beyond maxDate and show toast once
+    if (date && maxDate && date > maxDate && !toastShown) {
+      toast.error(`You can only book rides up to ${maxDateSchedules} days in advance`);
+      setToastShown(true);
+      // Reset toast flag after 3 seconds to allow showing it again if user tries again
+      setTimeout(() => setToastShown(false), 3000);
+      return;
+    }
     setInternalDate(date);
     updateDateTime(date, hour, minute, period);
   };
@@ -156,6 +183,7 @@ const ScheduleField = memo(({ value, onChange, className, variant }: ScheduleFie
               selected={internalDate}
               onSelect={handleSelectDate}
               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              toDate={maxDate}
               autoFocus
               className="p-2"
             />
