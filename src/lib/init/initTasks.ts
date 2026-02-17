@@ -2,6 +2,7 @@ import apiClient from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type { DefaultResponse } from '@/types';
 import { fetchOperatorParams, generateHmacHash } from '../utils';
+import { headers } from 'next/headers';
 
 interface InitTasksResult {
   serviceAvailable: boolean;
@@ -81,7 +82,10 @@ async function verifySession(sessionDetails: any): Promise<DefaultResponse> {
 }
 
 export async function runInitTasks(): Promise<InitTasksResult> {
-
+  // Get hostname from request headers (Next.js server-side)
+  const headersList = await headers();
+  const hostname = headersList.get('host') || 'unknown';
+  
   const serviceCheck = await authorizeUser();
 
   if (!serviceCheck.success) {

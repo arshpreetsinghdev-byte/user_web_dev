@@ -1,6 +1,13 @@
 import '@/lib/hippo/hippo.types';
+import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 
-const getHippoKey = () => process.env.NEXT_PUBLIC_HIPPO_KEY;
+const getHippoKey = () => {
+  // Try to get from operator params config first
+  const { getUserWebConfig } = useOperatorParamsStore.getState();
+  const config = getUserWebConfig();
+  console.log("chat support key: ", config?.chat_support);
+  return config?.chat_support;
+};
 
 /**
  * Initialize Hippo silently (no widget icon)
@@ -13,6 +20,7 @@ export const initHippo = () => {
     collapseType: "completeHide", // fully hidden widget
     hideNewConversation: "1",
     ignore_auto_msgs: "true",
+    notification_sound: "0",
     alwaysSkipBot: true,
     force_assign: "1",
     color: "#000000",

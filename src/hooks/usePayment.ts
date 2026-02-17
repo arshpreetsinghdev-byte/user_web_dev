@@ -109,7 +109,6 @@ export function usePayment() {
         (i: any) => i.name === "square_cards"
       );
       const config = useOperatorParamsStore.getState().getUserWebConfig();
-
       setPaymentDetails({
         stripeCards: normalizeStripeCards(
           responseData.stripe_cards || stripeConfig?.cards_data || []
