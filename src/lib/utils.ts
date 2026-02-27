@@ -36,9 +36,9 @@ export function getUserWebConfig(raw: any) {
   }
 }
 
-export async function generateHmacHash(data: string): Promise<string> {
+export async function generateHmacHash(data: string, businessToken: string): Promise<string> {
   const encoder = new TextEncoder();
-  const keyData = encoder.encode(API_ENDPOINTS.PRODUCTION.BUSINESS_TOKEN);
+  const keyData = encoder.encode(businessToken);
   const dataBuffer = encoder.encode(data);
 
   try {
@@ -84,8 +84,6 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
     catch (error) {
       console.log("error fetchOperatorParams", error);
     }
-    // console.log("response fetchOperatorParams", response?.data.data.autos_panel_theme);
-
 
   // console.log('Fetch operator params response:', response?.data.data);
     if (response?.status === 200) {
@@ -94,7 +92,7 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       // Parse user_web_config if it exists
       if (data.user_web_config) {
         const parsedConfig = getUserWebConfig(data.user_web_config);
-        console.log("Parsed Config:::", parsedConfig);
+        // console.log("Parsed Config:::", parsedConfig);
         data.user_web_config = parsedConfig;
       }
       
@@ -113,7 +111,7 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
     };
 
   } catch (error: any) {
-    console.error('❌ Fetch operator params failed:', error.message);
+    console.error('❌ Fetch operator params failed:', error);
     const errorMsg = error.message || 'Fetch operator params failed';
     return {
       success: false,
