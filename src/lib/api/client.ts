@@ -32,7 +32,7 @@ const handleSessionExpired = () => {
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    console.log("apiClient used")
+    // console.log("apiClient used")
     const { token, sessionId, sessionIdentifier, userSessionId, userSessionIdentifier, isAuthenticated } = useAuthStore.getState();
 
     // Attach Bearer token if it exists

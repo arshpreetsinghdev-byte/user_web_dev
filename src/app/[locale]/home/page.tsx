@@ -34,7 +34,10 @@ export default function HomePage() {
   };
 
   const handleRegisterDriver = () => {
-    window.open('https://jmpno.app.link/76PJg8ohi0b', '_blank');
+    const driverRegisterLink = config?.driver_register_link;
+    if (driverRegisterLink) {
+      window.open(driverRegisterLink, "_blank");
+    }
   };
 
   return (
