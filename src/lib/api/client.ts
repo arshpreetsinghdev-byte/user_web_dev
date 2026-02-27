@@ -29,7 +29,7 @@ const handleSessionExpired = () => {
     }
   }
 };
-
+//edit for gitlab-it
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // console.log("apiClient used")
