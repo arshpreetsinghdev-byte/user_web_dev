@@ -108,7 +108,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
       return;
     }
     try {
-      const data = await calculateFareAndFindDrivers();
+      // const data = await calculateFareAndFindDrivers();
       // console.log("🚙 Vehicles ready:", data?.regions.vehicles.length);
 
       const locale = params?.locale || "en";

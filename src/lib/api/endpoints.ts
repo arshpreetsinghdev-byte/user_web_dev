@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     VERIFY_CUSTOMER_OTP: '/open/v1/verify_customer_otp',
     UPDATE_USER_PROFILE: '/open/v1/update_user_profile',
     GET_USER_PROFILE: '/open/v1/get_user_profile_details',
+    GET_SUBDOMAIN_ID: '/open/v1/subdomain_client_id',
   },
 
   // User
@@ -102,7 +103,7 @@ export const API_ENDPOINTS = {
   //   BUSINESS_TOKEN: '31992b8102486bf5807577e2c5bb61ce763b535137856b5e0573f595ac717b54'
   // }
   PRODUCTION: {
-    AUTOS_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://test.jugnoo.in:8068',
+    AUTOS_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://test-8068.jugnoo.in',
     BUSINESS_ID: process.env.NEXT_PUBLIC_BUSINESS_ID || '1001',
     BUSINESS_TOKEN: process.env.NEXT_PUBLIC_BUSINESS_TOKEN || 'a5c5432676219e9fd380ac5a28d8ae4ab2b9e1e55cd75617b5c7955ee74d0397'
   }
