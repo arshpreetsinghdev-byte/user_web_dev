@@ -179,7 +179,7 @@ export async function runInitTasks(): Promise<InitTasksResult> {
 
   return {
     serviceAvailable: true,
-    googleMapsKey: getParams.data.map_browser_key,
+    googleMapsKey: getParams.data?.user_web_config?.map_browser_key,
     sessionDetails: sessionDetails,
     operatorParams: getParams.data,
   };
