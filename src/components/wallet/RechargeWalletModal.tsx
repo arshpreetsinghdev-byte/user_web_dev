@@ -64,10 +64,10 @@ export function RechargeWalletModal({
   }, [isOpen, refetch]);
 
   const handleRecharge = async () => {
-    if (!amount || parseFloat(amount) < 50) {
-      toast.error('Minimum recharge amount is 50');
-      return;
-    }
+    // if (!amount || parseFloat(amount) < 50) {
+    //   toast.error('Minimum recharge amount is 50');
+    //   return;
+    // }
 
     if (!selectedCardId) {
       toast.error('Please select a card to proceed');

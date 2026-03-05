@@ -79,6 +79,7 @@ export default function BookingPage() {
 
   // Use available vehicles from store - no fallbacks
   const regions = availableVehicles;
+  console.log("Regions fare fix:::", regions);
   const [vehicleServices, setVehicleServices] = useState<{ id: number; name: string; price: number; eta: number; description: string }[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);

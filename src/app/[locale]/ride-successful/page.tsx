@@ -161,10 +161,10 @@ export default function RideSuccessfulPage() {
   const isSuccess = bookingResult?.flag === SUCCESS_FLAG;
 
   // Debug payment details
-  console.log('Ride Successful - selectedPaymentMethod:', selectedPaymentMethod);
-  console.log('Ride Successful - selectedCardId:', selectedCardId);
-  console.log('Ride Successful - selectedSquareCardId:', selectedSquareCardId);
-  console.log('Ride Successful - paymentDetails:', paymentDetails);
+  // console.log('Ride Successful - selectedPaymentMethod:', selectedPaymentMethod);
+  // console.log('Ride Successful - selectedCardId:', selectedCardId);
+  // console.log('Ride Successful - selectedSquareCardId:', selectedSquareCardId);
+  // console.log('Ride Successful - paymentDetails:', paymentDetails);
 
   const appliedCouponData = useMemo(() => {
     return allPromotions.find(p => p.id === appliedCoupon);
@@ -248,11 +248,11 @@ export default function RideSuccessfulPage() {
                 {bookingResult.message}
               </p>
             )}
-            {isSuccess && bookingResult?.fareText && (
+            {/* {isSuccess && bookingResult?.fareText && (
               <p className="text-lg font-medium text-primary">
                 {t("Estimated Fare")}: {formatFareText(bookingResult.fareText)}
               </p>
-            )}
+            )} */}
           </div>
 
           {/* Content */}
@@ -291,7 +291,7 @@ export default function RideSuccessfulPage() {
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
                       {/* Left Column - Passenger Info & Flight Number */}
-                      <div className="space-y-3">
+                      <div className="space-y-3"> 
                         {/* Passenger Information */}
                         {(customerName || customerPhone) && (
                           <div className="space-y-1">

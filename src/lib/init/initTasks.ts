@@ -17,11 +17,12 @@ interface BusinessCredentials {
   business_token: string;
 }
 
-async function fetchBusinessCredentials(subdomain: string): Promise<DefaultResponse & { data?: BusinessCredentials }> {
+async function fetchBusinessCredentials(subdomain: string , subdomainNamePass: string | undefined): Promise<DefaultResponse & { data?: BusinessCredentials }> {
   try {
     console.log("Reaching fetch Business:::::");
     const response = await apiClient.post(API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GET_SUBDOMAIN_ID, {
-      subdomain_name: subdomain
+      subdomain_name: subdomain,
+      password: subdomainNamePass,
     }, {
       headers: {
         'Content-Type': 'application/json'
@@ -124,16 +125,17 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   // Get hostname from request headers (Next.js server-side)
   const headersList = await headers();
   const hostname = headersList.get('host') || 'unknown';
-  
+  const subdomainNamePass = process.env.SUBDOMAIN_PASS;
+  console.log("Subdomain name password:::::",subdomainNamePass)
   // Extract subdomain from hostname (e.g., "example-subdomain.example.com" -> "example-subdomain")
   let subdomain = hostname.split('.')[0];
-  console.log("Subdomain::",subdomain);
+  // console.log("Subdomain::",subdomain);
   if(subdomain === 'localhost:4000'){
     subdomain = "blackbadge-uwt"
   }
   // Fetch business credentials before authorizing
   console.log("Fetch business credentials before authorizing")
-  const credentialsResult = await fetchBusinessCredentials(subdomain);
+  const credentialsResult = await fetchBusinessCredentials(subdomain, subdomainNamePass);
   console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
   
   if (!credentialsResult.success || !credentialsResult.data) {

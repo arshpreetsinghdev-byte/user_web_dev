@@ -100,10 +100,10 @@ export function useWallet() {
                 toast.error("User phone number not found");
                 return;
             }
-            if (amount < 50) {
-                toast.error("Minimum recharge amount is 50");
-                return;
-            }
+            // if (amount < 50) {
+            //     toast.error("Minimum recharge amount is 50");
+            //     return;
+            // }
 
             return rechargeWallet({
                 driver_phone_no: user.phone_no.replace(/^\+/, ''),
