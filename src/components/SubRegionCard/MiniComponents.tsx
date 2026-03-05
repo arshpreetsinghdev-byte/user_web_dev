@@ -1,4 +1,5 @@
 import { UserRound, Check } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 
@@ -10,9 +11,9 @@ interface TitleBlockProps {
 
 function TitleBlock({ title, capacity, minutes }: TitleBlockProps) {
     return (
-        <div className='flex flex-col gap-1'>
-            <div className="text-left w-full items-center flex gap-2">
-                <h1 className="H3">
+        <div className='flex flex-col gap-1 min-w-0'>
+            <div className="text-left w-full items-center flex flex-wrap gap-x-2 gap-y-0.5 min-w-0">
+                <h1 className="H3 wrap-break-word">
                     {title}
                 </h1>
                 {capacity && (
@@ -31,10 +32,30 @@ function TitleBlock({ title, capacity, minutes }: TitleBlockProps) {
 
 
 function DescriptionBlock({ text }: { text: string }) {
+    const ref = useRef<HTMLParagraphElement>(null);
+    const [isClamped, setIsClamped] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (el) setIsClamped(el.scrollHeight > el.clientHeight);
+    }, [text]);
+
     return (
-        <p className="desscription">
-            {text}
-        </p>
+        <span className="block">
+            <p ref={ref} className={`desscription break-words ${expanded ? "" : "line-clamp-2"}`}>
+                {text}
+            </p>
+            {(isClamped || expanded) && (
+                <button
+                    type="button"
+                    className="text-primary text-xs font-medium select-none focus:outline-none"
+                    onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+                >
+                    {expanded ? "...less" : "...more"}
+                </button>
+            )}
+        </span>
     );
 }
 

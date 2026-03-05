@@ -368,7 +368,7 @@ export default function BookingPage() {
                         imgSrc={region.images.tab_normal}
                         selected={selectedRegion?.region_id === region.region_id}
                         onClick={() => handleRegionSelect(region.region_id)}
-                        className="max-h-25"
+                        className=""
                         subComponent1={
                           <TitleBlock
                             title={region.region_name}

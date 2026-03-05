@@ -90,9 +90,9 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       const data = response?.data.data;
       
       // Parse user_web_config if it exists
-      if (data.user_web_config) {
+      if (data?.user_web_config) {
         const parsedConfig = getUserWebConfig(data.user_web_config);
-        // console.log("Parsed Config:::", parsedConfig);
+        console.log("Parsed Config:::", parsedConfig);
         data.user_web_config = parsedConfig;
       }
       

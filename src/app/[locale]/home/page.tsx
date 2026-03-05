@@ -22,7 +22,7 @@ export default function HomePage() {
   const configHeading = config?.heading || "Welcome to,BlackBadge Transportation";
   const configSubHeading = config?.sub_heading || "";
   const carImageUrl = config?.car_image_url;
-  console.log("Car image url::", carImageUrl);
+  // console.log("Car image url::", carImageUrl);
   const [heading, headingHighlight] = configHeading.split(',').map((part: string) => part.trim());
 
   useEffect(() => {

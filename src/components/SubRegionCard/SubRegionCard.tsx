@@ -26,7 +26,7 @@ function SubRegionCard({
 
     return (
         <div
-            className={`flex items-center gap-4 rounded-lg transition-shadow cursor-pointer shadow-sm ${className} ${selected ? "ring-1 ring-primary shadow-md bg-primary/5" : "ring-1 ring-border hover:shadow hover:ring-primary/20"
+            className={`flex items-center gap-4 rounded-lg transition-shadow cursor-pointer shadow-sm overflow-hidden ${className} ${selected ? "ring-1 ring-primary shadow-md bg-primary/5" : "ring-1 ring-border hover:shadow hover:ring-primary/20"
                 } bg-white pr-6`}
             onClick={onClick}
         >

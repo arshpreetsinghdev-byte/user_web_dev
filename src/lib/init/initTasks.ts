@@ -19,6 +19,7 @@ interface BusinessCredentials {
 
 async function fetchBusinessCredentials(subdomain: string): Promise<DefaultResponse & { data?: BusinessCredentials }> {
   try {
+    console.log("Reaching fetch Business:::::");
     const response = await apiClient.post(API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GET_SUBDOMAIN_ID, {
       subdomain_name: subdomain
     }, {
@@ -27,7 +28,7 @@ async function fetchBusinessCredentials(subdomain: string): Promise<DefaultRespo
       },
       timeout: 5000,
     });
-    // console.log("Response ->", response.data.data, response.data.message, response.data); 
+    console.log("Response ->", response.data.data, response.data.message, response.data); 
     if (response.status === 200 && response.data.flag === 143) {
       return {
         success: true,
@@ -128,11 +129,12 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   let subdomain = hostname.split('.')[0];
   console.log("Subdomain::",subdomain);
   if(subdomain === 'localhost:4000'){
-    subdomain = "magenta-dasik-9633e9"
+    subdomain = "blackbadge-uwt"
   }
   // Fetch business credentials before authorizing
+  console.log("Fetch business credentials before authorizing")
   const credentialsResult = await fetchBusinessCredentials(subdomain);
-  // console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
+  console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
   
   if (!credentialsResult.success || !credentialsResult.data) {
     return {

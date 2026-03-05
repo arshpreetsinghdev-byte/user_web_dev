@@ -77,6 +77,7 @@ export default function RideSummaryPage() {
     setSelectedCard,
     selectedSquareCard,
     setSelectedSquareCard,
+    isCashEnabled,
     isStripeEnabled,
     isSquareEnabled,
     refreshPaymentDetails, // Get refresh function
@@ -258,7 +259,7 @@ export default function RideSummaryPage() {
               ) : (
                 <div className="space-y-3">
                   {/* Cash Payment Option */}
-                  {paymentMethods.map((method) => {
+                  {isCashEnabled && paymentMethods.map((method) => {
                     const selected = selectedPaymentMethod === method.id;
                     return (
                       <CouponPaymentCard

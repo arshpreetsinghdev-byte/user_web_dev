@@ -23,6 +23,7 @@ export interface StripeCard {
 export interface PaymentDetails {
   stripeCards: StripeCard[];
   squareCards: SquareCardData[];
+  isCashEnabled: number;
   isStripeEnabled: number;
   isSquareEnabled: number;
   walletBalance: number;
@@ -63,6 +64,7 @@ export function usePayment() {
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     stripeCards: [],
     squareCards: [],
+    isCashEnabled: 0,
     isStripeEnabled: 0,
     isSquareEnabled: 0,
     walletBalance: 0,
@@ -101,6 +103,10 @@ export function usePayment() {
 
       const responseData = data.data;
 
+      const cashConfig = responseData.payment_mode_config_data?.find(
+        (i: any) => i.name === "jugnoo_cash"
+      )
+
       const stripeConfig = responseData.payment_mode_config_data?.find(
         (i: any) => i.name === "stripe_cards"
       );
@@ -114,6 +120,7 @@ export function usePayment() {
         squareAppId: config?.NEXT_PUBLIC_SQUARE_APPLICATION_ID,
         squareLocId: config?.NEXT_PUBLIC_SQUARE_LOCATION_ID
       });
+      console.log("cash config::::->", cashConfig)
       setPaymentDetails({
         stripeCards: normalizeStripeCards(
           responseData.stripe_cards || stripeConfig?.cards_data || []
@@ -121,6 +128,8 @@ export function usePayment() {
         squareCards: normalizeSquareCards(
           responseData.square_cards || squareConfig?.cards_data || []
         ),
+        
+        isCashEnabled  : cashConfig?.enabled || 0,
         isStripeEnabled: stripeConfig?.enabled || 0,
         isSquareEnabled: squareConfig?.enabled || 0,
         walletBalance: responseData.jugnoo_balance || 0,
@@ -184,6 +193,7 @@ export function usePayment() {
     setSelectedCard,
     selectedSquareCard,
     setSelectedSquareCard,
+    isCashEnabled: paymentDetails.isCashEnabled === 1,
     isStripeEnabled: paymentDetails.isStripeEnabled === 1,
     isSquareEnabled: paymentDetails.isSquareEnabled === 1,
     refreshPaymentDetails: () => fetchPaymentDetails(true),
