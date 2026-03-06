@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchWalletBalance, getTransactionHistory, rechargeWallet } from '@/lib/api/wallet.api';
 import { useAuthStore } from '@/stores/auth.store';
@@ -39,6 +39,13 @@ export function useWallet() {
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
     console.log("wallet query:::", walletQuery);
+    // --- Pagination state ---
+    const [allTransactions, setAllTransactions] = useState<any[]>([]);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const pageSize = 10;
+    const initialFetchDone = useRef(false);
+
     const transactionsQuery = useQuery({
         queryKey: ['wallet-transactions', isAuthenticated],
         queryFn: () => getTransactionHistory({
@@ -50,6 +57,37 @@ export function useWallet() {
         enabled: isAuthenticated && !!walletQuery.data,
         staleTime: 5 * 60 * 1000,
     });
+
+    // Seed accumulated list from initial query
+    useEffect(() => {
+        if (transactionsQuery.data?.transactions) {
+            const txns = transactionsQuery.data.transactions;
+            setAllTransactions(txns);
+            setHasMore(txns.length >= pageSize);
+            initialFetchDone.current = true;
+        }
+    }, [transactionsQuery.data]);
+
+    // Load next page
+    const loadMoreTransactions = useCallback(async () => {
+        if (isLoadingMore || !hasMore) return;
+        setIsLoadingMore(true);
+        try {
+            const res = await getTransactionHistory({
+                login_type: 0,
+                locale: 'en',
+                currency: walletQuery.data?.data?.currency || 'USD',
+                start_from: allTransactions.length,
+            });
+            const newTxns = res.transactions || [];
+            setAllTransactions((prev: any[]) => [...prev, ...newTxns]);
+            setHasMore(newTxns.length >= pageSize);
+        } catch (e) {
+            console.error('Failed to load more transactions', e);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    }, [isLoadingMore, hasMore, allTransactions.length, walletQuery.data]);
 
     // console.log('💰 Wallet Data:', walletQuery.data?.data);
 
@@ -81,7 +119,10 @@ export function useWallet() {
     return {
         balance: responseData?.jugnoo_balance || 0,
         currency: operatorCurrency || '₹',
-        transactions: transactionsQuery.data?.transactions || [],
+        transactions: allTransactions,
+        hasMoreTransactions: hasMore,
+        isLoadingMore,
+        loadMoreTransactions,
         stripeCards,
         squareCards,
         isStripeEnabled,
@@ -92,6 +133,9 @@ export function useWallet() {
         isLoading: walletQuery.isLoading || transactionsQuery.isLoading || geoLoading,
         error: walletQuery.error || transactionsQuery.error,
         refetch: useCallback(() => {
+            // Reset pagination offset; the useEffect will replace allTransactions
+            // when new data arrives (it does a full replace, not append).
+            initialFetchDone.current = false;
             walletQuery.refetch();
             transactionsQuery.refetch();
         }, []), // TanStack Query refetch functions are stable
