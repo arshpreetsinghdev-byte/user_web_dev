@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchWalletBalance, getTransactionHistory, rechargeWallet } from '@/lib/api/wallet.api';
 import { useAuthStore } from '@/stores/auth.store';
-import { useGeolocation } from './useGeolocation';
+import { useGeolocationConfigStore } from '@/stores/geolocation.store';
 import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 import { toast } from 'sonner';
 
@@ -21,24 +21,18 @@ export interface StripeCard {
  */
 export function useWallet() {
     const { isAuthenticated } = useAuthStore();
-    const { latitude, longitude, loading: geoLoading } = useGeolocation();
-
-    // Default coordinates if geolocation fails (can be adjusted)
-    const defaultCoords = {
-        latitude: 30.719852,
-        longitude: 76.748012
-    };
+    const { latitude, longitude, permission, currency: geoCurrency } = useGeolocationConfigStore();
+    const geoLoading = permission === 'prompt';
 
     const walletQuery = useQuery({
         queryKey: ['wallet-balance', isAuthenticated, latitude, longitude],
         queryFn: () => fetchWalletBalance({
-            latitude: latitude || defaultCoords.latitude,
-            longitude: longitude || defaultCoords.longitude
+            latitude: latitude || 0,
+            longitude: longitude || 0
         }),
-        enabled: isAuthenticated && !geoLoading,
+        enabled: isAuthenticated && !geoLoading && latitude !== null && longitude !== null,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
-    console.log("wallet query:::", walletQuery);
     // --- Pagination state ---
     const [allTransactions, setAllTransactions] = useState<any[]>([]);
     const [hasMore, setHasMore] = useState(true);
@@ -51,7 +45,7 @@ export function useWallet() {
         queryFn: () => getTransactionHistory({
             login_type: 0,
             locale: 'en',
-            currency: walletQuery.data?.data?.currency || 'USD',
+            currency: geoCurrency || config?.currency_code || 'USD',
             start_from: 0,
         }),
         enabled: isAuthenticated && !!walletQuery.data,
@@ -111,7 +105,8 @@ export function useWallet() {
         ? responseData.square_cards
         : (squareConfig?.cards_data || []);
 
-    const operatorCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
+    const operatorCurrency = geoCurrency ||
+        useOperatorParamsStore.getState().data?.user_web_config?.currency ||
         useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
         '₹';
 
@@ -155,7 +150,7 @@ export function useWallet() {
                 amount,
                 login_type: 1,
                 payment_mode: cardType === 'square' ? 73 : 9,
-                currency: walletQuery.data?.data?.currency || 'USD',
+                currency: geoCurrency || config?.currency_code || 'USD',
                 card_id: cardId
             });
         }

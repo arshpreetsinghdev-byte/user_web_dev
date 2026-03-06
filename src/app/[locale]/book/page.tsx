@@ -728,6 +728,7 @@ export default function BookingPage() {
                   <div className="hidden md:flex justify-end mt-6">
                     <ActionButton onClick={onNext} className="px-8 py-3 text-base justify-center flex h-12 bg-primary hover:bg-primary/90 shadow-lg rounded-lg">
                       {"Next"}
+                      <ArrowRight className="h-4 w-4 ml-1" />
                     </ActionButton>
                   </div>
                 )}

@@ -13,7 +13,7 @@ import {
  * Fetch Wallet Balance
  */
 export const fetchWalletBalance = async (data: FetchWalletBalanceRequest): Promise<FetchWalletBalanceResponse> => {
-    console.log('💰 Calling fetch_wallet_balance API', data);
+    // console.log('💰 Calling fetch_wallet_balance API', data);
 
     try {
         const response = await apiClient.post<FetchWalletBalanceResponse>(
@@ -21,7 +21,7 @@ export const fetchWalletBalance = async (data: FetchWalletBalanceRequest): Promi
             data
         );
 
-        console.log('✅ Wallet Balance API Response:', response.data);
+        // console.log('✅ Wallet Balance API Response:', response.data);
         return response.data;
     } catch (error: any) {
         console.error('❌ Wallet Balance API Error:', error.response?.data || error.message);
@@ -33,7 +33,7 @@ export const fetchWalletBalance = async (data: FetchWalletBalanceRequest): Promi
  * Get Transaction History
  */
 export const getTransactionHistory = async (data: GetTransactionHistoryRequest): Promise<GetTransactionHistoryResponse> => {
-    console.log('📜 Calling get_transaction_history API', data);
+    // console.log('📜 Calling get_transaction_history API', data);
 
     try {
         const response = await apiClient.post<GetTransactionHistoryResponse>(
@@ -41,7 +41,7 @@ export const getTransactionHistory = async (data: GetTransactionHistoryRequest):
             data
         );
 
-        console.log('✅ Transaction History API Response:', response.data);
+        // console.log('✅ Transaction History API Response:', response.data);
         return response.data;
     } catch (error: any) {
         console.error('❌ Transaction History API Error:', error.response?.data || error.message);

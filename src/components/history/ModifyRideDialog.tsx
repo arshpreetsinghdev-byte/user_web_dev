@@ -125,6 +125,10 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
             toast.error(t("Pickup date/time cannot be empty"));
             return;
         }
+        if (new Date(pickupTime) < new Date()) {
+            toast.error(t("Pickup time cannot be in the past"));
+            return;
+        }
         if (!pickupAddress || pickupAddress.trim() === "") {
             toast.error(t("Pickup address cannot be empty"));
             return;
@@ -263,6 +267,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
                                 type="datetime-local"
                                 value={pickupTime}
                                 onChange={(e) => setPickupTime(e.target.value)}
+                                min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                                 className="w-full"
                                 required
                             />

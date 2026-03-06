@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { navigateWithLoader } from "@/lib/utils/navigationLoader";
 import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 import { openHippoChat } from '@/lib/hippo/hippo.service';
+import { useGeolocationConfigStore } from '@/stores/geolocation.store';
 
 export default function Navbar() {
   const { t } = useTranslations();
@@ -48,6 +49,7 @@ export default function Navbar() {
 
   // Get auth state from store
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { permission: geoPermission, hasLocationAccess } = useGeolocationConfigStore();
   const [mounted, setMounted] = useState(false);
   const [logoUrl, setLogoUrl] = useState('/black-badge-assets/ic_launcher.png');
 
@@ -149,6 +151,10 @@ export default function Navbar() {
     }
 
     if (item.key === 'wallet') {
+      if (!hasLocationAccess()) {
+        toast.error('Location permission is required to use wallet. Please enable location access in your browser settings and refresh the page.');
+        return;
+      }
       setWalletOpen(true);
     } else if (item.key === 'history') {
       const locale = params?.locale || 'en';
