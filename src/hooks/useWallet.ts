@@ -60,7 +60,7 @@ export function useWallet() {
             setHasMore(txns.length >= pageSize);
             initialFetchDone.current = true;
         }
-    }, [transactionsQuery.data]);
+    }, [transactionsQuery.data, transactionsQuery.dataUpdatedAt]);
 
     // Load next page
     const loadMoreTransactions = useCallback(async () => {
@@ -128,8 +128,9 @@ export function useWallet() {
         isLoading: walletQuery.isLoading || transactionsQuery.isLoading || geoLoading,
         error: walletQuery.error || transactionsQuery.error,
         refetch: useCallback(() => {
-            // Reset pagination offset; the useEffect will replace allTransactions
-            // when new data arrives (it does a full replace, not append).
+            // Clear list so reopening the dialog starts fresh
+            setAllTransactions([]);
+            setHasMore(true);
             initialFetchDone.current = false;
             walletQuery.refetch();
             transactionsQuery.refetch();
