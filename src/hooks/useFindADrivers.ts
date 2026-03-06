@@ -49,6 +49,9 @@ export function useFindADrivers() {
 		setAutosCoupons,
 		appliedCoupon,
 		allPromotions,
+		roundTrip,
+		returnDateTime,
+		setIsInterCityRequest,
 	} = useBookingStore();
 
 	// Fetch configuration whenever pickup coordinates change
@@ -107,6 +110,8 @@ export function useFindADrivers() {
 			pickupCityOffset: currentPickupCityOffset,
 			allPromotions: currentAllPromotions,
 			appliedCoupon: currentAppliedCoupon,
+			roundTrip: currentRoundTrip,
+			returnDateTime: currentReturnDateTime,
 		} = state;
 
 		// Validate input
@@ -162,6 +167,9 @@ export function useFindADrivers() {
 				account_no: couponData?.account_no
 			});
 
+			// Determine if this is a city-to-city service
+			const isCityToCity = currentSelectedService?.type === 'out_station';
+
 			// Find drivers
 			const result = await findAvailableDrivers(
 				currentPickupLocation,
@@ -174,12 +182,18 @@ export function useFindADrivers() {
 					timezoneOffset: currentPickupCityOffset || 330,
 					promoToApply: hasAccountId ? undefined : (currentAppliedCoupon ?? undefined),
 					couponToApply: hasAccountId ? couponData.account_id : undefined,
+					returnTrip: isCityToCity ? currentRoundTrip : undefined,
+					returnDateTime: (isCityToCity && currentRoundTrip === 1 && currentReturnDateTime) ? currentReturnDateTime : undefined,
 				}
 			);
 			const vehicles = result?.regions || [];
 			const promotions = result?.promotions || [];
 			const autosPromotions = result?.autos_promotions || [];
 			const autosCoupons = result?.autos_coupons || [];
+
+			// Track inter-city state
+			const isInterCity = !!(result as any)?.is_inter_city_request;
+			setIsInterCityRequest(isInterCity);
 
 			setPromotions(promotions);
 			setAutosPromotions(autosPromotions);

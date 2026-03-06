@@ -141,6 +141,11 @@ interface BookingState {
     fareText?: string;
   } | null;
 
+  // City-to-city / round trip
+  roundTrip: 0 | 1; // 0 = one way, 1 = round trip
+  returnDateTime: Date | null; // Return date/time for round trips
+  isInterCityRequest: boolean;
+
   // State
   isLoading: boolean;
 
@@ -183,6 +188,9 @@ interface BookingState {
   setBookingResult: (result: { flag: number; message: string; fareText?: string } | null) => void;
   setIsLoading: (loading: boolean) => void;
   setDistanceTime: (result: DistanceTimeResult | null) => void;
+  setRoundTrip: (value: 0 | 1) => void;
+  setReturnDateTime: (dateTime: Date | null) => void;
+  setIsInterCityRequest: (value: boolean) => void;
   setCurrentStepIndex: (index: number) => void;
   goToNextStep: () => void;
   goToPreviousStep: () => void;
@@ -235,6 +243,9 @@ export const useBookingStore = create<BookingState>()(
         selectedCardId: null, // Initialize Stripe card ID
         selectedSquareCardId: null, // Initialize Square card ID
         bookingResult: null,
+        roundTrip: 0,
+        returnDateTime: null,
+        isInterCityRequest: false,
         isLoading: false,
         pickupCityCurrency: useOperatorParamsStore.getState().data?.user_web_config?.currency ||
           useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || null,
@@ -412,6 +423,15 @@ export const useBookingStore = create<BookingState>()(
         setDistanceTime: (result) =>
           set({ distanceTime: result }, false, 'booking/setDistanceTime'),
 
+        setRoundTrip: (value) =>
+          set({ roundTrip: value }, false, 'booking/setRoundTrip'),
+
+        setReturnDateTime: (dateTime) =>
+          set({ returnDateTime: dateTime }, false, 'booking/setReturnDateTime'),
+
+        setIsInterCityRequest: (value) =>
+          set({ isInterCityRequest: value }, false, 'booking/setIsInterCityRequest'),
+
         setCurrentStepIndex: (index) =>
           set(() => {
             const safeIndex = Math.min(
@@ -500,6 +520,9 @@ export const useBookingStore = create<BookingState>()(
               pickupCityCurrency: useOperatorParamsStore.getState().data?.user_web_config?.currency ||
                 useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || null,
               pickupCityOffset: null,
+              roundTrip: 0,
+              returnDateTime: null,
+              isInterCityRequest: false,
               isLoading: false,
               currentStepIndex: 0,
               previousStepIndex: null,
@@ -543,6 +566,9 @@ export const useBookingStore = create<BookingState>()(
           distanceTime: state.distanceTime,
           serviceData: state.serviceData,
           selectedService: state.selectedService,
+          roundTrip: state.roundTrip,
+          returnDateTime: state.returnDateTime,
+          isInterCityRequest: state.isInterCityRequest,
         }),
       }
     )

@@ -27,6 +27,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   const [mounted, setMounted] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const isInitialMount = useRef(true);
+  const scheduleToastShownCount = useRef(0);
   const [isBookForOtherOpen, setIsBookForOtherOpen] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [couponsOpen, setCouponsOpen] = useState(true);
@@ -90,7 +91,14 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     });
     // console.log("validation:::::", validation);
     if (!validation.isValid) {
-      toast.error(validation.error);
+      if (validation.error === "Please select a pickup date and time") {
+        if (scheduleToastShownCount.current < 2) {
+          scheduleToastShownCount.current += 1;
+          toast(validation.error, { id: "schedule-tip", icon: "💡" });
+        }
+      } else {
+        toast.error(validation.error);
+      }
       return;
     }
     // Validate config (service area) for pickup, stops and destination
@@ -144,7 +152,14 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     });
 
     if (!validation.isValid) {
-      toast.error(validation.error);
+      if (validation.error === "Please select a pickup date and time") {
+        if (scheduleToastShownCount.current < 2) {
+          scheduleToastShownCount.current += 1;
+          toast(validation.error, { id: "schedule-tip", icon: "💡" });
+        }
+      } else {
+        toast.error(validation.error);
+      }
       return;
     }
 
@@ -183,11 +198,12 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     setCurrentStepIndex,
   ]);
 
-  // Reset isFormDirty when the /book page mounts
+  // Reset isFormDirty and schedule toast counter when the /book page mounts
   useEffect(() => {
     if (pathname.includes("/book")) {
       setIsFormDirty(false);
       isInitialMount.current = true;
+      scheduleToastShownCount.current = 0;
     }
   }, [pathname]);
 

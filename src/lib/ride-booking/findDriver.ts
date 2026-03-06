@@ -57,12 +57,12 @@ export const findAvailableDrivers = async (
     body.set('service_id', String(options.serviceId));
   }
 
-  // Add round trip details if applicable
-  if (options.isRoundTrip && options.returnDateTime) {
-    body.set('return_trip', '1');
-    body.set('return_time', formatDateTime(options.returnDateTime, options.timezoneOffset));
-    body.set('ride_time', String(distanceTime.rideTime * 2));
-    body.set('ride_distance', String(distanceTime.rideDistance * 2));
+  // Add return trip details if applicable (city-to-city round trip)
+  if (options.returnTrip !== undefined) {
+    body.set('return_trip', String(options.returnTrip));
+    if (options.returnTrip === 1 && options.returnDateTime) {
+      body.set('return_time', formatDateTime(options.returnDateTime, options.timezoneOffset));
+    }
   }
 
   // Add pickup time for scheduled rides

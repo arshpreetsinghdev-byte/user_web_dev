@@ -38,13 +38,14 @@ export function useWallet() {
         enabled: isAuthenticated && !geoLoading,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
-
+    console.log("wallet query:::", walletQuery);
     const transactionsQuery = useQuery({
         queryKey: ['wallet-transactions', isAuthenticated],
         queryFn: () => getTransactionHistory({
             login_type: 0,
             locale: 'en',
-            currency: walletQuery.data?.data?.currency || 'USD'
+            currency: walletQuery.data?.data?.currency || 'USD',
+            start_from: 0,
         }),
         enabled: isAuthenticated && !!walletQuery.data,
         staleTime: 5 * 60 * 1000,
@@ -94,7 +95,7 @@ export function useWallet() {
             walletQuery.refetch();
             transactionsQuery.refetch();
         }, []), // TanStack Query refetch functions are stable
-        recharge: async (amount: number, cardId: string | number) => {
+        recharge: async (amount: number, cardId: string | number, cardType: 'stripe' | 'square' = 'stripe') => {
             const user = useAuthStore.getState().user;
             if (!user?.phone_no) {
                 toast.error("User phone number not found");
@@ -109,8 +110,8 @@ export function useWallet() {
                 driver_phone_no: user.phone_no.replace(/^\+/, ''),
                 amount,
                 login_type: 1,
-                payment_mode: 9,
-                currency: walletQuery.data?.data?.currency || 'INR',
+                payment_mode: cardType === 'square' ? 73 : 9,
+                currency: walletQuery.data?.data?.currency || 'USD',
                 card_id: cardId
             });
         }

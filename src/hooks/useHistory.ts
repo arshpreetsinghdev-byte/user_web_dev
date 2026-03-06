@@ -155,22 +155,19 @@ export function useHistory(errorMessage: string, rideType?: string) {
                 // Map active tab to ride status filters
                 let ride_status_filter: number | undefined;
                 let past_ride_status_filter: number | undefined;
-                let limit: number | undefined;
                 let fetch_cancelled_scheduled_rides: number | undefined;
+                const limit = ITEMS_PER_PAGE;
 
                 if (activeTab === 'Scheduled') {
                     ride_status_filter = 1;
                     fetch_cancelled_scheduled_rides = 0;
-                    limit: ITEMS_PER_PAGE;
                 } else if (activeTab === 'Completed') {
-                    ride_status_filter = 2
+                    ride_status_filter = 2;
                     past_ride_status_filter = 1;
-                    limit: ITEMS_PER_PAGE;
                     fetch_cancelled_scheduled_rides = 0;
                 } else if (activeTab === 'Cancelled') {
                     ride_status_filter = 2;
                     past_ride_status_filter = 2;
-                    limit: ITEMS_PER_PAGE;
                 }
                 // For 'All' tab, don't add any status filters
 
@@ -182,7 +179,7 @@ export function useHistory(errorMessage: string, rideType?: string) {
                     ...(selected_service !== undefined && { selected_service }),
                     ...(ride_status_filter !== undefined && { ride_status_filter }),
                     ...(past_ride_status_filter !== undefined && { past_ride_status_filter }),
-                    ...(limit !== undefined && { limit }),
+                    limit,
                     ...(fetch_cancelled_scheduled_rides !== undefined && { fetch_cancelled_scheduled_rides })
                 }, controller.signal);
 
