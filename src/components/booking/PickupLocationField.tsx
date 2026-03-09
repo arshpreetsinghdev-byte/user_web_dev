@@ -49,7 +49,6 @@ const PickupLocationField = memo(({ value, onChange, className, variant }: Picku
 
   const inputRef = useGoogleAutocomplete({
     onPlaceSelect: handlePlaceSelect,
-    country: 'in', // Restrict to India
   });
 
   return (

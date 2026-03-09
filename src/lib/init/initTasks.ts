@@ -134,9 +134,9 @@ export async function runInitTasks(): Promise<InitTasksResult> {
     subdomain = "blackbadge-uwt"
   }
   // Fetch business credentials before authorizing
-  console.log("Fetch business credentials before authorizing")
+  // console.log("Fetch business credentials before authorizing")
   const credentialsResult = await fetchBusinessCredentials(subdomain, subdomainNamePass);
-  console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
+  // console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
   
   if (!credentialsResult.success || !credentialsResult.data) {
     return {

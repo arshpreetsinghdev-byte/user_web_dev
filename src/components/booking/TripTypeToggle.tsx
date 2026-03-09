@@ -88,7 +88,7 @@ export function TripTypeToggle({
               value === 1 ? "text-white/80" : "text-gray-400"
             )}
           >
-            Keep the car till return
+            {/* Keep the car till return */}
           </span>
         </div>
         {value === 1 && (

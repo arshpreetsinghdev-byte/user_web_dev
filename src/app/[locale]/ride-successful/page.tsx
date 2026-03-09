@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import HeaderActions from "@/components/shared/HeaderActions";
 import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 import { formatFareText } from "@/lib/utils/format";
+import { getCountryCallingCode } from 'libphonenumber-js';
 
 
 /* ---------------------------------- DATA --------------------------------- */
@@ -306,7 +307,7 @@ export default function RideSuccessfulPage() {
                               <div className="flex gap-[10px] items-center">
                                 <span className="text-sm text-gray-600">Phone:</span>
                                 <span className="text-sm font-medium text-gray-900">
-                                  {customerCountryCode ? `+${customerCountryCode} ` : ''}{customerPhone}
+                                  {customerCountryCode ? `+${(() => { try { return getCountryCallingCode(customerCountryCode as any); } catch { return customerCountryCode; } })()} ` : ''}{customerPhone}
                                 </span>
                               </div>
                             )}

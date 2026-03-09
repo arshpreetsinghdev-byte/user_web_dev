@@ -2,7 +2,7 @@
 
 import Script from "next/script";
 import { useEffect } from "react";
-import { initHippo, identifyHippoUser } from "@/lib/hippo/hippo.service";
+import { initHippo, identifyHippoUser, closeHippoChat, isHippoChatOpen } from "@/lib/hippo/hippo.service";
 import { useAuthStore } from "@/stores/auth.store";
 
 export default function HippoProvider() {
@@ -13,6 +13,22 @@ export default function HippoProvider() {
     if (typeof window !== "undefined" && window.initHippo) {
       initHippo();
     }
+  }, []);
+
+  // Intercept the mobile back button while the Hippo chat is open.
+  // We register in the capture phase so our handler fires before:
+  //   1. The Hippo widget's own (broken) popstate handler
+  //   2. Next.js's router popstate handler
+  // stopImmediatePropagation() prevents both from running, then we
+  // close the widget via the official API which does proper cleanup.
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (!isHippoChatOpen()) return;
+      e.stopImmediatePropagation();
+      closeHippoChat();
+    };
+    window.addEventListener("popstate", handlePopState, true /* capture */);
+    return () => window.removeEventListener("popstate", handlePopState, true);
   }, []);
 
   // Sync authenticated user data with Hippo

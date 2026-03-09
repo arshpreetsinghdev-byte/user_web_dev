@@ -20,6 +20,10 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(self)',
+          },
+          {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",

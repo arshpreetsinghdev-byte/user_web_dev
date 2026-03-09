@@ -45,8 +45,7 @@ const StopItem = memo(({ stop, index, onUpdate, onRemove, variant }: StopItemPro
   );
 
   const inputRef = useGoogleAutocomplete({
-    onPlaceSelect: handlePlaceSelect,
-    country: 'in', // Restrict to India
+    onPlaceSelect: handlePlaceSelect
   });
 
   return (

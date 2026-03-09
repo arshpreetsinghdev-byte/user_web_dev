@@ -27,12 +27,13 @@ interface ScheduleFieldProps {
   onChange: (value: Date | null) => void;
   className?: string;
   variant?: "outline" | "filled";
+  label?: string;
 }
 
 const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 const minutes = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"];
 
-const ScheduleField = memo(({ value, onChange, className, variant }: ScheduleFieldProps) => {
+const ScheduleField = memo(({ value, onChange, className, variant, label = "Return Time" }: ScheduleFieldProps) => {
   const [internalDate, setInternalDate] = useState<Date | undefined>(value || new Date());
   const [toastShown, setToastShown] = useState(false);
   const { getUserWebConfig } = useOperatorParamsStore();
@@ -148,7 +149,7 @@ const ScheduleField = memo(({ value, onChange, className, variant }: ScheduleFie
       variant={variant}
     >
       <label className={`text-xs lg:text-sm text-white/90 mb-1.5 block font-medium ${variant === "outline" ? "text-black!" : ""}`}>
-        Schedule Ride
+        {label}
       </label>
 
       <Popover>
