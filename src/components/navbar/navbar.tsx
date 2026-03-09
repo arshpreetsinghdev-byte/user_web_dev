@@ -152,7 +152,28 @@ export default function Navbar() {
 
     if (item.key === 'wallet') {
       if (!hasLocationAccess()) {
-        toast.error('Location permission is required to use wallet. Please enable location access in your browser settings and refresh the page.');
+        // Request browser location permission
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Permission granted — update store and open wallet
+              useGeolocationConfigStore.getState().setPermission('granted');
+              useGeolocationConfigStore.getState().setCoordinates(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              setWalletOpen(true);
+            },
+            (error) => {
+              // Permission denied or error
+              useGeolocationConfigStore.getState().setPermission('denied');
+              toast.error(t('Location permission is required to use wallet. Please enable location access in your browser settings and refresh the page.'));
+            },
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+          );
+        } else {
+          toast.error(t('Geolocation is not supported by this browser.'));
+        }
         return;
       }
       setWalletOpen(true);

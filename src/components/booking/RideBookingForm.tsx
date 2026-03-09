@@ -104,7 +104,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     // Validate config (service area) for pickup only
     try {
       if (pickup) {
-        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat ?? pickup.latitude, longitude: pickup.lng ?? pickup.longitude });
+        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat, longitude: pickup.lng });
         if (cfg?.data?.flag === 144) {
           // bookingService already toasts, but ensure we don't proceed
           return;
@@ -165,7 +165,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     // Validate config (service area) for pickup only
     try {
       if (pickup) {
-        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat ?? pickup.latitude, longitude: pickup.lng ?? pickup.longitude });
+        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat, longitude: pickup.lng });
         if (cfg?.data?.flag === 144) {
           return;
         }
