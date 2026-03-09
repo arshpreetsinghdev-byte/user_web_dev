@@ -73,7 +73,7 @@ export function SignupDialog({
       try {
         // ONBOARDING MODE: Update profile directly and authenticate
         if (isOnboardingMode) {
-          console.log('📝 Onboarding mode: Updating profile directly');
+          // console.log('📝 Onboarding mode: Updating profile directly');
           await updateProfile(name, email);
 
           // NOW set authentication after profile is updated
@@ -107,7 +107,7 @@ export function SignupDialog({
         // NORMAL SIGNUP MODE: Generate OTP
         const callingCode = `+${getCountryCallingCode(countryCode as CountryCode)}`
         const fullPhoneNumber = callingCode + phoneNumber
-        console.log('📝 Normal signup: Generating OTP');
+        // console.log('📝 Normal signup: Generating OTP');
 
         await generateOtp(fullPhoneNumber, callingCode)
 

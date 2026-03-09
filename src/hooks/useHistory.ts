@@ -32,7 +32,7 @@ export const mapApiRideToRideHistoryItem = (apiRide: ApiRideHistoryItem): RideHi
     }
     const pickupAddr = apiRide.pickup_location_address || apiRide.pickup_address;
     const dropAddr = apiRide.drop_location_address || apiRide.drop_address;
-    console.log("API RIDE------------>", apiRide);
+    // console.log("API RIDE------------>", apiRide);
     return {
         id: apiRide.pickup_id?.toString() ||
             apiRide.engagement_id?.toString() ||
@@ -168,9 +168,10 @@ export function useHistory(errorMessage: string, rideType?: string) {
                 } else if (activeTab === 'Cancelled') {
                     ride_status_filter = 2;
                     past_ride_status_filter = 2;
+                } else {
+                    // 'All' tab — send ride_status_filter=0 to fetch all rides
+                    ride_status_filter = 0;
                 }
-                // For 'All' tab, don't add any status filters
-
                 const response = await fetchRideHistory({
                     start_from: startFrom,
                     show_custom_fields: 1,
@@ -185,7 +186,7 @@ export function useHistory(errorMessage: string, rideType?: string) {
 
                 if (response.data && Array.isArray(response.data)) {
                     const mappedRides = response.data.map(mapApiRideToRideHistoryItem);
-                    console.log("mappedRides ---->>>>>>>", response.data);
+                    // console.log("mappedRides ---->>>>>>>", response.data);
                     // On mobile, append to existing rides; on desktop, replace
                     if (isMobile && currentPage > 0) {
                         setRides(prev => [...prev, ...mappedRides]);
@@ -208,7 +209,7 @@ export function useHistory(errorMessage: string, rideType?: string) {
                 }
             } catch (error) {
                 if (axios.isCancel(error)) {
-                    console.log("Request canceled");
+                    // console.log("Request canceled");
                 } else {
                     console.error("History fetch error:", error);
                     toast.error(errorMessage);

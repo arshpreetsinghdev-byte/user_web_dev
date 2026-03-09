@@ -27,6 +27,7 @@ import { TripTypeToggle } from "@/components/booking/TripTypeToggle";
 import { useFindADrivers } from "@/hooks/useFindADrivers";
 import ScheduleField from "@/components/booking/ScheduleField";
 import { ArrowRight } from "lucide-react";
+import RentalPackageSelector from "@/components/booking/RentalPackageSelector";
 
 const VehicleCardSkeleton = () => (
   <div className="flex items-center gap-4 rounded-lg bg-white p-3 ring-1 ring-border shadow-sm h-25">
@@ -93,7 +94,7 @@ export default function BookingPage() {
 
   // Use available vehicles from store - no fallbacks
   const regions = availableVehicles;
-  console.log("Regions fare fix:::", regions);
+  // console.log("Regions fare fix:::", regions);
   const [vehicleServices, setVehicleServices] = useState<{ id: number; name: string; price: number; eta: number; description: string }[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
@@ -240,21 +241,21 @@ export default function BookingPage() {
     const region = regions.find((r) => r.region_id === regionId);
     if (region) {
       setSelectedRegion(region);
-      console.log("[handleRegionSelect] Selected vehicle:", {
-        region_id: region.region_id,
-        region_name: region.region_name,
-        vehicle_type: region.vehicle_type,
-        ride_type: region.ride_type,
-        fare: {
-          fare_float: region.region_fare?.fare_float,
-          original_fare_float: region.region_fare?.original_fare_float,
-          currency_symbol: region.region_fare?.currency_symbol,
-          pool_fare_id: region.region_fare?.pool_fare_id,
-          package_id: region.region_fare?.package_id,
-          applicable_fare: region.region_fare?.applicable_fare,
-        },
-        packages: region.packages,
-      });
+      // console.log("[handleRegionSelect] Selected vehicle:", {
+      //   region_id: region.region_id,
+      //   region_name: region.region_name,
+      //   vehicle_type: region.vehicle_type,
+      //   ride_type: region.ride_type,
+      //   fare: {
+      //     fare_float: region.region_fare?.fare_float,
+      //     original_fare_float: region.region_fare?.original_fare_float,
+      //     currency_symbol: region.region_fare?.currency_symbol,
+      //     pool_fare_id: region.region_fare?.pool_fare_id,
+      //     package_id: region.region_fare?.package_id,
+      //     applicable_fare: region.region_fare?.applicable_fare,
+      //   },
+      //   packages: region.packages,
+      // });
       const servicesWithEta = (region.vehicle_services || []).map((svc) => ({
         ...svc,
         id: svc.id ?? 0,
@@ -266,8 +267,8 @@ export default function BookingPage() {
       setVehicleServices(servicesWithEta);
       setSelectedServices([]);
 
-      // Scroll to booking details section only when manually selected
-      if (shouldScroll) {
+      // Scroll to booking details section only when manually selected and no packages (hourly/rental)
+      if (shouldScroll && !((region.packages?.length ?? 0) > 0)) {
         setTimeout(() => {
           const bookingDetailsSection = document.getElementById('booking-details-section');
           if (bookingDetailsSection) {
@@ -510,42 +511,52 @@ export default function BookingPage() {
                       ))}
                     </div>
                   ) : regions.length > 0 ? (
-                    regions.map((region) => (
-                      <SubRegionCard
-                        key={region.region_id}
-                        imgSrc={region.images.tab_normal}
-                        selected={selectedRegion?.region_id === region.region_id}
-                        onClick={() => handleRegionSelect(region.region_id)}
-                        className=""
-                        subComponent1={
-                          <TitleBlock
-                            title={region.region_name}
-                            capacity={region.max_people}
-                          />
-                        }
-                        subComponent2={
-                          <PriceBlock
-                            currencySymbol={useOperatorParamsStore.getState().data?.user_web_config?.currency || useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || region.region_fare?.currency_symbol || "₹"}
-                            price={region.region_fare?.fare_float}
-                            oldPrice={
-                              region.region_fare?.original_fare_float !==
-                                region.region_fare?.fare_float
-                                ? region.region_fare?.original_fare_float
-                                : undefined
-                            }
-                          />
-                        }
-                        subComponent3={
-                          <DescriptionBlock
-                            text={
-                              region.description ||
-                              region.disclaimer_text ||
-                              `Book a ${region.region_name} for your ride`
-                            }
-                          />
-                        }
-                      />
-                    ))
+                    regions.map((region) => {
+                      const hasPackages = (region.packages?.length ?? 0) > 0;
+                      const isSelected = selectedRegion?.region_id === region.region_id;
+                      return (
+                        <SubRegionCard
+                          key={region.region_id}
+                          imgSrc={region.images.tab_normal}
+                          selected={isSelected}
+                          expanded={isSelected && hasPackages}
+                          onClick={() => handleRegionSelect(region.region_id)}
+                          className=""
+                          subComponent1={
+                            <TitleBlock
+                              title={region.region_name}
+                              capacity={region.max_people}
+                            />
+                          }
+                          subComponent2={
+                            <PriceBlock
+                              currencySymbol={useOperatorParamsStore.getState().data?.user_web_config?.currency || useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || region.region_fare?.currency_symbol || "₹"}
+                              price={isSelected && selectedRegion ? selectedRegion.region_fare?.fare_float : region.region_fare?.fare_float}
+                              oldPrice={
+                                region.region_fare?.original_fare_float !==
+                                  region.region_fare?.fare_float
+                                  ? region.region_fare?.original_fare_float
+                                  : undefined
+                              }
+                            />
+                          }
+                          subComponent3={
+                            <DescriptionBlock
+                              text={
+                                region.description ||
+                                region.disclaimer_text ||
+                                `Book a ${region.region_name} for your ride`
+                              }
+                            />
+                          }
+                          expandContent={
+                            hasPackages ? (
+                              <RentalPackageSelector region={isSelected && selectedRegion ? selectedRegion : region} />
+                            ) : undefined
+                          }
+                        />
+                      );
+                    })
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <div className="text-muted-foreground mb-2">

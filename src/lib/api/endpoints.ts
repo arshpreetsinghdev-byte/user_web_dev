@@ -94,7 +94,7 @@ export const API_ENDPOINTS = {
   // Vehicle/Driver Discovery
   VEHICLE: {
     FIND_DRIVER: '/open/v1/find_a_driver',
-    GET_FARE_ESTIMATE: '/open/v1/get_fare_estimate',
+    FARE_ESTIMATE: '/open/v1/fare_estimate',
   },
 
   // PRODUCTION: {

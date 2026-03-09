@@ -29,7 +29,7 @@ const PickupLocationField = memo(({ value, onChange, className, variant }: Picku
     (place: PlaceResult) => {
       // Update input text
       setInputValue(place.address);
-      console.log('Input Value set to:', place.address);
+      // console.log('Input Value set to:', place.address);
 
       // Update booking store
       setPickupFromPlace(place);
@@ -42,7 +42,7 @@ const PickupLocationField = memo(({ value, onChange, className, variant }: Picku
         placeId: place.placeId,
       });
       
-      console.log('📍 Pickup selected:', place);
+      // console.log('📍 Pickup selected:', place);
     },
     [onChange, setPickupFromPlace]
   );

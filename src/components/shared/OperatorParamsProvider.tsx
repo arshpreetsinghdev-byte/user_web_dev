@@ -12,7 +12,7 @@ export function useInitializeOperatorParams(operatorParams: any) {
 
   useEffect(() => {
     if (operatorParams) {
-      console.log('Initializing operator params:', operatorParams);
+      // console.log('Initializing operator params:', operatorParams);
       setData(operatorParams);
 
       // Apply theme colors from config
@@ -67,7 +67,7 @@ function applyTheme(theme: { main_color?: string; secondary_color?: string }) {
     root.style.setProperty('--secondary-dark', adjustColorBrightness(theme.secondary_color, -30));
   }
 
-  console.log('Applied operator theme:', theme);
+  // console.log('Applied operator theme:', theme);
 }
 
 /**

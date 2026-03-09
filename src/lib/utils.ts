@@ -82,7 +82,7 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       });
     }
     catch (error) {
-      console.log("error fetchOperatorParams", error);
+      // console.log("error fetchOperatorParams", error);
     }
 
   // console.log('Fetch operator params response:', response?.data.data);
@@ -92,7 +92,7 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       // Parse user_web_config if it exists
       if (data?.user_web_config) {
         const parsedConfig = getUserWebConfig(data.user_web_config);
-        console.log("Parsed Config:::", parsedConfig);
+        // console.log("Parsed Config:::", parsedConfig);
         data.user_web_config = parsedConfig;
       }
       

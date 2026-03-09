@@ -77,19 +77,19 @@ export const findAvailableDrivers = async (
 
   // Add coupon to apply
   if (options.couponToApply !== undefined) {
-    console.log("🎟️ Setting coupon_to_apply:", options.couponToApply);
+    // console.log("🎟️ Setting coupon_to_apply:", options.couponToApply);
     body.set('coupon_to_apply', String(options.couponToApply));
   }
 
   try {
-    console.log('🚗 Finding drivers (form)...', Object.fromEntries(body.entries()));
+    // console.log('🚗 Finding drivers (form)...', Object.fromEntries(body.entries()));
     // Session headers are automatically added by API client interceptor based on auth state
 
     const data = await bookingService.findDrivers(body, operatorToken);
-    console.log('🚗 Find drivers response:', data);
+    // console.log('🚗 Find drivers response:', data);
     // Check for success (flag 175)
     if (data.flag === 175) {
-      console.log('✅ Drivers found:', data?.regions || 0);
+      // console.log('✅ Drivers found:', data?.regions || 0);
       return data;
     } else {
       throw new Error('Failed to find drivers');

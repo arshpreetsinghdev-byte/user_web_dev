@@ -53,7 +53,7 @@ export const getTransactionHistory = async (data: GetTransactionHistoryRequest):
  * Recharge Wallet (Settle Negative Balance / Add Money)
  */
 export const rechargeWallet = async (data: RechargeWalletRequest): Promise<RechargeWalletResponse> => {
-    console.log('💳 Calling settle_negative_wallet_balance API', data);
+    // console.log('💳 Calling settle_negative_wallet_balance API', data);
 
     try {
         const response = await apiClient.post<RechargeWalletResponse>(
@@ -61,7 +61,7 @@ export const rechargeWallet = async (data: RechargeWalletRequest): Promise<Recha
             data
         );
 
-        console.log('✅ Recharge Wallet API Response:', response.data);
+        // console.log('✅ Recharge Wallet API Response:', response.data);
         return response.data;
     } catch (error: any) {
         console.error('❌ Recharge Wallet API Error:', error.response?.data || error.message);

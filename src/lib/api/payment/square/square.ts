@@ -47,7 +47,7 @@ export async function loadSquareSDK(environment: 'sandbox' | 'production' = 'san
         attempts++;
         if ((window as any).Square) {
           clearInterval(interval);
-          console.log(`✅ Square ${environment} SDK loaded`);
+          // console.log(`✅ Square ${environment} SDK loaded`);
           resolve(true);
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);

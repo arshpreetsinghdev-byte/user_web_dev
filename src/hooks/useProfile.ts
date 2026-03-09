@@ -44,7 +44,7 @@ export function useProfile() {
    */
   const fetchProfile = useCallback(async () => {
     try {
-      console.log('📥 Fetching user profile...');
+      // console.log('📥 Fetching user profile...');
 
       // Validate session before fetching
       const isValid = await validateSession();
@@ -54,7 +54,7 @@ export function useProfile() {
       }
 
       await fetchProfileAPI();
-      console.log('✅ Profile fetched successfully');
+      // console.log('✅ Profile fetched successfully');
     } catch (error: any) {
       console.error('❌ Failed to fetch profile:', error);
       // Error handling is done in the API call and store
@@ -86,14 +86,14 @@ export function useProfile() {
     }
 
     try {
-      console.log('💾 Updating profile:', { fullName, email });
+      // console.log('💾 Updating profile:', { fullName, email });
 
       const response = await updateProfileAPI({
         updated_user_name: fullName,
         updated_user_email: email,
         image_file: avatarFile || undefined
       });
-      console.log("Profile response!!!!!!!!!", response);
+      // console.log("Profile response!!!!!!!!!", response);
       if (response && response.flag === 144) {
         // Handle warning case
         toast.warning(response.error || response.message || t('profile.emailTaken') || 'The email address provided is already registered with us.');

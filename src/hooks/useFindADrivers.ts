@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { bookingService } from "@/services/booking.service";
 import { bookingValidator } from "@/lib/validators/bookingValidator";
 import { findAvailableDrivers, filterVehiclesByRideType } from "@/lib/ride-booking/findDriver";
@@ -65,7 +66,7 @@ export function useFindADrivers() {
 					longitude: pickup.lng,
 				});
 
-				const services = (response.data?.services || []).filter((s: any) => s.type !== "rental" && s.type !== "car_rental");
+				const services = response.data?.services || [];
 				if (services.length) {
 					setServiceData(services);
 
@@ -89,14 +90,14 @@ export function useFindADrivers() {
 					setPickupCityOffset(Number(response.data.offset));
 				}
 			} catch (error) {
-				console.log("❌ Error fetching configuration:", error);
+				// console.log("❌ Error fetching configuration:", error);
 			}
 		};
 
 		fetchConfiguration();
 	}, [pickup?.lat, pickup?.lng, setPickupCityCurrency, setPickupCityOffset, setSelectedService, setServiceData]);
 
-	const calculateFareAndFindDrivers = useCallback(async (): Promise<FindDriversResult> => {
+	const calculateFareAndFindDrivers = useCallback(async (isRetry = false): Promise<FindDriversResult> => {
 		// Get latest state directly from store to avoid dependency loop
 		const state = useBookingStore.getState();
 		const {
@@ -159,13 +160,13 @@ export function useFindADrivers() {
 			const couponData = appliedPromo?.type === 'autos_coupon' ? (appliedPromo.originalData as any) : null;
 			const hasAccountId = couponData && couponData.account_id !== undefined && couponData.account_id !== null;
 
-			console.log("🎫 Applied Coupon Info:", {
-				appliedCoupon: currentAppliedCoupon,
-				type: appliedPromo?.type,
-				hasAccountId,
-				account_id: couponData?.account_id,
-				account_no: couponData?.account_no
-			});
+			// console.log("🎫 Applied Coupon Info:", {
+			// 	appliedCoupon: currentAppliedCoupon,
+			// 	type: appliedPromo?.type,
+			// 	hasAccountId,
+			// 	account_id: couponData?.account_id,
+			// 	account_no: couponData?.account_no
+			// });
 
 			// Determine if this is a city-to-city service
 			const isCityToCity = currentSelectedService?.type === 'out_station';
@@ -195,26 +196,51 @@ export function useFindADrivers() {
 			const isInterCity = !!(result as any)?.is_inter_city_request;
 			setIsInterCityRequest(isInterCity);
 
+			// Auto-switch selected service based on is_inter_city_request (only on first call, not retry)
+			if (!isRetry) {
+				const { serviceData: currentServiceData } = useBookingStore.getState();
+				const isRentalService = currentSelectedService?.type === 'rental' || currentSelectedService?.type === 'car_rental';
+				if (isInterCity && currentSelectedService?.type !== 'out_station' && !isRentalService) {
+					const outStationService = currentServiceData.find((s: any) => s.type === 'out_station');
+					if (outStationService) {
+						setSelectedService(outStationService);
+						toast.info(`Outstation service auto-selected — destination is out of city range`, { id: 'service-auto-switch' });
+						const retryResult = await calculateFareAndFindDrivers(true);
+						return { ...retryResult, autoSwitched: true };
+					}
+				} else if (!isInterCity && currentSelectedService?.type === 'out_station') {
+					const localService = currentServiceData.find((s: any) => s.type === 'on_demand')
+						|| currentServiceData.find((s: any) => s.type !== 'out_station' && s.type !== 'airport_taxi' && s.type !== 'rental' && s.type !== 'car_rental')
+						|| currentServiceData[0];
+					if (localService) {
+						setSelectedService(localService);
+						toast.info(`On-demand service auto-selected — destination is within city range`, { id: 'service-auto-switch' });
+						const retryResult = await calculateFareAndFindDrivers(true);
+						return { ...retryResult, autoSwitched: true };
+					}
+				}
+			}
+
 			setPromotions(promotions);
 			setAutosPromotions(autosPromotions);
 			setAutosCoupons(autosCoupons);
 
-			console.log("FETCHED VEHICLES +++++++", vehicles)
+			// console.log("FETCHED VEHICLES +++++++", vehicles)
 			// Filter by supported ride types (gracefully fallback to all)
 			const supportedRideTypes = (currentSelectedService?.supported_ride_type || [])
 				.map((rt: number | string) => Number(rt))
 				.filter((rt: number) => !Number.isNaN(rt));
 
 			const filtered = filterVehiclesByRideType(vehicles, supportedRideTypes);
-			console.log("fine till here -->", filtered)
+			// console.log("fine till here -->", filtered)
 			setAvailableVehicles(filtered);
-			console.log("Returning");
+			// console.log("Returning");
 			return {
 				vehicles: filtered,
 				route: routeData,
 			};
 		} catch (err) {
-			console.log("ERROR IN CALCULTING FARE ", err);
+			// console.log("ERROR IN CALCULTING FARE ", err);
 		} finally {
 			setIsFinding(false);
 			setIsLoading(false);
@@ -226,6 +252,8 @@ export function useFindADrivers() {
 		setAutosPromotions,
 		setAutosCoupons,
 		setRouteData,
+		setSelectedService,
+		setIsInterCityRequest,
 	]);
 
 	return {

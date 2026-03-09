@@ -131,12 +131,12 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true, error: null });
           try {
             const currentState = useAuthStore.getState();
-            console.log('🔍 Current session in store before generateOtp:', {
-              sessionId: currentState.sessionId,
-              sessionIdentifier: currentState.sessionIdentifier
-            });
+            // // console.log('🔍 Current session in store before generateOtp:', {
+            //   sessionId: currentState.sessionId,
+            //   sessionIdentifier: currentState.sessionIdentifier
+            // });
             const response = await generateCustomerLoginOtp(data);
-            console.log('📩 Generate OTP Response:', response);
+            // console.log('📩 Generate OTP Response:', response);
             if (response.flag === 143) {
               set({
                 isLoading: false,
@@ -159,7 +159,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             const response = await verifyCustomerOtp(data);
 
-            console.log('🔐 Verify OTP Response:', response);
+            // console.log('🔐 Verify OTP Response:', response);
 
             if (response.flag === 143) {
               // Extract from top level or from data object (defensive)
@@ -170,14 +170,14 @@ export const useAuthStore = create<AuthState>()(
               const token = response.access_token || response.data?.access_token;
               const signupOnboarding = response.signup_onboarding ?? response.data?.signup_onboarding;
 
-              // console.log('✅ OTP Verified - Final session used:', {
+              // // console.log('✅ OTP Verified - Final session used:', {
               //   newUserSessionId,
               //   newUserSessionIdentifier,
               //   userIdentifier
               // });
 
               if (signupOnboarding === 1) {
-                console.log('⏸️ Onboarding required - deferring authentication');
+                // console.log('⏸️ Onboarding required - deferring authentication');
                 set({
                   // ONLY store in user session, DON'T overwrite global sessionId
                   userSessionId: newUserSessionId,
@@ -263,7 +263,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             const response = await getUserProfile();
 
-            console.log('📥 Fetch Profile Response:', response);
+            // console.log('📥 Fetch Profile Response:', response);
 
             if (response.flag === 143 && response.data) {
               const profileData = response.data;
@@ -283,7 +283,7 @@ export const useAuthStore = create<AuthState>()(
                 error: null,
               }));
 
-              console.log('✅ Profile updated in store');
+              // console.log('✅ Profile updated in store');
               return response;
             } else if (response.flag === 101) {
               console.warn('⚠️ Authentication failed (Flag 101) - Logging out');
@@ -323,16 +323,16 @@ export const useAuthStore = create<AuthState>()(
 
           // Use cached result if validation was recent (prevents excessive API calls)
           if (now - lastValidationTime < VALIDATION_CACHE_DURATION) {
-            console.log('✅ Using cached session validation');
+            // console.log('✅ Using cached session validation');
             return true;
           }
 
           try {
-            console.log('🔍 Validating user session...');
+            // console.log('🔍 Validating user session...');
             const response = await getUserProfile();
 
             if (response.flag === 143) {
-              console.log('✅ Session is valid');
+              // console.log('✅ Session is valid');
               lastValidationTime = now;
               return true;
             } else if (response.flag === 101) {

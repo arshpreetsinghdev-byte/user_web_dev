@@ -5,7 +5,7 @@ const getHippoKey = () => {
   // Try to get from operator params config first
   const { getUserWebConfig } = useOperatorParamsStore.getState();
   const config = getUserWebConfig();
-  console.log("chat support key: ", config?.chat_support);
+  // console.log("chat support key: ", config?.chat_support);
   return config?.chat_support;
 };
 

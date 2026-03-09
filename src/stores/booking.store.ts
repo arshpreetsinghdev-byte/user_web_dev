@@ -3,7 +3,7 @@ import { devtools, persist } from 'zustand/middleware';
 import { Location, Vehicle, PriceEstimate } from '@/types';
 import type { Stop, BookingLocation, DistanceTimeResult } from '@/components/booking/types';
 import { createEmptyLocation, placeToBookingLocation } from '@/components/booking/types';
-import type { VehicleRegion, Promotion, AutosPromotion, AutosCoupon } from '@/types';
+import type { VehicleRegion, VehiclePackage, Promotion, AutosPromotion, AutosCoupon } from '@/types';
 import type { PlaceResult } from '@/types';
 import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 
@@ -141,6 +141,9 @@ interface BookingState {
     fareText?: string;
   } | null;
 
+  // Rental / hourly package
+  selectedPackage: VehiclePackage | null;
+
   // City-to-city / round trip
   roundTrip: 0 | 1; // 0 = one way, 1 = round trip
   returnDateTime: Date | null; // Return date/time for round trips
@@ -188,6 +191,7 @@ interface BookingState {
   setBookingResult: (result: { flag: number; message: string; fareText?: string } | null) => void;
   setIsLoading: (loading: boolean) => void;
   setDistanceTime: (result: DistanceTimeResult | null) => void;
+  setSelectedPackage: (pkg: VehiclePackage | null) => void;
   setRoundTrip: (value: 0 | 1) => void;
   setReturnDateTime: (dateTime: Date | null) => void;
   setIsInterCityRequest: (value: boolean) => void;
@@ -243,6 +247,7 @@ export const useBookingStore = create<BookingState>()(
         selectedCardId: null, // Initialize Stripe card ID
         selectedSquareCardId: null, // Initialize Square card ID
         bookingResult: null,
+        selectedPackage: null,
         roundTrip: 0,
         returnDateTime: null,
         isInterCityRequest: false,
@@ -259,7 +264,7 @@ export const useBookingStore = create<BookingState>()(
         nextStepIndex: 1,
 
         setPickup: (location) => {
-          console.log('Setting pickup location to:', location);
+          // console.log('Setting pickup location to:', location);
           set({ pickup: location }, false, 'booking/setPickup');
         },
 
@@ -277,7 +282,7 @@ export const useBookingStore = create<BookingState>()(
               placeId: place.placeId,
             }
           }, false, 'booking/setPickupFromPlace');
-          console.log('📍 Pickup set from place:', bookingLocation);
+          // console.log('📍 Pickup set from place:', bookingLocation);
         },
 
         setScheduledDateTime: (dateTime) =>
@@ -303,7 +308,7 @@ export const useBookingStore = create<BookingState>()(
               placeId: place.placeId,
             }
           }, false, 'booking/setDropoffFromPlace');
-          console.log('🎯 Dropoff set from place:', bookingLocation);
+          // console.log('🎯 Dropoff set from place:', bookingLocation);
         },
 
         setStops: (stops) =>
@@ -423,6 +428,9 @@ export const useBookingStore = create<BookingState>()(
         setDistanceTime: (result) =>
           set({ distanceTime: result }, false, 'booking/setDistanceTime'),
 
+        setSelectedPackage: (pkg) =>
+          set({ selectedPackage: pkg }, false, 'booking/setSelectedPackage'),
+
         setRoundTrip: (value) =>
           set({ roundTrip: value }, false, 'booking/setRoundTrip'),
 
@@ -517,6 +525,7 @@ export const useBookingStore = create<BookingState>()(
               selectedPaymentMethod: null,
               selectedCardId: null, // Reset Stripe card selection
               bookingResult: null,
+              selectedPackage: null,
               pickupCityCurrency: useOperatorParamsStore.getState().data?.user_web_config?.currency ||
                 useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || null,
               pickupCityOffset: null,

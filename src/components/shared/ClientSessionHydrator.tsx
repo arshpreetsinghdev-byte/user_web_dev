@@ -11,7 +11,7 @@ export default function ClientSessionHydrator({ session }: { session: any }) {
     // Only set global session if it doesn't exist or has changed
   if (session && session.session_id && session.session_identifier) {
     if (!currentState.sessionId || currentState.sessionId !== session.session_id) {
-      console.log('🔧 Setting global session');
+      // console.log('🔧 Setting global session');
       setSession(session.session_id, session.session_identifier);
     }
   }
@@ -22,7 +22,7 @@ export default function ClientSessionHydrator({ session }: { session: any }) {
 
     // Validate user session if logged in
     if (isAuthenticated) {
-      console.log("🔄 Validating user session on startup...")
+      // console.log("🔄 Validating user session on startup...")
       fetchProfile().catch((err) => {
         // console.error("❌ Session validation failed:", err)
         // Store handles logout on flag 101

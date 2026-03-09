@@ -23,7 +23,7 @@ const ServiceSelector = memo(({ variant }: ServiceSelectorProps) => {
   const handleServiceChange = (serviceId: string) => {
     const service = serviceData.find((s) => s.id?.toString() === serviceId);
     setSelectedService(service || null);
-    console.log('🚕 Service selected:', service);
+    // console.log('🚕 Service selected:', service);
   };
 
   if (!serviceData || serviceData.length < 1) {

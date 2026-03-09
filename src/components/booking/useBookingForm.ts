@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { useBookingStore } from "@/stores/booking.store";
 import { bookingValidator } from "@/lib/validators/bookingValidator";
 import { toast } from "sonner";
-import { bookingService } from "@/services/booking.service";
 import type { Stop } from "./types";
 import type { Location } from "@/types";
 
@@ -41,18 +40,6 @@ export const useBookingForm = () => {
   }, [stops, setStops]);
 
   const updateStop = useCallback(async (id: number | string, location: Location) => {
-    try {
-      const cfg = await bookingService.fetchConfiguration({ latitude: location.lat, longitude: location.lng });
-      const isInvalid = cfg?.flag === 144 || cfg?.data?.flag === 144;
-      if (isInvalid) {
-        // toast.error("Selected stop is outside the service area");
-        return;
-      }
-    } catch (err) {
-      toast.error("Failed to validate stop location. Please try again.");
-      return;
-    }
-
     const updatedStops = stops.map((stop) =>
       stop.id === id
         ? {
@@ -83,25 +70,8 @@ export const useBookingForm = () => {
     setScheduledDateTime(null);
   }, [setPickup, setDropoff, setStops, setScheduledDateTime]);
 
-  const setDestination = useCallback(async (location: Location | null) => {
-    if (!location) {
-      setDropoff(null);
-      return;
-    }
-
-    try {
-      const cfg = await bookingService.fetchConfiguration({ latitude: location.lat, longitude: location.lng });
-      const isInvalid = cfg?.flag === 144 || cfg?.data?.flag === 144;
-      if (isInvalid) {
-        // toast.error("Selected destination is outside the service area");
-        return;
-      }
-    } catch (err) {
-      toast.error("Failed to validate destination. Please try again.");
-      return;
-    }
-
-    setDropoff(location);
+  const setDestination = useCallback((location: Location | null) => {
+    setDropoff(location ?? null);
   }, [setDropoff]);
 
   return {

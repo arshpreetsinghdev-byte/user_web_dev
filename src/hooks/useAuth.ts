@@ -45,8 +45,8 @@ export function useAuth() {
    * Verify OTP
    */
   const handleVerifyOtp = async (otp: string, phoneNumber: string, countryCode: string) => {
-    console.log('🔑 Verifying OTP:', { otp, phoneNumber, countryCode });
-  console.log('🌍 Location:', { latitude, longitude });
+    // console.log('🔑 Verifying OTP:', { otp, phoneNumber, countryCode });
+  // console.log('🌍 Location:', { latitude, longitude });
   
   const request: VerifyOtpRequest = {
     latitude: latitude || 0,
@@ -57,7 +57,7 @@ export function useAuth() {
     login_otp: otp,
   };
   
-  console.log('📤 Verify OTP request:', request);
+  // console.log('📤 Verify OTP request:', request);
   return verifyOtp(request);
   };
 

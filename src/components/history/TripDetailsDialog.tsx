@@ -88,7 +88,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                 //     setDetailedRide(mapped);
                 // }
             } catch (error) {
-                console.log("Failed to fetch ride summary:", error);
+                // console.log("Failed to fetch ride summary:", error);
                 toast.error("Failed to fetch ride summary");
             } finally {
                 if (active) setIsLoading(false);
@@ -128,7 +128,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
                     setRoutePath(result.path);
                 }
             } catch (error) {
-                console.log("Failed to fetch route path:", error);
+                // console.log("Failed to fetch route path:", error);
                 toast.error("Failed to fetch route path");
             }
         };

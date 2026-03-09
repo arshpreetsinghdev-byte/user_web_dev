@@ -5,6 +5,7 @@
 
 // Components
 export { default as RideBookingForm } from './RideBookingForm';
+export { default as RentalPackageSelector } from './RentalPackageSelector';
 export { default as PickupLocationField } from './PickupLocationField';
 export { default as DestinationField } from './DestinationField';
 export { default as StopItem } from './StopItem';

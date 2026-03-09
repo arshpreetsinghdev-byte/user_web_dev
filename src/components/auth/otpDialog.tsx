@@ -75,19 +75,19 @@ export function OtpDialog({
         // Build full phone number for API
         const fullPhoneNumber = countryCode + phoneNumber
 
-        console.log('🔐 Verifying OTP with:', {
-          otp: otpValue,
-          phoneNumber: fullPhoneNumber,
-          countryCode
-        });
+        // console.log('🔐 Verifying OTP with:', {
+        //   otp: otpValue,
+        //   phoneNumber: fullPhoneNumber,
+        //   countryCode
+        // });
 
         // Call API to verify OTP with phone data
         const response = await verifyOtp(otpValue, fullPhoneNumber, countryCode)
-        console.log('✅ OTP verified successfully:', response);
+        // console.log('✅ OTP verified successfully:', response);
 
         // Check if signup onboarding is required
         if (!signupData && response?.data?.signup_onboarding === 1) {
-          console.log('📝 Signup onboarding required');
+          // console.log('📝 Signup onboarding required');
           toast.info(t("auth.completeProfile") || "Please complete your profile");
 
           // Close OTP dialog and open signup dialog with pre-filled phone
@@ -99,10 +99,10 @@ export function OtpDialog({
 
         // If this was a signup flow (signupData exists), update profile
         if (signupData && signupData.name && signupData.email) {
-          console.log('📝 Updating profile with signup data:', signupData);
+          // console.log('📝 Updating profile with signup data:', signupData);
           try {
             await updateProfile(signupData.name, signupData.email);
-            console.log('✅ Profile updated successfully');
+            // console.log('✅ Profile updated successfully');
           } catch (profileError: any) {
             // console.error('❌ Profile update failed:', profileError);
             // Don't fail the login if profile update fails

@@ -39,7 +39,7 @@ const StopItem = memo(({ stop, index, onUpdate, onRemove, variant }: StopItemPro
         placeId: place.placeId,
       });
       
-      console.log(`🛑 Stop ${index + 1} selected:`, place);
+      // console.log(`🛑 Stop ${index + 1} selected:`, place);
     },
     [stop.id, index, onUpdate]
   );

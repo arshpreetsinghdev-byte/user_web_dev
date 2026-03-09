@@ -36,7 +36,7 @@ export const useOperatorParamsStore = create<OperatorParamsState>((set, get) => 
 
   getData: () => {
     const state = get();
-    console.log('OperatorParamsStore.getData called, returning:', state.data);
+    // console.log('OperatorParamsStore.getData called, returning:', state.data);
     return { ...state.data };
   },
 

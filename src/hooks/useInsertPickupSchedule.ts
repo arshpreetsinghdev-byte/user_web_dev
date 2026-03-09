@@ -16,6 +16,7 @@ export function useInsertPickupSchedule() {
   const {
     selectedRegion,
     selectedService,
+    selectedPackage,
     pickup,
     dropoff,
     passengerCount,
@@ -103,7 +104,7 @@ export function useInsertPickupSchedule() {
       couponToApply: accountId,
       returnTrip: (selectedService?.type === 'out_station') ? roundTrip : undefined,
       returnTime: (selectedService?.type === 'out_station' && roundTrip === 1 && returnDateTime) ? returnDateTime : undefined,
-      packageId: selectedRegion.region_fare?.package_id ?? undefined,
+      packageId: selectedPackage?.package_id ?? selectedRegion.region_fare?.package_id ?? undefined,
       poolFareId: selectedRegion.region_fare?.pool_fare_id ?? undefined,
     };
 

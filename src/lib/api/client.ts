@@ -95,7 +95,7 @@ apiClient.interceptors.request.use(
     if (activeSessionId && activeSessionIdentifier && config.headers) {
       config.headers['x-jugnoo-session-id'] = activeSessionId;
       config.headers['x-jugnoo-session-identifier'] = activeSessionIdentifier;
-      console.log('📡 Using session:', isUserEndpoint ? 'USER' : isSystemEndpoint ? 'SYSTEM' : 'AUTO', config.url);
+      // console.log('📡 Using session:', isUserEndpoint ? 'USER' : isSystemEndpoint ? 'SYSTEM' : 'AUTO', config.url);
     }
 
     return config;

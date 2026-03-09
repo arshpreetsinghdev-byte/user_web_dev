@@ -101,11 +101,10 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
       }
       return;
     }
-    // Validate config (service area) for pickup, stops and destination
+    // Validate config (service area) for pickup only
     try {
-      const points = [pickup, ...stops, destination].filter(Boolean) as any[];
-      for (const p of points) {
-        const cfg = await bookingService.fetchConfiguration({ latitude: p.lat ?? p.latitude, longitude: p.lng ?? p.longitude });
+      if (pickup) {
+        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat ?? pickup.latitude, longitude: pickup.lng ?? pickup.longitude });
         if (cfg?.data?.flag === 144) {
           // bookingService already toasts, but ensure we don't proceed
           return;
@@ -163,11 +162,10 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
       return;
     }
 
-    // Validate config (service area) before calculating fare
+    // Validate config (service area) for pickup only
     try {
-      const points = [pickup, ...stops, destination].filter(Boolean) as any[];
-      for (const p of points) {
-        const cfg = await bookingService.fetchConfiguration({ latitude: p.lat ?? p.latitude, longitude: p.lng ?? p.longitude });
+      if (pickup) {
+        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat ?? pickup.latitude, longitude: pickup.lng ?? pickup.longitude });
         if (cfg?.data?.flag === 144) {
           return;
         }
@@ -179,9 +177,11 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
 
     try {
       const result = await calculateFareAndFindDrivers();
-      toast.success(
-        `Found ${result.vehicles.length} vehicles. Route: ${result.route.distanceText}, ${result.route.durationText}`
-      );
+      if (!result?.autoSwitched) {
+        toast.success(
+          `Found ${result.vehicles.length} vehicles. Route: ${result.route.distanceText}, ${result.route.durationText}`
+        );
+      }
     } catch (err) {
       toast.error("Failed to calculate fare. Please try again.");
     } finally {
