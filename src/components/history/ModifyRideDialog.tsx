@@ -52,7 +52,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
     const [customerNote, setCustomerNote] = useState(ride?.customerNote || "");
     const [flightNumber, setFlightNumber] = useState(ride?.flightNumber || "");
     // Only show flight number for airport rides (type 4)
-    // console.log("ride type::::", ride);
+    console.log("ride type::::", ride);
     const isAirportRide = ride && (ride.ride_type === 11 || ride.product_type === 11);
 
     // Handle pickup address selection from Google Maps
@@ -60,7 +60,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
         setPickupAddress(place.address);
         setPickupLat(place.lat);
         setPickupLng(place.lng);
-        // console.log('✅ Pickup location selected:', place);
+        console.log('✅ Pickup location selected:', place);
     }, []);
 
     // Handle drop address selection from Google Maps
@@ -68,13 +68,13 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
         setDropAddress(place.address);
         setDropLat(place.lat);
         setDropLng(place.lng);
-        // console.log('✅ Drop location selected:', place);
+        console.log('✅ Drop location selected:', place);
     }, []);
 
     // Setup autocomplete when dialog opens and Google Maps is loaded
     useEffect(() => {
         if (!open || !isGoogleMapsLoaded) {
-            // console.log('⏸️ Waiting for dialog open and Google Maps loaded', { open, isGoogleMapsLoaded });
+            console.log('⏸️ Waiting for dialog open and Google Maps loaded', { open, isGoogleMapsLoaded });
             return;
         }
 
@@ -84,30 +84,30 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
             let dropCleanup: (() => void) | null = null;
 
             if (pickupInputRef.current) {
-                // console.log('🔧 Setting up pickup autocomplete');
+                console.log('🔧 Setting up pickup autocomplete');
                 pickupCleanup = mapsService.setupAutocomplete(
                     pickupInputRef.current,
                     handlePickupPlaceSelect
                 );
-                // console.log('✅ Pickup autocomplete setup complete');
+                console.log('✅ Pickup autocomplete setup complete');
             } else {
-                // console.log('❌ Pickup input ref not found');
+                console.log('❌ Pickup input ref not found');
             }
 
             if (dropInputRef.current) {
-                // console.log('🔧 Setting up drop autocomplete');
+                console.log('🔧 Setting up drop autocomplete');
                 dropCleanup = mapsService.setupAutocomplete(
                     dropInputRef.current,
                     handleDropPlaceSelect
                 );
-                // console.log('✅ Drop autocomplete setup complete');
+                console.log('✅ Drop autocomplete setup complete');
             } else {
-                // console.log('❌ Drop input ref not found');
+                console.log('❌ Drop input ref not found');
             }
 
             // Cleanup function
             return () => {
-                // console.log('🧹 Cleaning up autocomplete');
+                console.log('🧹 Cleaning up autocomplete');
                 if (pickupCleanup) pickupCleanup();
                 if (dropCleanup) dropCleanup();
             };

@@ -46,7 +46,7 @@ export const bookingService = {
         longitude: params.longitude,
       }
     );
-    // console.log("config response::", response?.data.flag);
+    console.log("config response::", response?.data.flag);
     if (response?.data?.flag === 144) {
       if (params.showToast !== false) {
         toast.error('Selected city is outside the service area');

@@ -32,7 +32,7 @@ const handleSessionExpired = () => {
 //edit for gitlab-it
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // console.log("apiClient used")
+    console.log("apiClient used")
     const { token, sessionId, sessionIdentifier, userSessionId, userSessionIdentifier, isAuthenticated } = useAuthStore.getState();
 
     // Attach Bearer token if it exists
@@ -95,7 +95,7 @@ apiClient.interceptors.request.use(
     if (activeSessionId && activeSessionIdentifier && config.headers) {
       config.headers['x-jugnoo-session-id'] = activeSessionId;
       config.headers['x-jugnoo-session-identifier'] = activeSessionIdentifier;
-      // console.log('📡 Using session:', isUserEndpoint ? 'USER' : isSystemEndpoint ? 'SYSTEM' : 'AUTO', config.url);
+      console.log('📡 Using session:', isUserEndpoint ? 'USER' : isSystemEndpoint ? 'SYSTEM' : 'AUTO', config.url);
     }
 
     return config;

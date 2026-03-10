@@ -58,7 +58,7 @@ export default function Navbar() {
     (state) => state.data.operatorDetails?.[0]?.logo_url || null
   );
   const userWebLogo = useOperatorParamsStore(state => state.data.user_web_config?.logo_url || null);
-  // console.log("user web logo::::->", userWebLogo);
+  console.log("user web logo::::->", userWebLogo);
   // Handle hydration and custom events
   useEffect(() => {
     setMounted(true);
@@ -82,8 +82,8 @@ export default function Navbar() {
   };
 
   const handleLoginProceed = (phoneNumber: string, countryCode: string) => {
-    // console.log('Country Code:', countryCode);
-    // console.log('Phone Number:', phoneNumber);
+    console.log('Country Code:', countryCode);
+    console.log('Phone Number:', phoneNumber);
     setPhoneData({ phoneNumber, countryCode });
     // setIsOnboarding(true); 
     setLoginOpen(false);
@@ -91,9 +91,9 @@ export default function Navbar() {
   };
 
   const handleSignUp = (data: any) => {
-    // console.log('Sign Up Data:', data);
+    console.log('Sign Up Data:', data);
     if (phoneData.phoneNumber && phoneData.countryCode && isOnboarding) {
-      // console.log('✅ Onboarding completed - user is now logged in');
+      console.log('✅ Onboarding completed - user is now logged in');
       setSignupOpen(false);
       setPhoneData({ phoneNumber: '', countryCode: '' });
       setSignupData(null);
@@ -108,14 +108,14 @@ export default function Navbar() {
   };
 
   const handleOtpLogin = (otp: string) => {
-    // console.log('OTP verified successfully');
+    console.log('OTP verified successfully');
     setOtpOpen(false);
     setIsOnboarding(false);
     setSignupData(null);
   };
 
   const handleSignupOnboarding = (phoneNumber: string, countryCode: string) => {
-    // console.log('Signup onboarding required for:', phoneNumber, countryCode);
+    console.log('Signup onboarding required for:', phoneNumber, countryCode);
     setPhoneData({ phoneNumber, countryCode });
     setOtpOpen(false);
     setIsOnboarding(true);

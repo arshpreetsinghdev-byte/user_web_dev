@@ -89,7 +89,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
       stops,
       scheduledDateTime,
     });
-    // console.log("validation:::::", validation);
+    console.log("validation:::::", validation);
     if (!validation.isValid) {
       if (validation.error === "Please select a pickup date and time") {
         if (scheduleToastShownCount.current < 2) {
@@ -116,7 +116,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     }
     try {
       const data = await calculateFareAndFindDrivers();
-      // console.log("🚙 Vehicles ready:", data?.regions.vehicles.length);
+      console.log("🚙 Vehicles ready:", data?.regions.vehicles.length);
 
       const locale = params?.locale || "en";
       window.dispatchEvent(new Event("routeChangeStart"));
@@ -252,11 +252,11 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   ]);
 
   const isBookPage = pathname.includes("/book");
-  // console.log("is book page::", isBookPage);
+  console.log("is book page::", isBookPage);
   const handleSubmit = isBookPage ? handleCalculateFare : handleBookNow;
   const showAdditionalOptions = showOtherOptions;
 
-  // console.log("selectedService", selectedService?.type)
+  console.log("selectedService", selectedService?.type)
   return (
     <div
       className={`w-full max-w-105 p-3 lg:p-4 bg-primary rounded-lg lg:rounded-xl flex flex-col ${className ? className : ""} ${variant === "outline" ? "bg-white border border-border" : ""}`}

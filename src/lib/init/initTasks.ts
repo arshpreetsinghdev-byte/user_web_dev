@@ -16,10 +16,11 @@ interface BusinessCredentials {
   business_id: number;
   business_token: string;
 }
+console.log("INIT TASK RUNNING:", Date.now())
 
 async function fetchBusinessCredentials(subdomain: string , subdomainNamePass: string | undefined): Promise<DefaultResponse & { data?: BusinessCredentials }> {
   try {
-    // console.log("Reaching fetch Business:::::");
+    console.log("Reaching fetch Business:::::");
     const response = await apiClient.post(API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GET_SUBDOMAIN_ID, {
       subdomain_name: subdomain,
       password: subdomainNamePass,
@@ -29,7 +30,7 @@ async function fetchBusinessCredentials(subdomain: string , subdomainNamePass: s
       },
       timeout: 5000,
     });
-    // console.log("Response ->", response.data.data, response.data.message, response.data); 
+    console.log("Response ->", response.data.data, response.data.message, response.data); 
     if (response.status === 200 && response.data.flag === 143) {
       return {
         success: true,
@@ -126,17 +127,17 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   const headersList = await headers();
   const hostname = headersList.get('host') || 'unknown';
   const subdomainNamePass = process.env.SUBDOMAIN_PASS;
-  // console.log("Subdomain name password:::::",subdomainNamePass)
+  console.log("Subdomain name password:::::",subdomainNamePass)
   // Extract subdomain from hostname (e.g., "example-subdomain.example.com" -> "example-subdomain")
   let subdomain = hostname.split('.')[0];
-  // console.log("Subdomain::",subdomain);
+  console.log("Subdomain::",subdomain);
   if(subdomain === 'localhost:4000'){
     subdomain = "blackbadge-uwt"
   }
   // Fetch business credentials before authorizing
-  // console.log("Fetch business credentials before authorizing")
+  console.log("Fetch business credentials before authorizing")
   const credentialsResult = await fetchBusinessCredentials(subdomain, subdomainNamePass);
-  // console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
+  console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
   
   if (!credentialsResult.success || !credentialsResult.data) {
     return {

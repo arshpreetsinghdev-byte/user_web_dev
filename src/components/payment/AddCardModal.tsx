@@ -112,7 +112,7 @@ export function AddCardModal({
 
     // Check if elements are already mounted
     if (cardNumberRef.current) {
-      // // console.log('Stripe elements already initialized');
+      console.log('Stripe elements already initialized');
       return;
     }
 
@@ -154,7 +154,7 @@ export function AddCardModal({
       cardExpiryRef.current.mount(cardExpiryEl);
       cardCvcRef.current.mount(cardCvcEl);
 
-      // // console.log('✅ Stripe elements initialized successfully');
+      console.log('✅ Stripe elements initialized successfully');
       setElementsReady(true);
     } catch (err) {
       console.error("Stripe init failed", err);
@@ -196,7 +196,7 @@ export function AddCardModal({
       toast.loading('Processing card...', { id: 'add-card' });
 
       // Step 1: Create token from card element
-      // // console.log('🔐 Step 1: Creating Stripe token...');
+      console.log('🔐 Step 1: Creating Stripe token...');
       const { token, error } = await stripeRef.current.createToken(cardNumberRef.current);
 
       if (error) {
@@ -207,7 +207,7 @@ export function AddCardModal({
         throw new Error('Invalid card token response');
       }
 
-      // // console.log('✅ Step 1: Token created successfully');
+      console.log('✅ Step 1: Token created successfully');
 
       // Step 2: Prepare card data
       const tokenData = {
@@ -220,7 +220,7 @@ export function AddCardModal({
       };
 
       // Step 3: Send card data to backend
-      // console.log('💾 Step 2: Saving card to backend...');
+      console.log('💾 Step 2: Saving card to backend...');
       const response = await addCardWithToken(
         tokenData,
         userSessionId,
@@ -231,7 +231,7 @@ export function AddCardModal({
         throw new Error(response.message || 'Failed to save card');
       }
 
-      // console.log('✅ Step 2: Card saved successfully');
+      console.log('✅ Step 2: Card saved successfully');
       toast.success('Card added successfully', { id: 'add-card' });
 
       // Notify parent component to refresh card list

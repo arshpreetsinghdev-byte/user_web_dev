@@ -39,7 +39,7 @@ const DestinationField = memo(({ value, onChange, className, variant }: Destinat
         lng: place.lng,
         placeId: place.placeId,
       });
-      // console.log('🎯 Destination selected:', place);
+      console.log('🎯 Destination selected:', place);
     },
     [onChange, setDropoffFromPlace]
   );

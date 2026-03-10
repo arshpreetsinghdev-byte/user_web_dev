@@ -150,10 +150,10 @@ export function AddSquareCardModal({
       toast.loading('Processing card...', { id: 'add-square-card' });
 
       // Step 1: Tokenize card
-      // console.log('🔐 Step 1: Tokenizing Square card...');
+      console.log('🔐 Step 1: Tokenizing Square card...');
       const token = await tokenizeSquareCard(cardRef.current);
 
-      // console.log('✅ Step 1: Token created successfully');
+      console.log('✅ Step 1: Token created successfully');
 
       // Step 2: Prepare card data
       const cardData: any = {
@@ -161,7 +161,7 @@ export function AddSquareCardModal({
       };
 
       // Step 3: Send card data to backend
-      // console.log('💾 Step 2: Saving card to backend...');
+      console.log('💾 Step 2: Saving card to backend...');
       const response = await addSquareCardWithToken(
         cardData,
         sessionId,
@@ -172,7 +172,7 @@ export function AddSquareCardModal({
         throw new Error(response.message || 'Failed to save card');
       }
 
-      // console.log('✅ Step 2: Card saved successfully');
+      console.log('✅ Step 2: Card saved successfully');
       toast.success('Card added successfully', { id: 'add-square-card' });
 
       // Notify parent component to refresh card list

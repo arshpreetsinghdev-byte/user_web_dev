@@ -44,7 +44,7 @@ export function useProfile() {
    */
   const fetchProfile = useCallback(async () => {
     try {
-      // console.log('📥 Fetching user profile...');
+      console.log('📥 Fetching user profile...');
 
       // Validate session before fetching
       const isValid = await validateSession();
@@ -54,7 +54,7 @@ export function useProfile() {
       }
 
       await fetchProfileAPI();
-      // console.log('✅ Profile fetched successfully');
+      console.log('✅ Profile fetched successfully');
     } catch (error: any) {
       console.error('❌ Failed to fetch profile:', error);
       // Error handling is done in the API call and store

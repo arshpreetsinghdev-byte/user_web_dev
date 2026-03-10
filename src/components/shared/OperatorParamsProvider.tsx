@@ -12,7 +12,7 @@ export function useInitializeOperatorParams(operatorParams: any) {
 
   useEffect(() => {
     if (operatorParams) {
-      // console.log('Initializing operator params:', operatorParams);
+      console.log('Initializing operator params:', operatorParams);
       setData(operatorParams);
 
       // Apply theme colors from config
@@ -52,7 +52,7 @@ function applyTheme(theme: { main_color?: string; secondary_color?: string }) {
   //   theme.main_color = '#0096FF';
   //   theme.secondary_color = '#00008B';
   const root = document.documentElement;
-  // console.log("theme found -> ",theme)
+  console.log("theme found -> ",theme)
   if (theme.main_color) {
     root.style.setProperty('--primary', theme.main_color);
     root.style.setProperty('--primary-hover', adjustColorBrightness(theme.main_color, -20));
@@ -67,7 +67,7 @@ function applyTheme(theme: { main_color?: string; secondary_color?: string }) {
     root.style.setProperty('--secondary-dark', adjustColorBrightness(theme.secondary_color, -30));
   }
 
-  // console.log('Applied operator theme:', theme);
+  console.log('Applied operator theme:', theme);
 }
 
 /**

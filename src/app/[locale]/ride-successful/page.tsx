@@ -162,10 +162,10 @@ export default function RideSuccessfulPage() {
   const isSuccess = bookingResult?.flag === SUCCESS_FLAG;
 
   // Debug payment details
-  // console.log('Ride Successful - selectedPaymentMethod:', selectedPaymentMethod);
-  // console.log('Ride Successful - selectedCardId:', selectedCardId);
-  // console.log('Ride Successful - selectedSquareCardId:', selectedSquareCardId);
-  // console.log('Ride Successful - paymentDetails:', paymentDetails);
+  console.log('Ride Successful - selectedPaymentMethod:', selectedPaymentMethod);
+  console.log('Ride Successful - selectedCardId:', selectedCardId);
+  console.log('Ride Successful - selectedSquareCardId:', selectedSquareCardId);
+  console.log('Ride Successful - paymentDetails:', paymentDetails);
 
   const appliedCouponData = useMemo(() => {
     return allPromotions.find(p => p.id === appliedCoupon);

@@ -81,7 +81,7 @@ export function GeolocationProvider() {
       .then((response) => {
         const currency = response.currency || response.data?.currency || '₹';
         setConfigData(response, currency);
-        // console.log('✅ Fetched user web configuration:', { currency, latitude, longitude });
+        console.log('✅ Fetched user web configuration:', { currency, latitude, longitude });
       })
       .catch((error) => {
         console.error('❌ Failed to fetch user web configuration:', error);
