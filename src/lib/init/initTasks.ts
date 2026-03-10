@@ -16,6 +16,11 @@ interface BusinessCredentials {
   business_id: number;
   business_token: string;
 }
+
+// In-memory cache for init results, keyed by subdomain
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const initCache = new Map<string, { result: InitTasksResult; timestamp: number }>();
+
 console.log("INIT TASK RUNNING:", Date.now())
 
 async function fetchBusinessCredentials(subdomain: string , subdomainNamePass: string | undefined): Promise<DefaultResponse & { data?: BusinessCredentials }> {
@@ -134,6 +139,14 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   if(subdomain === 'localhost:4000'){
     subdomain = "blackbadge-uwt"
   }
+
+  // Check cache — return cached result if still valid
+  const cached = initCache.get(subdomain);
+  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL_MS) {
+    console.log(`[initTasks] Using cached result for "${subdomain}" (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
+    return cached.result;
+  }
+
   // Fetch business credentials before authorizing
   console.log("Fetch business credentials before authorizing")
   const credentialsResult = await fetchBusinessCredentials(subdomain, subdomainNamePass);
@@ -182,10 +195,16 @@ export async function runInitTasks(): Promise<InitTasksResult> {
     };
   }
 
-  return {
+  const result: InitTasksResult = {
     serviceAvailable: true,
     googleMapsKey: getParams.data?.user_web_config?.map_browser_key,
     sessionDetails: sessionDetails,
     operatorParams: getParams.data,
   };
+
+  // Cache only successful results
+  initCache.set(subdomain, { result, timestamp: Date.now() });
+  console.log(`[initTasks] Cached result for "${subdomain}"`);
+
+  return result;
 }
