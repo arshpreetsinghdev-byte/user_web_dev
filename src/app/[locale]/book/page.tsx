@@ -84,6 +84,7 @@ export default function BookingPage() {
     returnDateTime,
     setReturnDateTime,
     scheduledDateTime,
+    pickupCityOffset,
   } = useBookingStore();
   const { isAuthenticated } = useAuthStore();
   const { openAuthModal } = useUIStore();
@@ -485,6 +486,7 @@ export default function BookingPage() {
                             onChange={handleReturnTimeChange}
                             variant="outline"
                             className="h-8 text-xs"
+                            pickupCityOffset={pickupCityOffset}
                           />
                         </div>
                       </>

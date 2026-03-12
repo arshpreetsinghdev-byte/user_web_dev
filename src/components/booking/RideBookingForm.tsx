@@ -58,6 +58,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     allPromotions,
     appliedCoupon,
     setAppliedCoupon,
+    pickupCityOffset,
   } = useBookingStore();
   const { showToast } = useUIStore();
   const { isFinding, calculateFareAndFindDrivers } = useFindADrivers();
@@ -116,7 +117,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     }
     try {
       const data = await calculateFareAndFindDrivers();
-      console.log("🚙 Vehicles ready:", data?.regions.vehicles.length);
+      // console.log("🚙 Vehicles ready:", data?.regions.vehicles.length);
 
       const locale = params?.locale || "en";
       window.dispatchEvent(new Event("routeChangeStart"));
@@ -289,7 +290,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
 
         <DestinationField value={destination} onChange={setDestination} variant={variant} />
 
-        <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} label="Schedule Ride" />
+        <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} label="Schedule Ride" pickupCityOffset={pickupCityOffset} />
 
         <ServiceSelector variant={variant} />
         {isBookPage && allPromotions.length > 0 && (
