@@ -61,13 +61,13 @@ export const findAvailableDrivers = async (
   if (options.returnTrip !== undefined) {
     body.set('return_trip', String(options.returnTrip));
     if (options.returnTrip === 1 && options.returnDateTime) {
-      body.set('return_time', formatDateTime(options.returnDateTime, options.timezoneOffset));
+      body.set('return_time', formatDateTime(options.returnDateTime));
     }
   }
 
   // Add pickup time for scheduled rides
   if (options.scheduledFareFlow && options.rideDateTime) {
-    body.set('pickup_time', formatDateTime(options.rideDateTime, options.timezoneOffset));
+    body.set('pickup_time', formatDateTime(options.rideDateTime));
   }
 
   // Add promo to apply

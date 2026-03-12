@@ -80,9 +80,9 @@ export function PhoneInput({
     )
   }, [countries, search])
 
-  // Get selected country from countryCode prop (e.g., "+91")
+  // Get selected country from countryCode prop (e.g., "+1")
   const selectedCountry = React.useMemo(() => {
-    return countries.find((c) => c.code === countryCode) || countries.find((c) => c.code === "IN");
+    return countries.find((c) => c.code === countryCode) || countries.find((c) => c.code === "US");
   }, [countries, countryCode])
 
   // Focus input after selecting country

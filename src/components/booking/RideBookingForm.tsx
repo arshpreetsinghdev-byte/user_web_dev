@@ -58,7 +58,6 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     allPromotions,
     appliedCoupon,
     setAppliedCoupon,
-    pickupCityOffset,
   } = useBookingStore();
   const { showToast } = useUIStore();
   const { isFinding, calculateFareAndFindDrivers } = useFindADrivers();
@@ -90,7 +89,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
       stops,
       scheduledDateTime,
     });
-    console.log("validation:::::", validation);
+    // console.log("validation:::::", validation);
     if (!validation.isValid) {
       if (validation.error === "Please select a pickup date and time") {
         if (scheduleToastShownCount.current < 2) {
@@ -290,7 +289,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
 
         <DestinationField value={destination} onChange={setDestination} variant={variant} />
 
-        <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} label="Schedule Ride" pickupCityOffset={pickupCityOffset} />
+        <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} label="Schedule Ride" />
 
         <ServiceSelector variant={variant} />
         {isBookPage && allPromotions.length > 0 && (

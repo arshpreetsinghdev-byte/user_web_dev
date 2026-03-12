@@ -34,6 +34,7 @@ interface AuthState {
   user_image: string | null;
   isLoading: boolean;
   error: string | null;
+  isHydrated: boolean; // Track if store has been hydrated from localStorage
   verifyOtp: (data: VerifyOtpRequest) => Promise<VerifyOtpResponse>;
 
   // Actions
@@ -67,6 +68,7 @@ export const useAuthStore = create<AuthState>()(
         user_image: null,
         isLoading: false,
         error: null,
+        isHydrated: false,
 
         setUser: (user) =>
           set({ user, isAuthenticated: true }, false, 'auth/setUser'),
@@ -391,6 +393,13 @@ export const useAuthStore = create<AuthState>()(
           userSessionIdentifier: state.userSessionIdentifier, // User session - persisted
           isAuthenticated: state.isAuthenticated,
         }),
+        onRehydrateStorage: () => (state) => {
+          // Mark store as hydrated after rehydration is complete
+          if (state) {
+            state.isHydrated = true;
+            console.log('✅ Auth store hydrated from localStorage');
+          }
+        },
       }
     )
   )

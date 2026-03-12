@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useAuthStore } from "@/stores/auth.store"
 
 export default function ClientSessionHydrator({ session }: { session: any }) {
-  const { setSession, isAuthenticated, fetchProfile } = useAuthStore()
+  const { setSession, isAuthenticated, fetchProfile, isHydrated } = useAuthStore()
   const currentState = useAuthStore.getState();
 
   useEffect(() => {
@@ -20,15 +20,15 @@ export default function ClientSessionHydrator({ session }: { session: any }) {
     //   setSession(session.session_id, session.session_identifier)
     // }
 
-    // Validate user session if logged in
-    if (isAuthenticated) {
+    // Validate user session ONLY after store has hydrated
+    if (isAuthenticated && isHydrated) {
       console.log("🔄 Validating user session on startup...")
       fetchProfile().catch((err) => {
         // console.error("❌ Session validation failed:", err)
         // Store handles logout on flag 101
       })
     }
-  }, [session, setSession, isAuthenticated, fetchProfile])
+  }, [session, setSession, isAuthenticated, fetchProfile, isHydrated])
 
   return null
 }
