@@ -28,24 +28,12 @@ interface ScheduleFieldProps {
   className?: string;
   variant?: "outline" | "filled";
   label?: string;
-  pickupCityOffset?: number | null;
 }
 
 const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 const minutes = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"];
 
-// Get current hours/minutes in the pickup city's timezone using its UTC offset
-function getPickupCityCurrentTime(offset: number) {
-  const now = new Date();
-  const totalMinutes = now.getUTCHours() * 60 + now.getUTCMinutes() + offset;
-  const normalized = ((totalMinutes % 1440) + 1440) % 1440;
-  return {
-    hours: Math.floor(normalized / 60),
-    minutes: normalized % 60,
-  };
-}
-
-const ScheduleField = memo(({ value, onChange, className, variant, label = "Return Time", pickupCityOffset }: ScheduleFieldProps) => {
+const ScheduleField = memo(({ value, onChange, className, variant, label = "Return Time" }: ScheduleFieldProps) => {
   const [internalDate, setInternalDate] = useState<Date | undefined>(value || new Date());
   const [toastShown, setToastShown] = useState(false);
   const { getUserWebConfig } = useOperatorParamsStore();
@@ -66,32 +54,19 @@ const ScheduleField = memo(({ value, onChange, className, variant, label = "Retu
   const maxDate = getMaxDate();
 
   const getInitialTime = () => {
-    let hours24: number;
-    let mins: number;
-
-    if (value) {
-      hours24 = value.getHours();
-      mins = Math.ceil(value.getMinutes() / 5) * 5;
-    } else if (pickupCityOffset != null) {
-      const cityTime = getPickupCityCurrentTime(pickupCityOffset);
-      hours24 = cityTime.hours;
-      mins = Math.ceil(cityTime.minutes / 5) * 5;
-    } else {
-      const d = new Date();
-      hours24 = d.getHours();
-      mins = Math.ceil(d.getMinutes() / 5) * 5;
-    }
+    const d = value || new Date();
+    let mins = Math.ceil(d.getMinutes() / 5) * 5;
 
     // Handle rollover to next hour if minutes reach 60
     if (mins >= 60) {
-      hours24 = (hours24 + 1) % 24;
+      d.setHours(d.getHours() + 1);
       mins = 0;
     }
 
     return {
-      hour: (hours24 % 12 || 12).toString().padStart(2, '0'),
+      hour: (d.getHours() % 12 || 12).toString().padStart(2, '0'),
       minute: mins.toString().padStart(2, '0'),
-      period: (hours24 >= 12 ? "PM" : "AM") as "AM" | "PM"
+      period: (d.getHours() >= 12 ? "PM" : "AM") as "AM" | "PM"
     };
   };
 
@@ -115,21 +90,6 @@ const ScheduleField = memo(({ value, onChange, className, variant, label = "Retu
       setPeriod(d.getHours() >= 12 ? "PM" : "AM");
     }
   }, [value]);
-
-  // When offset changes (user picks new pickup location), update default time if no value selected yet
-  useEffect(() => {
-    if (value || pickupCityOffset == null) return;
-    const cityTime = getPickupCityCurrentTime(pickupCityOffset);
-    let hours24 = cityTime.hours;
-    let mins = Math.ceil(cityTime.minutes / 5) * 5;
-    if (mins >= 60) {
-      hours24 = (hours24 + 1) % 24;
-      mins = 0;
-    }
-    setHour((hours24 % 12 || 12).toString().padStart(2, '0'));
-    setMinute(mins.toString().padStart(2, '0'));
-    setPeriod(hours24 >= 12 ? "PM" : "AM");
-  }, [pickupCityOffset, value]);
 
   const handleSelectDate = (date: Date | undefined) => {
     // Check if date is beyond maxDate and show toast once

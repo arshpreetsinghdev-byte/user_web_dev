@@ -76,7 +76,7 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
     let response;
     console.log("headers fetchOperatorParams", headers);
     try {
-      response = await apiClient.post(API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.FETCH_OPERATOR_PARAMS, reqObj, {
+      response = await apiClient.post(API_ENDPOINTS.AUTH.FETCH_OPERATOR_PARAMS, reqObj, {
         headers,
         timeout: 5000,
       });

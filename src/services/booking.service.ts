@@ -88,7 +88,7 @@ export const bookingService = {
    */
   async findDrivers(body: URLSearchParams, operatorToken: string): Promise<FindDriversResponse> {
     const response = await apiClient.post<FindDriversResponse>(
-      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.VEHICLE.FIND_DRIVER,
+      API_ENDPOINTS.VEHICLE.FIND_DRIVER,
       body,
       {
         headers: {
@@ -112,7 +112,7 @@ export const bookingService = {
     sessionIdentifier: string
   ): Promise<InsertPickupScheduleResponse> {
     const response = await apiClient.post<InsertPickupScheduleResponse>(
-      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.BOOKING.INSERT_PICKUP_SCHEDULE,
+      API_ENDPOINTS.BOOKING.INSERT_PICKUP_SCHEDULE,
       body,
       {
         headers: {
@@ -131,7 +131,7 @@ export const bookingService = {
    */
   async getFareEstimate(body: URLSearchParams): Promise<any> {
     const response = await apiClient.post(
-      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.VEHICLE.FARE_ESTIMATE,
+      API_ENDPOINTS.VEHICLE.FARE_ESTIMATE,
       body,
       {
         headers: {

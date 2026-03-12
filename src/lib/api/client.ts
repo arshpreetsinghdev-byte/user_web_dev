@@ -2,11 +2,29 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 import { storage } from '@/lib/utils/storage';
 import { STORAGE_KEYS, API_TIMEOUT } from '@/lib/utils/constants';
 import { useAuthStore } from '@/stores/auth.store';
-import { BASE_URL } from '@/lib/api/endpoints';
 import { useUIStore } from '@/stores/ui.store';
 
+// Get the base URL dynamically based on environment
+const getBaseUrl = (): string => {
+  // Server-side (SSR/SSG) - use direct API URL
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://prod-autos-api.jugnoo.in';
+  }
+
+  // Client-side - check if we're in production
+  const hostname = window.location.hostname;
+  const isProduction = hostname !== 'localhost' && hostname !== '127.0.0.1';
+
+  if (isProduction) {
+    // Use Next.js proxy to bypass CORS
+    return '/api/proxy';
+  }
+
+  // Local development - use direct API URL
+  return process.env.NEXT_PUBLIC_API_URL || 'https://prod-autos-api.jugnoo.in';
+};
+
 const apiClient: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
@@ -29,42 +47,45 @@ const handleSessionExpired = () => {
     }
   }
 };
+// System endpoints always use generic/operator session
+const systemEndpoints = [
+  '/open/v1/authorization',
+  '/open/v1/verify_session',
+  '/open/v1/fetch_operator_params',
+  '/open/v1/fetch_configuration_user_web',
+  '/open/v1/generate_customer_login_otp',
+  '/open/v1/verify_customer_otp',
+  // Removed '/open/v1/find_a_driver' - should use user session when authenticated
+
+  '/open/v1/add_card_3d',
+  '/open/v1/confirm_card_3d',
+  '/open/v1/delete_card',
+];
+
+// User-specific endpoints that REQUIRE user session
+const userEndpoints = [
+  '/open/v1/get_user_profile',
+  '/open/v1/update_user_profile',
+  '/open/v1/insert_pickup_schedule',
+  '/open/v1/add_sqaure_card',
+  '/open/v1/fetch_wallet_balance',
+];
+
 //edit for gitlab-it
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     console.log("apiClient used")
-    const { token, sessionId, sessionIdentifier, userSessionId, userSessionIdentifier, isAuthenticated } = useAuthStore.getState();
+
+    // Set baseURL dynamically for each request (handles CORS proxy in production)
+    config.baseURL = getBaseUrl();
+
+    const { token, sessionId, sessionIdentifier, userSessionId, userSessionIdentifier, isAuthenticated, isHydrated } = useAuthStore.getState();
 
     // Attach Bearer token if it exists
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Determine which session to use based on endpoint
-    // System endpoints always use generic/operator session
-    const systemEndpoints = [
-      '/open/v1/authorization',
-      '/open/v1/verify_session',
-      '/open/v1/fetch_operator_params',
-      '/open/v1/fetch_configuration_user_web',
-      '/open/v1/generate_customer_login_otp',
-      '/open/v1/verify_customer_otp',
-      // Removed '/open/v1/find_a_driver' - should use user session when authenticated
-
-      '/open/v1/add_card_3d',
-      '/open/v1/confirm_card_3d',
-      '/open/v1/delete_card',
-
-    ];
-
-    // User-specific endpoints that REQUIRE user session
-    const userEndpoints = [
-      '/open/v1/get_user_profile',
-      '/open/v1/update_user_profile',
-      '/open/v1/insert_pickup_schedule',
-      '/open/v1/add_sqaure_card',
-      '/open/v1/fetch_wallet_balance',
-    ];
     const isSystemEndpoint = systemEndpoints.some(endpoint => config.url?.includes(endpoint));
     const isUserEndpoint = userEndpoints.some(endpoint => config.url?.includes(endpoint));
 
@@ -72,14 +93,23 @@ apiClient.interceptors.request.use(
     let activeSessionIdentifier = sessionIdentifier;
 
     // For user-specific endpoints, enforce user session requirement
+    // BUT only after the store has hydrated (prevents logout on page refresh)
     if (isUserEndpoint) {
       if (!userSessionId || !userSessionIdentifier) {
-        // console.error('❌ User session required for:', config.url);
-        handleSessionExpired();
-        throw new axios.Cancel('User session required for this endpoint');
+        // Only enforce strict check AFTER hydration is complete
+        if (isHydrated) {
+          console.error('❌ User session required for:', config.url);
+          handleSessionExpired();
+          throw new axios.Cancel('User session required for this endpoint');
+        } else {
+          // During hydration, allow the request to proceed with system session
+          console.warn('⚠️ Store not hydrated yet, using system session temporarily for:', config.url);
+          // Will use fallback to system session below
+        }
+      } else {
+        activeSessionId = userSessionId;
+        activeSessionIdentifier = userSessionIdentifier;
       }
-      activeSessionId = userSessionId;
-      activeSessionIdentifier = userSessionIdentifier;
     }
     // For system endpoints, always use system session
     else if (isSystemEndpoint) {
@@ -111,8 +141,17 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => {
     // Check for session expiration in successful responses (Flag 101)
+    // Only logout for non-system endpoints — system session errors should NOT destroy user session
     if (response.data?.flag === 101) {
-      console.warn('⚠️ Session expired (Flag 101) - Logging out');
+      const requestUrl = response.config?.url || '';
+      const isSystemRequest = systemEndpoints.some(ep => requestUrl.includes(ep));
+
+      if (isSystemRequest) {
+        console.warn('⚠️ System session expired (Flag 101) - NOT logging out user');
+        return Promise.reject(new Error('System session expired.'));
+      }
+
+      console.warn('⚠️ User session expired (Flag 101) - Logging out');
       storage.remove(STORAGE_KEYS.AUTH_TOKEN);
       storage.remove(STORAGE_KEYS.USER_DATA);
       useAuthStore.getState().logout();
@@ -130,16 +169,23 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Check for session expiration errors
+    const requestUrl = error.config?.url || '';
+    const isSystemRequest = systemEndpoints.some(ep => requestUrl.includes(ep));
+
+    // Check for session expiration errors — only use precise flag/status checks
     const errorData = error.response?.data as any;
     const isSessionExpired =
       errorData?.flag === 101 ||
-      error.response?.status === 401 ||
-      errorData?.message?.toLowerCase().includes('session') ||
-      errorData?.error?.toLowerCase().includes('authentication');
+      error.response?.status === 401;
 
     if (isSessionExpired) {
-      console.warn('⚠️ Session expired - Logging out');
+      // System endpoint failure should NOT destroy user session
+      if (isSystemRequest) {
+        console.warn('⚠️ System endpoint session error - NOT logging out user:', requestUrl);
+        return Promise.reject(error.response?.data || error.message || 'System session error');
+      }
+
+      console.warn('⚠️ User session expired - Logging out');
 
       // Clear auth storage
       storage.remove(STORAGE_KEYS.AUTH_TOKEN);
@@ -152,17 +198,6 @@ apiClient.interceptors.response.use(
       }
 
       return Promise.reject(new Error('Session expired. Please login again.'));
-    }
-
-    // Handle 401 Unauthorized - redirect to login
-    if (error.response?.status === 401) {
-      storage.remove(STORAGE_KEYS.AUTH_TOKEN);
-      storage.remove(STORAGE_KEYS.USER_DATA);
-
-      // Redirect to login (handle based on your routing)
-      if (typeof window !== 'undefined') {
-        window.location.href = '/en/home';
-      }
     }
 
     // Handle other errors

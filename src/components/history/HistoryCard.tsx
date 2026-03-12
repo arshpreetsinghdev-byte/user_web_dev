@@ -87,7 +87,7 @@ export function HistoryCard({ ride, onClick, onCancel }: HistoryCardProps) {
     const operatorCurrency = useOperatorParamsStore(
         state => state.data?.user_web_config?.currency || state.data?.user_web_config?.currency_symbol || '₹'
     );
-
+    // console.log("Ride:::", ride);
     return (
         <div
             onClick={() => isClickable && onClick?.(ride)}

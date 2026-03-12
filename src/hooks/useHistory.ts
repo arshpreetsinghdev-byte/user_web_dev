@@ -32,7 +32,7 @@ export const mapApiRideToRideHistoryItem = (apiRide: ApiRideHistoryItem): RideHi
     }
     const pickupAddr = apiRide.pickup_location_address || apiRide.pickup_address;
     const dropAddr = apiRide.drop_location_address || apiRide.drop_address;
-    // console.log("API RIDE------------>", apiRide);
+    
     return {
         id: apiRide.pickup_id?.toString() ||
             apiRide.engagement_id?.toString() ||
@@ -146,12 +146,14 @@ export function useHistory(errorMessage: string, rideType?: string) {
                 let selected_service: number | undefined;
                 if (rideType === 'daily') {
                     selected_service = 1;
+                } else if (rideType === 'rental') {
+                    selected_service = 2;
                 } else if (rideType === 'outstation') {
                     selected_service = 3;
                 } else if (rideType === 'airport') {
                     selected_service = 4;
                 }
-
+                console.log("Selected Service::", selected_service);
                 // Map active tab to ride status filters
                 let ride_status_filter: number | undefined;
                 let past_ride_status_filter: number | undefined;
