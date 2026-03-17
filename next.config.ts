@@ -14,14 +14,6 @@ const nextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/proxy/:path*',
-        destination: 'https://prod-autos-api.jugnoo.in/:path*',
-      },
-    ];
-  },
   async headers() {
     return [
       {

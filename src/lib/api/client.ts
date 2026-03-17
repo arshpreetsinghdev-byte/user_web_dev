@@ -2,29 +2,11 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 import { storage } from '@/lib/utils/storage';
 import { STORAGE_KEYS, API_TIMEOUT } from '@/lib/utils/constants';
 import { useAuthStore } from '@/stores/auth.store';
+import { BASE_URL } from '@/lib/api/endpoints';
 import { useUIStore } from '@/stores/ui.store';
 
-// Get the base URL dynamically based on environment
-const getBaseUrl = (): string => {
-  // Server-side (SSR/SSG) - use direct API URL
-  if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || 'https://prod-autos-api.jugnoo.in';
-  }
-
-  // Client-side - check if we're in production
-  const hostname = window.location.hostname;
-  const isProduction = hostname !== 'localhost' && hostname !== '127.0.0.1';
-
-  if (isProduction) {
-    // Use Next.js proxy to bypass CORS
-    return '/api/proxy';
-  }
-
-  // Local development - use direct API URL
-  return process.env.NEXT_PUBLIC_API_URL || 'https://prod-autos-api.jugnoo.in';
-};
-
 const apiClient: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
@@ -71,13 +53,9 @@ const userEndpoints = [
   '/open/v1/fetch_wallet_balance',
 ];
 
-//edit for gitlab-it
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     console.log("apiClient used")
-
-    // Set baseURL dynamically for each request (handles CORS proxy in production)
-    //config.baseURL = getBaseUrl();
 
     const { token, sessionId, sessionIdentifier, userSessionId, userSessionIdentifier, isAuthenticated, isHydrated } = useAuthStore.getState();
 
