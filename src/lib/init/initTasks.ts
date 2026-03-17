@@ -139,7 +139,7 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   if(subdomain === 'localhost:4000'){
     subdomain = "blackbadge-uwt"
   }
-
+ 
   // Check cache — return cached result if still valid
   const cached = initCache.get(subdomain);
   if (cached && (Date.now() - cached.timestamp) < CACHE_TTL_MS) {
