@@ -68,9 +68,6 @@ export const verifyCustomerOtp = async (
 export const updateUserProfile = async (
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  console.log('👤 Calling update_user_profile API');
-  console.log('📦 Request data:', data);
-  console.log('📁 Image file:', data.image_file);
 
   const { userSessionId, userSessionIdentifier } = useAuthStore.getState();
   if (!userSessionId || !userSessionIdentifier) {
@@ -98,7 +95,6 @@ export const updateUserProfile = async (
     }
 
     // Log FormData contents
-    console.log('📋 FormData contents:');
     for (let pair of formData.entries()) {
       console.log(pair[0] + ':', pair[1]);
     }

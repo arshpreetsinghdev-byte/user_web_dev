@@ -514,12 +514,14 @@ export default function BookingPage() {
                     regions.map((region) => {
                       const hasPackages = (region.packages?.length ?? 0) > 0;
                       const isSelected = selectedRegion?.region_id === region.region_id;
+                      // Don't show packages for city-to-city or outstation services
+                      const showPackages = hasPackages && !isCityToCity;
                       return (
                         <SubRegionCard
                           key={region.region_id}
                           imgSrc={region.images.tab_normal}
                           selected={isSelected}
-                          expanded={isSelected && hasPackages}
+                          expanded={isSelected && showPackages}
                           onClick={() => handleRegionSelect(region.region_id)}
                           className=""
                           subComponent1={
@@ -550,7 +552,7 @@ export default function BookingPage() {
                             />
                           }
                           expandContent={
-                            hasPackages ? (
+                            showPackages ? (
                               <RentalPackageSelector region={isSelected && selectedRegion ? selectedRegion : region} />
                             ) : undefined
                           }
