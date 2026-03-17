@@ -77,7 +77,7 @@ apiClient.interceptors.request.use(
     console.log("apiClient used")
 
     // Set baseURL dynamically for each request (handles CORS proxy in production)
-    config.baseURL = getBaseUrl();
+    //config.baseURL = getBaseUrl();
 
     const { token, sessionId, sessionIdentifier, userSessionId, userSessionIdentifier, isAuthenticated, isHydrated } = useAuthStore.getState();
 

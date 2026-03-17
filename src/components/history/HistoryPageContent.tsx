@@ -230,8 +230,8 @@ export function HistoryPageContent() {
                             <SelectValue placeholder={t("Daily")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="daily">{t("On Demand")}</SelectItem>
-                            <SelectItem value="rental">{t("Hourly")}</SelectItem>
+                            <SelectItem value="daily">{t("Daily")}</SelectItem>
+                            <SelectItem value="rental">{t("Rental")}</SelectItem>
                             <SelectItem value="airport">{t("Airport")}</SelectItem>
                             <SelectItem value="outstation">{t("City To City")}</SelectItem>
                         </SelectContent>
