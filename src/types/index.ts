@@ -384,6 +384,7 @@ export interface GetTransactionHistoryRequest {
   login_type: number;
   locale: string;
   currency: string;
+  start_from: string | number;
 }
 
 export interface GetTransactionHistoryResponse {
@@ -478,6 +479,7 @@ export interface RegionFare {
   per_km_fare?: number;
   per_min_fare?: number;
   pool_fare_id: string | number;
+  package_id?: number;
   currency_symbol: string;
   currency: string;
   tax_percentage: number;
@@ -516,6 +518,31 @@ export interface VehicleRegion {
   multiple_destinations_enabled?: number;
   schedule_ride_disable?: number;
   instant_ride_disable?: number;
+  packages?: VehiclePackage[];
+  [key: string]: any;
+}
+
+export interface VehiclePackage {
+  package_id: number;
+  package_name?: string;
+  return_trip: 0 | 1; // 0 = one way, 1 = round trip
+  fare_fixed: number;
+  fare_per_km: number;
+  fare_threshold_distance: number;
+  fare_per_km_threshold_distance: number;
+  fare_per_km_after_threshold: number;
+  fare_per_km_before_threshold: number;
+  fare_per_min: number;
+  fare_threshold_time: number;
+  fare_per_waiting_min: number;
+  fare_threshold_waiting_time: number;
+  vehicle_type: number;
+  ride_type: number;
+  fare_minimum: number;
+  fare_per_baggage: number;
+  region_id: number;
+  operator_id: number;
+  to_city_id?: number;
   [key: string]: any;
 }
 // export type FindDriversResponse = any;
@@ -620,7 +647,7 @@ export interface FindDriverRequest {
 
 export interface FindDriverOptions {
   serviceId?: number;
-  isRoundTrip?: boolean;
+  returnTrip?: 0 | 1; // 0 = one way, 1 = round trip
   returnDateTime?: Date;
   rideDateTime?: Date;
   timezoneOffset?: number;
@@ -654,6 +681,10 @@ export interface InsertPickupScheduleRequest {
   customerPhoneNo?: string; // Book for someone else
   promoToApply?: number;
   couponToApply?: number;
+  returnTrip?: 0 | 1; // 0 = one way, 1 = round trip (for city-to-city)
+  returnTime?: Date | string; // Return time for round trips
+  packageId?: number; // package_id from find_a_driver response (city-to-city)
+  poolFareId?: number | string; // pool_fare_id from find_a_driver response
 }
 
 export interface InsertPickupScheduleResponse {
@@ -747,6 +778,8 @@ export interface HistoryRequest {
   selected_service?: number;
   ride_status_filter?: number;
   past_ride_status_filter?: number;
+  limit?: number;
+  fetch_cancelled_scheduled_rides?: number;
 }
 
 export interface HistoryResponse {

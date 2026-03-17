@@ -52,7 +52,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
     const [customerNote, setCustomerNote] = useState(ride?.customerNote || "");
     const [flightNumber, setFlightNumber] = useState(ride?.flightNumber || "");
     // Only show flight number for airport rides (type 4)
-    // console.log("ride type::::", ride);
+    console.log("ride type::::", ride);
     const isAirportRide = ride && (ride.ride_type === 11 || ride.product_type === 11);
 
     // Handle pickup address selection from Google Maps
@@ -123,6 +123,10 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
         }
         if (!pickupTime || pickupTime.trim() === "") {
             toast.error(t("Pickup date/time cannot be empty"));
+            return;
+        }
+        if (new Date(pickupTime) < new Date()) {
+            toast.error(t("Pickup time cannot be in the past"));
             return;
         }
         if (!pickupAddress || pickupAddress.trim() === "") {
@@ -263,6 +267,7 @@ export function ModifyRideDialog({ open, onOpenChange, ride, onModifySuccess }: 
                                 type="datetime-local"
                                 value={pickupTime}
                                 onChange={(e) => setPickupTime(e.target.value)}
+                                min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                                 className="w-full"
                                 required
                             />

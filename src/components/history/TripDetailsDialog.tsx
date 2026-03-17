@@ -140,7 +140,7 @@ export function TripDetailsDialog({ open, onOpenChange, ride }: TripDetailsDialo
     const path = useMemo(() => {
         return routePath.length > 0 ? routePath : [];
     }, [routePath]);
-    // console.log("path lat longs ->",path)
+    console.log("path lat longs ->",path)
     const handleRatingSubmitted = () => {
         // Refresh the page or refetch data after rating is submitted
         window.location.reload();

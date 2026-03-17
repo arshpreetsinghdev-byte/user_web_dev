@@ -23,6 +23,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PhoneInput } from "@/components/auth/phoneInput";
 import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 import IncrementDecrement from "@/components/IncrementDecrement";
+import { TripTypeToggle } from "@/components/booking/TripTypeToggle";
+import { useFindADrivers } from "@/hooks/useFindADrivers";
+import ScheduleField from "@/components/booking/ScheduleField";
+import { ArrowRight } from "lucide-react";
+import RentalPackageSelector from "@/components/booking/RentalPackageSelector";
 
 const VehicleCardSkeleton = () => (
   <div className="flex items-center gap-4 rounded-lg bg-white p-3 ring-1 ring-border shadow-sm h-25">
@@ -73,18 +78,91 @@ export default function BookingPage() {
     setDriverNote,
     luggageCount,
     setLuggageCount,
+    roundTrip,
+    setRoundTrip,
+    isInterCityRequest,
+    returnDateTime,
+    setReturnDateTime,
+    scheduledDateTime,
   } = useBookingStore();
   const { isAuthenticated } = useAuthStore();
   const { openAuthModal } = useUIStore();
+  const { isFinding, calculateFareAndFindDrivers } = useFindADrivers();
+
+  // Determine if the current service is city-to-city (out_station type)
+  const isCityToCity = selectedService?.type === 'out_station' || isInterCityRequest;
 
   // Use available vehicles from store - no fallbacks
   const regions = availableVehicles;
+  console.log("Regions fare fix:::", regions);
   const [vehicleServices, setVehicleServices] = useState<{ id: number; name: string; price: number; eta: number; description: string }[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
   const [isMobileFormActive, setIsMobileFormActive] = useState(true);
   const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
   const hasAutoSelected = useRef(false);
+
+  // Handle trip type toggle (One Way / Round Trip)
+  const handleTripTypeToggle = useCallback(async (newValue: 0 | 1) => {
+    if (newValue === roundTrip) return;
+    setRoundTrip(newValue);
+    setSelectedRegion(null);
+    // Do NOT reset hasAutoSelected here — the auto-select effect would fire immediately
+    // with stale (old-trip) vehicle data before the API returns the new vehicles.
+    // We manually re-select after the API resolves instead.
+
+    // If switching to round trip without a return time, set a default (pickup + 24h)
+    if (newValue === 1 && !returnDateTime) {
+      const baseDate = scheduledDateTime || new Date();
+      const defaultReturn = new Date(baseDate);
+      defaultReturn.setDate(defaultReturn.getDate() + 1);
+      setReturnDateTime(defaultReturn);
+    }
+
+    // If switching to one way, clear return time
+    if (newValue === 0) {
+      setReturnDateTime(null);
+    }
+
+    // Re-fetch vehicles with new return_trip value, then re-select first vehicle with fresh fare/package data
+    setTimeout(async () => {
+      try {
+        await calculateFareAndFindDrivers();
+        // Read the freshly updated vehicles directly from the store (not stale closure)
+        const updatedVehicles = useBookingStore.getState().availableVehicles;
+        if (updatedVehicles.length > 0) {
+          const region = updatedVehicles[0];
+          setSelectedRegion(region);
+          const servicesWithEta = (region.vehicle_services || []).map((svc) => ({
+            ...svc,
+            id: svc.id ?? 0,
+            name: svc.name ?? '',
+            price: svc.price ?? 0,
+            eta: svc.eta ?? 0,
+            description: svc.description ?? '',
+          }));
+          setVehicleServices(servicesWithEta);
+          setSelectedServices([]);
+          hasAutoSelected.current = true;
+        }
+      } catch (err) {
+        console.error("Failed to refresh vehicles after trip type toggle:", err);
+      }
+    }, 50);
+  }, [roundTrip, setRoundTrip, setSelectedRegion, setSelectedServices, calculateFareAndFindDrivers, returnDateTime, scheduledDateTime, setReturnDateTime]);
+
+  // Handle return time change
+  const handleReturnTimeChange = useCallback(async (date: Date | null) => {
+    setReturnDateTime(date);
+    // Re-fetch fares with updated return time
+    setTimeout(async () => {
+      try {
+        await calculateFareAndFindDrivers();
+      } catch (err) {
+        console.error("Failed to refresh vehicles after return time change:", err);
+      }
+    }, 50);
+  }, [setReturnDateTime, calculateFareAndFindDrivers]);
 
   // Fetch coupons on mount
   // useEffect(() => {
@@ -132,7 +210,6 @@ export default function BookingPage() {
     }
     return 0;
   }, [currentStepIndex, selectedRegion]);
-  // console.log('SubProgress:', subProgress);
 
   // Target view for the right panel list
   const targetView = useMemo<"regions" | "coupons">(() => {
@@ -164,6 +241,21 @@ export default function BookingPage() {
     const region = regions.find((r) => r.region_id === regionId);
     if (region) {
       setSelectedRegion(region);
+      // console.log("[handleRegionSelect] Selected vehicle:", {
+      //   region_id: region.region_id,
+      //   region_name: region.region_name,
+      //   vehicle_type: region.vehicle_type,
+      //   ride_type: region.ride_type,
+      //   fare: {
+      //     fare_float: region.region_fare?.fare_float,
+      //     original_fare_float: region.region_fare?.original_fare_float,
+      //     currency_symbol: region.region_fare?.currency_symbol,
+      //     pool_fare_id: region.region_fare?.pool_fare_id,
+      //     package_id: region.region_fare?.package_id,
+      //     applicable_fare: region.region_fare?.applicable_fare,
+      //   },
+      //   packages: region.packages,
+      // });
       const servicesWithEta = (region.vehicle_services || []).map((svc) => ({
         ...svc,
         id: svc.id ?? 0,
@@ -175,8 +267,8 @@ export default function BookingPage() {
       setVehicleServices(servicesWithEta);
       setSelectedServices([]);
 
-      // Scroll to booking details section only when manually selected
-      if (shouldScroll) {
+      // Scroll to booking details section only when manually selected and no packages (hourly/rental)
+      if (shouldScroll && !((region.packages?.length ?? 0) > 0)) {
         setTimeout(() => {
           const bookingDetailsSection = document.getElementById('booking-details-section');
           if (bookingDetailsSection) {
@@ -224,13 +316,19 @@ export default function BookingPage() {
     // Step 2 (Payment): Navigate to ride-summary (like Next button)
     if (nextStep === 2) {
       if (!selectedRegion) {
-        toast.error('Please select a vehicle first');
+        toast.error('Please select a vehicle first', { id: 'no-vehicle' });
+        return;
+      }
+
+      // Validate pickup date/time is selected
+      if (!scheduledDateTime) {
+        toast.error('Please select a pickup date and time', { id: 'no-datetime' });
         return;
       }
 
       // Validate flight number for airport rides
       if (selectedService?.type === "airport_taxi" && !flightNumber.trim()) {
-        toast.error('Flight number is required for airport rides');
+        toast.error('Flight number is required for airport rides', { id: 'no-flight-number' });
         return;
       }
 
@@ -244,7 +342,7 @@ export default function BookingPage() {
     }
 
     setCurrentStepIndex(nextStep);
-  }, [selectedRegion, locale, router, setCurrentStepIndex, isAuthenticated, openAuthModal, selectedService, flightNumber, setSelectedRegion, setIsMobileFormActive]);
+  }, [selectedRegion, locale, router, setCurrentStepIndex, isAuthenticated, openAuthModal, selectedService, flightNumber, scheduledDateTime, setSelectedRegion, setIsMobileFormActive]);
 
   const onBack = useCallback(() => {
     if (typeof window !== "undefined" && window.innerWidth < 768 && currentStepIndex <= 1 && !isMobileFormActive) {
@@ -263,21 +361,38 @@ export default function BookingPage() {
   }, [currentStepIndex, setCurrentStepIndex, isMobileFormActive, locale, router]);
 
   const onNext = useCallback(() => {
+    // Always validate date/time first, regardless of step or mobile state
+    if (!scheduledDateTime) {
+      toast.error('Please select a pickup date and time', { id: 'no-datetime' });
+      return;
+    }
+
     if (typeof window !== "undefined" && window.innerWidth < 768 && currentStepIndex <= 1 && isMobileFormActive) {
       setIsMobileFormActive(false);
+      return;
+    }
+
+    // Step 0: user somehow clicked Next without vehicles loaded yet
+    if (currentStepIndex === 0) {
       return;
     }
 
     // Step 1: Select Car Type -> Step 2: Payment (ride-summary)
     if (currentStepIndex === 1) {
       if (!selectedRegion) {
-        toast.error('Please select a vehicle to proceed');
+        toast.error('Please select a vehicle to proceed', { id: 'no-vehicle' });
+        return;
+      }
+
+      // Validate return date/time for round trip city-to-city rides
+      if (isCityToCity && roundTrip === 1 && !returnDateTime) {
+        toast.error('Please select a return date and time', { id: 'no-return-datetime' });
         return;
       }
 
       // Validate flight number for airport rides
       if (selectedService?.type === "airport_taxi" && !flightNumber.trim()) {
-        toast.error('Flight number is required for airport rides');
+        toast.error('Flight number is required for airport rides', { id: 'no-flight-number' });
         return;
       }
 
@@ -287,7 +402,7 @@ export default function BookingPage() {
       }
       router.push(`/${locale}/ride-summary`);
     }
-  }, [currentStepIndex, selectedRegion, locale, router, isMobileFormActive, isAuthenticated, selectedService, flightNumber]);
+  }, [currentStepIndex, selectedRegion, locale, router, isMobileFormActive, isAuthenticated, selectedService, flightNumber, scheduledDateTime, isCityToCity, roundTrip, returnDateTime]);
 
   return (
     <section className="relative min-h-[calc(100vh-88px)] pb-20 w-full bg-[#f8f8f8]">
@@ -344,6 +459,40 @@ export default function BookingPage() {
                 </h2>
               </div>
 
+              {/* One Way / Round Trip toggle for city-to-city rides */}
+              {currentStepIndex === 1 && isCityToCity && (
+                <div className="mt-2 mb-1 space-y-3">
+                  <TripTypeToggle
+                    value={roundTrip}
+                    onChange={handleTripTypeToggle}
+                    disabled={isFinding || isLoading}
+                  />
+
+                  {/* Pickup & Return time display for city-to-city */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span className="font-medium text-gray-700">Booking for:</span>
+                    <span>
+                      {scheduledDateTime
+                        ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(scheduledDateTime))
+                        : 'Select Pickup Time'}
+                    </span>
+                    {roundTrip === 1 && (
+                      <>
+                        <span className="text-gray-400">—</span>
+                        <div className="flex-1">
+                          <ScheduleField
+                            value={returnDateTime}
+                            onChange={handleReturnTimeChange}
+                            variant="outline"
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div
                 className={`overflow-y-auto max-h-150 space-y-3
                   [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] p-1
@@ -362,42 +511,54 @@ export default function BookingPage() {
                       ))}
                     </div>
                   ) : regions.length > 0 ? (
-                    regions.map((region) => (
-                      <SubRegionCard
-                        key={region.region_id}
-                        imgSrc={region.images.tab_normal}
-                        selected={selectedRegion?.region_id === region.region_id}
-                        onClick={() => handleRegionSelect(region.region_id)}
-                        className="max-h-25"
-                        subComponent1={
-                          <TitleBlock
-                            title={region.region_name}
-                            capacity={region.max_people}
-                          />
-                        }
-                        subComponent2={
-                          <PriceBlock
-                            currencySymbol={useOperatorParamsStore.getState().data?.user_web_config?.currency || useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || region.region_fare?.currency_symbol || "₹"}
-                            price={region.region_fare?.fare_float}
-                            oldPrice={
-                              region.region_fare?.original_fare_float !==
-                                region.region_fare?.fare_float
-                                ? region.region_fare?.original_fare_float
-                                : undefined
-                            }
-                          />
-                        }
-                        subComponent3={
-                          <DescriptionBlock
-                            text={
-                              region.description ||
-                              region.disclaimer_text ||
-                              `Book a ${region.region_name} for your ride`
-                            }
-                          />
-                        }
-                      />
-                    ))
+                    regions.map((region) => {
+                      const hasPackages = (region.packages?.length ?? 0) > 0;
+                      const isSelected = selectedRegion?.region_id === region.region_id;
+                      // Don't show packages for city-to-city or outstation services
+                      const showPackages = hasPackages && !isCityToCity;
+                      return (
+                        <SubRegionCard
+                          key={region.region_id}
+                          imgSrc={region.images.tab_normal}
+                          selected={isSelected}
+                          expanded={isSelected && showPackages}
+                          onClick={() => handleRegionSelect(region.region_id)}
+                          className=""
+                          subComponent1={
+                            <TitleBlock
+                              title={region.region_name}
+                              capacity={region.max_people}
+                            />
+                          }
+                          subComponent2={
+                            <PriceBlock
+                              currencySymbol={useOperatorParamsStore.getState().data?.user_web_config?.currency || useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || region.region_fare?.currency_symbol || "₹"}
+                              price={isSelected && selectedRegion ? selectedRegion.region_fare?.fare_float : region.region_fare?.fare_float}
+                              oldPrice={
+                                region.region_fare?.original_fare_float !==
+                                  region.region_fare?.fare_float
+                                  ? region.region_fare?.original_fare_float
+                                  : undefined
+                              }
+                            />
+                          }
+                          subComponent3={
+                            <DescriptionBlock
+                              text={
+                                region.description ||
+                                region.disclaimer_text ||
+                                `Book a ${region.region_name} for your ride`
+                              }
+                            />
+                          }
+                          expandContent={
+                            showPackages ? (
+                              <RentalPackageSelector region={isSelected && selectedRegion ? selectedRegion : region} />
+                            ) : undefined
+                          }
+                        />
+                      );
+                    })
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <div className="text-muted-foreground mb-2">
@@ -580,6 +741,7 @@ export default function BookingPage() {
                   <div className="hidden md:flex justify-end mt-6">
                     <ActionButton onClick={onNext} className="px-8 py-3 text-base justify-center flex h-12 bg-primary hover:bg-primary/90 shadow-lg rounded-lg">
                       {"Next"}
+                      <ArrowRight className="h-4 w-4 ml-1" />
                     </ActionButton>
                   </div>
                 )}
@@ -632,6 +794,7 @@ export default function BookingPage() {
       <div className="fixed bottom-0 left-0 right-0 z-10 w-full py-3 px-4 block sm:hidden bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.12)]">
         <ActionButton onClick={onNext} className="w-[90%] px-2 text-lg justify-center mx-auto flex h-9.50!">
           {"Next"}
+          <ArrowRight className="h-4 w-4 ml-1" />
         </ActionButton>
       </div>
     </section>

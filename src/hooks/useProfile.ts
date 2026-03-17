@@ -86,14 +86,14 @@ export function useProfile() {
     }
 
     try {
-      console.log('💾 Updating profile:', { fullName, email });
+      // console.log('💾 Updating profile:', { fullName, email });
 
       const response = await updateProfileAPI({
         updated_user_name: fullName,
         updated_user_email: email,
         image_file: avatarFile || undefined
       });
-      console.log("Profile response!!!!!!!!!", response);
+      // console.log("Profile response!!!!!!!!!", response);
       if (response && response.flag === 144) {
         // Handle warning case
         toast.warning(response.error || response.message || t('profile.emailTaken') || 'The email address provided is already registered with us.');

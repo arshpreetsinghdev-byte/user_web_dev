@@ -9,20 +9,14 @@ export function getCookieValue(name: string): string | undefined {
 	return match ? decodeURIComponent(match[1]) : undefined;
 }
 
-// Format date/time for API requests with optional timezone adjustment
-export function formatDateTime(date: Date, timezoneOffset?: number): string {
-	const d = new Date(date);
-
-	if (timezoneOffset) {
-		d.setMinutes(d.getMinutes() - timezoneOffset);
-	}
-
-	const year = d.getFullYear();
-	const month = String(d.getMonth() + 1).padStart(2, '0');
-	const day = String(d.getDate()).padStart(2, '0');
-	const hours = String(d.getHours()).padStart(2, '0');
-	const minutes = String(d.getMinutes()).padStart(2, '0');
-	const seconds = String(d.getSeconds()).padStart(2, '0');
+// Format date/time for API requests — always outputs UTC
+export function formatDateTime(date: Date): string {
+	const year = date.getUTCFullYear();
+	const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+	const day = String(date.getUTCDate()).padStart(2, '0');
+	const hours = String(date.getUTCHours()).padStart(2, '0');
+	const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+	const seconds = String(date.getUTCSeconds()).padStart(2, '0');
 
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
@@ -106,6 +100,35 @@ export function buildInsertPickupScheduleBody(req: InsertPickupScheduleRequest):
 
 	if (req.couponToApply !== undefined) {
 		body.set('coupon_to_apply', String(req.couponToApply));
+	}
+
+	if (req.packageId !== undefined) {
+		body.set('package_id', String(req.packageId));
+	}
+
+	if (req.poolFareId !== undefined) {
+		body.set('pool_fare_id', String(req.poolFareId));
+	}
+
+	if (req.returnTrip !== undefined) {
+		body.set('return_trip', String(req.returnTrip));
+	}
+
+	if (req.returnTime !== undefined) {
+		let returnTimeStr = '';
+		if (typeof req.returnTime === 'string') {
+			returnTimeStr = req.returnTime;
+		} else {
+			const d = new Date(req.returnTime);
+			const year = d.getUTCFullYear();
+			const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+			const day = String(d.getUTCDate()).padStart(2, '0');
+			const hours = String(d.getUTCHours()).padStart(2, '0');
+			const minutes = String(d.getUTCMinutes()).padStart(2, '0');
+			const seconds = String(d.getUTCSeconds()).padStart(2, '0');
+			returnTimeStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+		}
+		body.set('return_time', returnTimeStr);
 	}
 
 	return body;

@@ -16,6 +16,7 @@ export function useInsertPickupSchedule() {
   const {
     selectedRegion,
     selectedService,
+    selectedPackage,
     pickup,
     dropoff,
     passengerCount,
@@ -31,6 +32,8 @@ export function useInsertPickupSchedule() {
     scheduledDateTime,
     appliedCoupon,
     allPromotions,
+    roundTrip,
+    returnDateTime,
   } = useBookingStore();
 
   const submitPickupSchedule = useCallback(async (): Promise<InsertPickupScheduleResponse> => {
@@ -99,6 +102,10 @@ export function useInsertPickupSchedule() {
         selectedPaymentMethod === "square_card" ? selectedSquareCardId : undefined,
       promoToApply: appliedCoupon ?? undefined,
       couponToApply: accountId,
+      returnTrip: (selectedService?.type === 'out_station') ? roundTrip : undefined,
+      returnTime: (selectedService?.type === 'out_station' && roundTrip === 1 && returnDateTime) ? returnDateTime : undefined,
+      packageId: selectedPackage?.package_id ?? selectedRegion.region_fare?.package_id ?? undefined,
+      poolFareId: selectedRegion.region_fare?.pool_fare_id ?? undefined,
     };
 
     setIsSubmitting(true);
@@ -127,6 +134,9 @@ export function useInsertPickupSchedule() {
     selectedService?.id,
     sessionId,
     sessionIdentifier,
+    roundTrip,
+    returnDateTime,
+    selectedService?.type,
   ]);
 
   return {

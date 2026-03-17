@@ -29,11 +29,11 @@ function getStepWeights(totalSteps: number): number[] {
 }
 
 function getProgress(currentStepNumber: number, totalSteps: number, subProgress: number = 0) {
-  // console.log("CURRENT STEP NUMBER -> ",currentStepNumber, totalSteps, subProgress);
+  console.log("CURRENT STEP NUMBER -> ",currentStepNumber, totalSteps, subProgress);
   const weights = getStepWeights(totalSteps);
   if (currentStepNumber <= 2) {
     const firstStepWeight = weights[0];
-    // console.log("FIRST STEP WEIGHT -> ",(subProgress / 100) * firstStepWeight);
+    console.log("FIRST STEP WEIGHT -> ",(subProgress / 100) * firstStepWeight);
     return (subProgress / 100) * firstStepWeight;
   }
   const baseProgress = weights.slice(0, currentStepNumber - 1).reduce((a, b) => a + b, 0);
@@ -76,7 +76,7 @@ export default function Stepper({
     // Allow clicking on all steps now - logic handled in onStepChange
     isControlled ? onStepChange?.(index) : setInternalStep(index);
   };
-  // console.log("PROGRESS -> ",progress);
+  console.log("PROGRESS -> ",progress);
   return (
     <div className="w-[90%] px-4 md:px-8 pb-4">
       <div className="relative flex items-center justify-center min-h-5">

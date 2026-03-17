@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import HeaderActions from "@/components/shared/HeaderActions";
 import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 import { formatFareText } from "@/lib/utils/format";
+import { getCountryCallingCode } from 'libphonenumber-js';
 
 
 /* ---------------------------------- DATA --------------------------------- */
@@ -248,11 +249,11 @@ export default function RideSuccessfulPage() {
                 {bookingResult.message}
               </p>
             )}
-            {isSuccess && bookingResult?.fareText && (
+            {/* {isSuccess && bookingResult?.fareText && (
               <p className="text-lg font-medium text-primary">
                 {t("Estimated Fare")}: {formatFareText(bookingResult.fareText)}
               </p>
-            )}
+            )} */}
           </div>
 
           {/* Content */}
@@ -291,7 +292,7 @@ export default function RideSuccessfulPage() {
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
                       {/* Left Column - Passenger Info & Flight Number */}
-                      <div className="space-y-3">
+                      <div className="space-y-3"> 
                         {/* Passenger Information */}
                         {(customerName || customerPhone) && (
                           <div className="space-y-1">
@@ -306,7 +307,7 @@ export default function RideSuccessfulPage() {
                               <div className="flex gap-[10px] items-center">
                                 <span className="text-sm text-gray-600">Phone:</span>
                                 <span className="text-sm font-medium text-gray-900">
-                                  {customerCountryCode ? `+${customerCountryCode} ` : ''}{customerPhone}
+                                  {customerCountryCode ? `+${(() => { try { return getCountryCallingCode(customerCountryCode as any); } catch { return customerCountryCode; } })()} ` : ''}{customerPhone}
                                 </span>
                               </div>
                             )}

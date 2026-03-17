@@ -32,7 +32,7 @@ export const mapApiRideToRideHistoryItem = (apiRide: ApiRideHistoryItem): RideHi
     }
     const pickupAddr = apiRide.pickup_location_address || apiRide.pickup_address;
     const dropAddr = apiRide.drop_location_address || apiRide.drop_address;
-    console.log("API RIDE------------>", apiRide);
+    
     return {
         id: apiRide.pickup_id?.toString() ||
             apiRide.engagement_id?.toString() ||
@@ -146,34 +146,34 @@ export function useHistory(errorMessage: string, rideType?: string) {
                 let selected_service: number | undefined;
                 if (rideType === 'daily') {
                     selected_service = 1;
+                } else if (rideType === 'rental') {
+                    selected_service = 2;
                 } else if (rideType === 'outstation') {
                     selected_service = 3;
                 } else if (rideType === 'airport') {
                     selected_service = 4;
                 }
-
+                console.log("Selected Service::", selected_service);
                 // Map active tab to ride status filters
                 let ride_status_filter: number | undefined;
                 let past_ride_status_filter: number | undefined;
-                let limit: number | undefined;
                 let fetch_cancelled_scheduled_rides: number | undefined;
+                const limit = ITEMS_PER_PAGE;
 
                 if (activeTab === 'Scheduled') {
                     ride_status_filter = 1;
                     fetch_cancelled_scheduled_rides = 0;
-                    limit: ITEMS_PER_PAGE;
                 } else if (activeTab === 'Completed') {
-                    ride_status_filter = 2
+                    ride_status_filter = 2;
                     past_ride_status_filter = 1;
-                    limit: ITEMS_PER_PAGE;
                     fetch_cancelled_scheduled_rides = 0;
                 } else if (activeTab === 'Cancelled') {
                     ride_status_filter = 2;
                     past_ride_status_filter = 2;
-                    limit: ITEMS_PER_PAGE;
+                } else {
+                    // 'All' tab — send ride_status_filter=0 to fetch all rides
+                    ride_status_filter = 0;
                 }
-                // For 'All' tab, don't add any status filters
-
                 const response = await fetchRideHistory({
                     start_from: startFrom,
                     show_custom_fields: 1,
@@ -182,13 +182,13 @@ export function useHistory(errorMessage: string, rideType?: string) {
                     ...(selected_service !== undefined && { selected_service }),
                     ...(ride_status_filter !== undefined && { ride_status_filter }),
                     ...(past_ride_status_filter !== undefined && { past_ride_status_filter }),
-                    ...(limit !== undefined && { limit }),
+                    limit,
                     ...(fetch_cancelled_scheduled_rides !== undefined && { fetch_cancelled_scheduled_rides })
                 }, controller.signal);
 
                 if (response.data && Array.isArray(response.data)) {
                     const mappedRides = response.data.map(mapApiRideToRideHistoryItem);
-                    console.log("mappedRides ---->>>>>>>", response.data);
+                    // console.log("mappedRides ---->>>>>>>", response.data);
                     // On mobile, append to existing rides; on desktop, replace
                     if (isMobile && currentPage > 0) {
                         setRides(prev => [...prev, ...mappedRides]);
@@ -211,7 +211,7 @@ export function useHistory(errorMessage: string, rideType?: string) {
                 }
             } catch (error) {
                 if (axios.isCancel(error)) {
-                    console.log("Request canceled");
+                    // console.log("Request canceled");
                 } else {
                     console.error("History fetch error:", error);
                     toast.error(errorMessage);

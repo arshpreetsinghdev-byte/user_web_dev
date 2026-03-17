@@ -5,7 +5,7 @@ const getHippoKey = () => {
   // Try to get from operator params config first
   const { getUserWebConfig } = useOperatorParamsStore.getState();
   const config = getUserWebConfig();
-  console.log("chat support key: ", config?.chat_support);
+  // console.log("chat support key: ", config?.chat_support);
   return config?.chat_support;
 };
 
@@ -25,6 +25,8 @@ export const initHippo = () => {
     force_assign: "1",
     color: "#000000",
     language: "en",
+    showWhatsappWidget: false,
+    showWhatsappRedirect: false,
   });
 };
 
@@ -48,18 +50,30 @@ export const identifyHippoUser = (user: {
   });
 };
 
+// Track whether the widget is currently open so the HippoProvider's
+// back-button interceptor knows when to act.
+let _hippoWidgetOpen = false;
+
+export const isHippoChatOpen = () => _hippoWidgetOpen;
+
 /**
- * Open chat programmatically
+ * Open chat programmatically.
+ * Also pushes a dummy history entry (same URL) so the mobile back button
+ * hits this entry first instead of navigating to the previous page.
  */
 export const openHippoChat = () => {
   if (typeof window === "undefined" || !window.expandHippoWidget) return;
+  _hippoWidgetOpen = true;
+  // Push same URL so Next.js router does not detect a route change on back.
+  history.pushState({ hippoOpen: true }, "", window.location.href);
   window.expandHippoWidget();
 };
 
 /**
- * Close chat programmatically (optional)
+ * Close chat programmatically.
  */
 export const closeHippoChat = () => {
   if (typeof window === "undefined" || !window.collapseHippoWidget) return;
+  _hippoWidgetOpen = false;
   window.collapseHippoWidget();
 };

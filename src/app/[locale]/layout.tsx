@@ -20,6 +20,7 @@ import BookingNavigationGuard from '@/components/BookingNavigationGuard';
 import QueryProvider from '@/components/providers/QueryProvider';
 import { PageLoadingSpinner } from '@/components/shared/PageLoadingSpinner';
 import { OperatorParamsProvider } from '@/components/shared/OperatorParamsProvider';
+import { GeolocationProvider } from '@/components/shared/GeolocationProvider';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -66,6 +67,7 @@ export default async function RootLayout({
           <HippoProvider />
           <BookingNavigationGuard />
           <ClientSessionHydrator session={initResult.sessionDetails} />
+          <GeolocationProvider />
           <GoogleMapsLoader apiKey={(initResult.googleMapsKey || '')} />
           <PageLoadingSpinner />
           <OperatorParamsProvider operatorParams={initResult.operatorParams}>

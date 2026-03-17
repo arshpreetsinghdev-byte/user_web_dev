@@ -29,9 +29,9 @@ export const useOperatorParamsStore = create<OperatorParamsState>((set, get) => 
   data: {},
 
   setData: (params: OperatorParamsData) => {
-    // console.log('OperatorParamsStore.setData called with:', params);
+    console.log('OperatorParamsStore.setData called with:', params);
     set({ data: { ...params } });
-    // console.log('OperatorParamsStore data after set:', get().data);
+    console.log('OperatorParamsStore data after set:', get().data);
   },
 
   getData: () => {

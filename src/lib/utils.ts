@@ -27,7 +27,7 @@ export function getUserWebConfig(raw: any) {
     }
 
     // 3) Parse JSON
-    // console.log('Parsed user_web_config:', JSON.parse(cleaned));
+    console.log('Parsed user_web_config:', JSON.parse(cleaned));
     return JSON.parse(cleaned);
 
   } catch (err) {
@@ -74,9 +74,9 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       'x-jugnoo-session-identifier': sessionDetails.session_identifier,
     }
     let response;
-    // console.log("headers fetchOperatorParams", headers);
+    console.log("headers fetchOperatorParams", headers);
     try {
-      response = await apiClient.post(API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.FETCH_OPERATOR_PARAMS, reqObj, {
+      response = await apiClient.post(API_ENDPOINTS.AUTH.FETCH_OPERATOR_PARAMS, reqObj, {
         headers,
         timeout: 5000,
       });
@@ -85,14 +85,14 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       console.log("error fetchOperatorParams", error);
     }
 
-  // console.log('Fetch operator params response:', response?.data.data);
+  console.log('Fetch operator params response:', response?.data.data);
     if (response?.status === 200) {
       const data = response?.data.data;
       
       // Parse user_web_config if it exists
-      if (data.user_web_config) {
+      if (data?.user_web_config) {
         const parsedConfig = getUserWebConfig(data.user_web_config);
-        // console.log("Parsed Config:::", parsedConfig);
+        console.log("Parsed Config:::", parsedConfig);
         data.user_web_config = parsedConfig;
       }
       

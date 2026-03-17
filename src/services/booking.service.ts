@@ -8,6 +8,7 @@ import { useOperatorParamsStore } from "@/lib/operatorParamsStore";
 export interface FetchConfigurationParams {
   latitude: number;
   longitude: number;
+  showToast?: boolean;
 }
 
 export interface FetchConfigurationResponse {
@@ -45,16 +46,14 @@ export const bookingService = {
         longitude: params.longitude,
       }
     );
-    // console.log("config response::", response?.data.flag);
+    console.log("config response::", response?.data.flag);
     if (response?.data?.flag === 144) {
-      toast.error('Selected city is outside the service area');
+      if (params.showToast !== false) {
+        toast.error('Selected city is outside the service area');
+      }
       return response?.data;
     }
-    if (response.data?.data?.services) {
-      response.data.data.services = response.data.data.services.filter(
-        (s: any) => s.type !== "rental" && s.type !== "car_rental"
-      );
-    }
+    // rental/car_rental services are now included
 
     // Force operator currency as priority
     const operatorCurrency = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
@@ -89,7 +88,7 @@ export const bookingService = {
    */
   async findDrivers(body: URLSearchParams, operatorToken: string): Promise<FindDriversResponse> {
     const response = await apiClient.post<FindDriversResponse>(
-      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.VEHICLE.FIND_DRIVER,
+      API_ENDPOINTS.VEHICLE.FIND_DRIVER,
       body,
       {
         headers: {
@@ -113,13 +112,30 @@ export const bookingService = {
     sessionIdentifier: string
   ): Promise<InsertPickupScheduleResponse> {
     const response = await apiClient.post<InsertPickupScheduleResponse>(
-      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.BOOKING.INSERT_PICKUP_SCHEDULE,
+      API_ENDPOINTS.BOOKING.INSERT_PICKUP_SCHEDULE,
       body,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "x-jugnoo-session-id": sessionId,
           "x-jugnoo-session-identifier": sessionIdentifier,
+        },
+      }
+    );
+
+    return response.data;
+  },
+
+  /**
+   * Get fare estimate for a specific package (rental/hourly)
+   */
+  async getFareEstimate(body: URLSearchParams): Promise<any> {
+    const response = await apiClient.post(
+      API_ENDPOINTS.VEHICLE.FARE_ESTIMATE,
+      body,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );

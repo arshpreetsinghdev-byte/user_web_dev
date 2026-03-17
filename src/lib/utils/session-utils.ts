@@ -9,17 +9,11 @@
 export function isSessionError(error: any): boolean {
   if (!error) return false;
   
-  const errorMessage = error.message?.toLowerCase() || '';
   const errorData = error.response?.data || {};
   
   return (
     errorData.flag === 101 ||
-    error.response?.status === 401 ||
-    errorMessage.includes('session') ||
-    errorMessage.includes('authentication') ||
-    errorMessage.includes('unauthorized') ||
-    errorMessage.includes('invalid session') ||
-    errorMessage.includes('expired')
+    error.response?.status === 401
   );
 }
 

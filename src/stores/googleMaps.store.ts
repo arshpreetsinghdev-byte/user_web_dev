@@ -19,7 +19,7 @@ export const useGoogleMapsStore = create<GoogleMapsState>()(
         set({ isLoaded, isLoading: false }, false, 'maps/loaded');
         if (isLoaded) {
           // toast.success('Google Maps loaded successfully');
-          console.log('✅ Google Maps loaded successfully');
+          // console.log('✅ Google Maps loaded successfully');
         }
       });
 

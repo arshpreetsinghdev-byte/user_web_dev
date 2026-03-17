@@ -230,9 +230,10 @@ export function HistoryPageContent() {
                             <SelectValue placeholder={t("Daily")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="daily">{t("Daily")}</SelectItem>
+                            <SelectItem value="daily">{t("On Demand")}</SelectItem>
+                            <SelectItem value="rental">{t("Hourly")}</SelectItem>
                             <SelectItem value="airport">{t("Airport")}</SelectItem>
-                            <SelectItem value="outstation">{t("Outstation")}</SelectItem>
+                            <SelectItem value="outstation">{t("City To City")}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -272,7 +273,7 @@ export function HistoryPageContent() {
                             onPageChange={handlePageChange}
                         />
                     )}
-
+ 
                     {/* Loading indicator for mobile infinite scroll */}
                     {isMobile && isLoadingMore && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

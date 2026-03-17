@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 export default function ServiceUnavailablePage() {
@@ -80,8 +82,8 @@ export default function ServiceUnavailablePage() {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
-            href="/service-unavailable"
+          <button
+            onClick={() => window.history.back()}
             className="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-200 flex items-center gap-2"
           >
             <svg
@@ -98,7 +100,7 @@ export default function ServiceUnavailablePage() {
               />
             </svg>
             Try Again
-          </Link>
+          </button>
           
           <Link
             href="/"

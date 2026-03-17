@@ -27,6 +27,7 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   const [mounted, setMounted] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const isInitialMount = useRef(true);
+  const scheduleToastShownCount = useRef(0);
   const [isBookForOtherOpen, setIsBookForOtherOpen] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [couponsOpen, setCouponsOpen] = useState(true);
@@ -90,14 +91,20 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     });
     // console.log("validation:::::", validation);
     if (!validation.isValid) {
-      toast.error(validation.error);
+      if (validation.error === "Please select a pickup date and time") {
+        if (scheduleToastShownCount.current < 2) {
+          scheduleToastShownCount.current += 1;
+          toast(validation.error, { id: "schedule-tip", icon: "💡" });
+        }
+      } else {
+        toast.error(validation.error);
+      }
       return;
     }
-    // Validate config (service area) for pickup, stops and destination
+    // Validate config (service area) for pickup only
     try {
-      const points = [pickup, ...stops, destination].filter(Boolean) as any[];
-      for (const p of points) {
-        const cfg = await bookingService.fetchConfiguration({ latitude: p.lat ?? p.latitude, longitude: p.lng ?? p.longitude });
+      if (pickup) {
+        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat, longitude: pickup.lng });
         if (cfg?.data?.flag === 144) {
           // bookingService already toasts, but ensure we don't proceed
           return;
@@ -144,15 +151,21 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     });
 
     if (!validation.isValid) {
-      toast.error(validation.error);
+      if (validation.error === "Please select a pickup date and time") {
+        if (scheduleToastShownCount.current < 2) {
+          scheduleToastShownCount.current += 1;
+          toast(validation.error, { id: "schedule-tip", icon: "💡" });
+        }
+      } else {
+        toast.error(validation.error);
+      }
       return;
     }
 
-    // Validate config (service area) before calculating fare
+    // Validate config (service area) for pickup only
     try {
-      const points = [pickup, ...stops, destination].filter(Boolean) as any[];
-      for (const p of points) {
-        const cfg = await bookingService.fetchConfiguration({ latitude: p.lat ?? p.latitude, longitude: p.lng ?? p.longitude });
+      if (pickup) {
+        const cfg = await bookingService.fetchConfiguration({ latitude: pickup.lat, longitude: pickup.lng });
         if (cfg?.data?.flag === 144) {
           return;
         }
@@ -164,9 +177,11 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
 
     try {
       const result = await calculateFareAndFindDrivers();
-      toast.success(
-        `Found ${result.vehicles.length} vehicles. Route: ${result.route.distanceText}, ${result.route.durationText}`
-      );
+      if (!result?.autoSwitched) {
+        toast.success(
+          `Found ${result.vehicles.length} vehicles. Route: ${result.route.distanceText}, ${result.route.durationText}`
+        );
+      }
     } catch (err) {
       toast.error("Failed to calculate fare. Please try again.");
     } finally {
@@ -183,11 +198,12 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
     setCurrentStepIndex,
   ]);
 
-  // Reset isFormDirty when the /book page mounts
+  // Reset isFormDirty and schedule toast counter when the /book page mounts
   useEffect(() => {
     if (pathname.includes("/book")) {
       setIsFormDirty(false);
       isInitialMount.current = true;
+      scheduleToastShownCount.current = 0;
     }
   }, [pathname]);
 
@@ -236,11 +252,11 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
   ]);
 
   const isBookPage = pathname.includes("/book");
-  // console.log("is book page::", isBookPage);
+  console.log("is book page::", isBookPage);
   const handleSubmit = isBookPage ? handleCalculateFare : handleBookNow;
   const showAdditionalOptions = showOtherOptions;
 
-  // console.log("selectedService", selectedService?.type)
+  console.log("selectedService", selectedService?.type)
   return (
     <div
       className={`w-full max-w-105 p-3 lg:p-4 bg-primary rounded-lg lg:rounded-xl flex flex-col ${className ? className : ""} ${variant === "outline" ? "bg-white border border-border" : ""}`}
@@ -273,10 +289,10 @@ const RideBookingForm = ({ className, variant, currentStepIndex }: { className?:
 
         <DestinationField value={destination} onChange={setDestination} variant={variant} />
 
-        <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} />
+        <ScheduleField value={scheduledDateTime} onChange={setScheduledDateTime} variant={variant} label="Schedule Ride" />
 
         <ServiceSelector variant={variant} />
-        {isBookPage && (
+        {isBookPage && allPromotions.length > 0 && (
           <div className="bg-[#f6f6f6] border border-[#d7d6d6] rounded-[10px]">
             {/* Other Options Toggle Button */}
             {isBookPage && (

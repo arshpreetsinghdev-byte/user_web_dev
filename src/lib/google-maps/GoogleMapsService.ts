@@ -37,12 +37,12 @@ class GoogleMapsService {
 
   async loadApiKey(apiKey: string, libraries: string[] = ['places', 'geometry']): Promise<void> {
     if (this.apiKey === apiKey && this.isLoaded) {
-      console.log('✅ Google Maps already loaded with same key');
+      // // console.log('✅ Google Maps already loaded with same key');
       return;
     }
 
     if (this.apiKey !== apiKey && this.isLoaded) {
-      console.log('🔄 Reloading Google Maps with new key');
+      // console.log('🔄 Reloading Google Maps with new key');
       this.removeExistingScript();
       this.isLoaded = false;
       this.notifyStateChange();
@@ -50,7 +50,7 @@ class GoogleMapsService {
 
     // If already loading, wait for it
     if (this.isLoading && this.loadPromise) {
-      console.log('⏳ Google Maps already loading...');
+      // console.log('⏳ Google Maps already loading...');
       return this.loadPromise;
     }
 
@@ -82,7 +82,7 @@ class GoogleMapsService {
       (window as any).google = undefined;
     }
 
-    console.log('🗑️ Removed existing Google Maps script');
+    // console.log('🗑️ Removed existing Google Maps script');
   }
 
 
@@ -242,7 +242,7 @@ class GoogleMapsService {
         onPlaceSelect(placeData);
       });
 
-      console.log('✅ Autocomplete setup on input');
+      // console.log('✅ Autocomplete setup on input');
 
       // Return cleanup function
       return () => {
@@ -270,7 +270,7 @@ class GoogleMapsService {
         styles: options.styles,
       });
 
-      console.log('🗺️ Map plotted successfully');
+      // console.log('🗺️ Map plotted successfully');
       return map;
     } catch (error) {
       console.error('❌ Failed to plot map:', error);
@@ -356,10 +356,10 @@ class GoogleMapsService {
         lng: point.lng()
       }));
 
-      console.log('🗺️ Route calculated:', {
-        distance: `${distanceInKm} km`,
-        duration: `${durationInMinutes} minutes`,
-      });
+      // console.log('🗺️ Route calculated:', {
+      //   distance: `${distanceInKm} km`,
+      //   duration: `${durationInMinutes} minutes`,
+      // });
 
       return {
         distance: totalDistance,

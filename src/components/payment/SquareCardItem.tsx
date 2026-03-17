@@ -50,12 +50,12 @@ export function SquareCardItem({ card, selected, onClick, onDelete }: SquareCard
       setIsDeleting(false);
     }
   };
-  console.log(
-    "CARD:",
-    card.card_id,
-    "SELECTED:",
-    selected
-  );
+  // console.log(
+  //   "CARD:",
+  //   card.card_id,
+  //   "SELECTED:",
+  //   selected
+  // );
   return (
     <>
       <div
@@ -76,7 +76,7 @@ export function SquareCardItem({ card, selected, onClick, onDelete }: SquareCard
 
         {/* Card Details */}
         <div className="flex-1 text-left" onClick={() => {
-          console.log("CARD CLICKED");
+          // console.log("CARD CLICKED");
           onClick();
         }}>
           <div className="flex items-center gap-2">

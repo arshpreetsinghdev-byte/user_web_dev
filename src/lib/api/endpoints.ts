@@ -94,7 +94,7 @@ export const API_ENDPOINTS = {
   // Vehicle/Driver Discovery
   VEHICLE: {
     FIND_DRIVER: '/open/v1/find_a_driver',
-    GET_FARE_ESTIMATE: '/open/v1/get_fare_estimate',
+    FARE_ESTIMATE: '/open/v1/fare_estimate',
   },
 
   // PRODUCTION: {
@@ -103,7 +103,7 @@ export const API_ENDPOINTS = {
   //   BUSINESS_TOKEN: '31992b8102486bf5807577e2c5bb61ce763b535137856b5e0573f595ac717b54'
   // }
   PRODUCTION: {
-    AUTOS_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://test-8068.jugnoo.in',
+    AUTOS_BASE_URL: process.env.NEXT_PUBLIC_API_URL,
     BUSINESS_ID: process.env.NEXT_PUBLIC_BUSINESS_ID || '1001',
     BUSINESS_TOKEN: process.env.NEXT_PUBLIC_BUSINESS_TOKEN || 'a5c5432676219e9fd380ac5a28d8ae4ab2b9e1e55cd75617b5c7955ee74d0397'
   }

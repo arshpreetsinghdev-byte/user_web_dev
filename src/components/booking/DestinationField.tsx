@@ -46,7 +46,6 @@ const DestinationField = memo(({ value, onChange, className, variant }: Destinat
 
   const inputRef = useGoogleAutocomplete({
     onPlaceSelect: handlePlaceSelect,
-    country: 'in',
   });
 
   return (

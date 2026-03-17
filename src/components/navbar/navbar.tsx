@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { navigateWithLoader } from "@/lib/utils/navigationLoader";
 import { useOperatorParamsStore } from '@/lib/operatorParamsStore';
 import { openHippoChat } from '@/lib/hippo/hippo.service';
+import { useGeolocationConfigStore } from '@/stores/geolocation.store';
 
 export default function Navbar() {
   const { t } = useTranslations();
@@ -48,6 +49,7 @@ export default function Navbar() {
 
   // Get auth state from store
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { permission: geoPermission, hasLocationAccess } = useGeolocationConfigStore();
   const [mounted, setMounted] = useState(false);
   const [logoUrl, setLogoUrl] = useState('/black-badge-assets/ic_launcher.png');
 
@@ -56,7 +58,7 @@ export default function Navbar() {
     (state) => state.data.operatorDetails?.[0]?.logo_url || null
   );
   const userWebLogo = useOperatorParamsStore(state => state.data.user_web_config?.logo_url || null);
-  // console.log("user web logo::::->", userWebLogo);
+  console.log("user web logo::::->", userWebLogo);
   // Handle hydration and custom events
   useEffect(() => {
     setMounted(true);
@@ -149,6 +151,31 @@ export default function Navbar() {
     }
 
     if (item.key === 'wallet') {
+      if (!hasLocationAccess()) {
+        // Request browser location permission
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Permission granted — update store and open wallet
+              useGeolocationConfigStore.getState().setPermission('granted');
+              useGeolocationConfigStore.getState().setCoordinates(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              setWalletOpen(true);
+            },
+            (error) => {
+              // Permission denied or error
+              useGeolocationConfigStore.getState().setPermission('denied');
+              toast.error(t('Location permission is required to use wallet. Please enable location access in your browser settings and refresh the page.'));
+            },
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+          );
+        } else {
+          toast.error(t('Geolocation is not supported by this browser.'));
+        }
+        return;
+      }
       setWalletOpen(true);
     } else if (item.key === 'history') {
       const locale = params?.locale || 'en';

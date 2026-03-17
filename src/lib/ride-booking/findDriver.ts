@@ -57,17 +57,17 @@ export const findAvailableDrivers = async (
     body.set('service_id', String(options.serviceId));
   }
 
-  // Add round trip details if applicable
-  if (options.isRoundTrip && options.returnDateTime) {
-    body.set('return_trip', '1');
-    body.set('return_time', formatDateTime(options.returnDateTime, options.timezoneOffset));
-    body.set('ride_time', String(distanceTime.rideTime * 2));
-    body.set('ride_distance', String(distanceTime.rideDistance * 2));
+  // Add return trip details if applicable (city-to-city round trip)
+  if (options.returnTrip !== undefined) {
+    body.set('return_trip', String(options.returnTrip));
+    if (options.returnTrip === 1 && options.returnDateTime) {
+      body.set('return_time', formatDateTime(options.returnDateTime));
+    }
   }
 
   // Add pickup time for scheduled rides
   if (options.scheduledFareFlow && options.rideDateTime) {
-    body.set('pickup_time', formatDateTime(options.rideDateTime, options.timezoneOffset));
+    body.set('pickup_time', formatDateTime(options.rideDateTime));
   }
 
   // Add promo to apply
@@ -77,19 +77,19 @@ export const findAvailableDrivers = async (
 
   // Add coupon to apply
   if (options.couponToApply !== undefined) {
-    console.log("🎟️ Setting coupon_to_apply:", options.couponToApply);
+    // console.log("🎟️ Setting coupon_to_apply:", options.couponToApply);
     body.set('coupon_to_apply', String(options.couponToApply));
   }
 
   try {
-    console.log('🚗 Finding drivers (form)...', Object.fromEntries(body.entries()));
+    // console.log('🚗 Finding drivers (form)...', Object.fromEntries(body.entries()));
     // Session headers are automatically added by API client interceptor based on auth state
 
     const data = await bookingService.findDrivers(body, operatorToken);
-    console.log('🚗 Find drivers response:', data);
+    // console.log('🚗 Find drivers response:', data);
     // Check for success (flag 175)
     if (data.flag === 175) {
-      console.log('✅ Drivers found:', data?.regions || 0);
+      // console.log('✅ Drivers found:', data?.regions || 0);
       return data;
     } else {
       throw new Error('Failed to find drivers');
