@@ -22,7 +22,7 @@ export default function HomePage() {
   const configHeading = config?.heading || "Welcome to,BlackBadge Transportation";
   const configSubHeading = config?.sub_heading || "";
   const carImageUrl = config?.car_image_url;
-  console.log("Car image url::", carImageUrl);
+  // console.log("Car image url::", carImageUrl);
   const [heading, headingHighlight] = configHeading.split(',').map((part: string) => part.trim());
 
   useEffect(() => {
@@ -41,10 +41,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="relative min-h-[calc(95vh-88px)] pb-40 md:pb-5 lg:pb-30 mt-8 ">
+    <div className="relative flex flex-col min-h-[calc(100dvh-80px)] overflow-hidden">
       {/* Main Content */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-0 relative z-10">
-        <div className="flex flex-col lg:flex-row w-full justify-between gap-10 md:gap-6 lg:gap-8 xl:gap-10">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-0 relative z-10 flex-1">
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-10 md:gap-6 lg:gap-8 xl:gap-10 mt-8">
 
           {/* Hero Section */}
           <div className="w-full lg:w-1/2 2xl:w-[60%] mt-6 md:mt-2 lg:mt-5 2xl:mt-10 order-1">
@@ -87,20 +87,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Background Banners */}
-      <div className="absolute bottom-0 left-0 right-0 w-full z-0 pointer-events-none">
-        <div className="relative w-full h-20 sm:h-24 md:h-32 lg:h-40 bg-[url('/images/banners/Group.png')] bg-cover bg-center bg-no-repeat opacity-10" />
-        <div className="relative w-full h-14 sm:h-18 md:h-22 bg-[url('/images/banners/road.png')] bg-cover bg-center bg-no-repeat" />
+      {/* Background Banners - positioned at bottom */}
+      <div className="w-full z-0 pointer-events-none mt-10 md:mt-[-10dvh]">
+        <div className="relative w-full h-16 sm:h-20 md:h-28 lg:h-20 xl:h-40 bg-[url('/images/banners/Group.png')] bg-cover bg-center bg-no-repeat opacity-10" />
+        <div className="relative w-full h-10 sm:h-14 md:h-18 lg:h-20 xl:h-22 bg-[url('/images/banners/road.png')] bg-cover bg-bottom bg-no-repeat" />
       </div>
 
       {/* Car Animation */}
       <motion.div
-        className="absolute bottom-6 left-4 sm:left-6 lg:left-8 xl:left-[calc((100vw-1280px)/2+2rem)] 2xl:left-[calc((100vw-1536px)/2+2rem)] z-10 pointer-events-none"
+        className="absolute bottom-4 sm:bottom-5 md:bottom-6 left-4 sm:left-6 lg:left-8 xl:left-[calc((100vw-1280px)/2+2rem)] 2xl:left-[calc((100vw-1536px)/2+2rem)] z-10 pointer-events-none"
         initial={{ x: -1000 }}
         animate={mounted ? { x: 0 } : { x: -1000 }}
         transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
       >
-        <div 
+        <div  
           className="relative w-60 sm:w-50 md:w-52 lg:w-100 h-20 sm:h-24 md:h-28 lg:h-40 bg-cover bg-center bg-no-repeat" 
             style={carImageUrl ? { backgroundImage: `url('${carImageUrl}')` } : { backgroundImage: "url('/images/vehicles/mainCar.png')" }}
         />

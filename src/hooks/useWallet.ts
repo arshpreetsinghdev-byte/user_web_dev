@@ -127,13 +127,12 @@ export function useWallet() {
         squareLocationId: config?.NEXT_PUBLIC_SQUARE_LOCATION_ID || process.env.NEXT_PUBLIC_SQUARE_lOCATION_ID,
         isLoading: walletQuery.isLoading || transactionsQuery.isLoading || geoLoading,
         error: walletQuery.error || transactionsQuery.error,
-        refetch: useCallback(() => {
+        refetch: useCallback(async () => {
             // Clear list so reopening the dialog starts fresh
             setAllTransactions([]);
             setHasMore(true);
             initialFetchDone.current = false;
-            walletQuery.refetch();
-            transactionsQuery.refetch();
+            await Promise.all([walletQuery.refetch(), transactionsQuery.refetch()]);
         }, []), // TanStack Query refetch functions are stable
         recharge: async (amount: number, cardId: string | number, cardType: 'stripe' | 'square' = 'stripe') => {
             const user = useAuthStore.getState().user;

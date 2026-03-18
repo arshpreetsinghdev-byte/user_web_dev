@@ -10,6 +10,7 @@ import { NAV_ITEMS } from "@/lib/utils/constants";
 import { LoginDialog, SignupDialog, OtpDialog } from '@/components/auth/auth';
 import { ProfileDialog } from '@/components/profile/profile';
 import { WalletDialog } from '@/components/wallet/WalletDialog';
+import { ManageCardsModal } from '@/components/wallet/ManageCardsModal';
 import { useAuthStore } from '@/stores/auth.store';
 import { useUIStore } from '@/stores/ui.store';
 import type { SignupData } from '@/types';
@@ -26,6 +27,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
+  const [cardsOpen, setCardsOpen] = useState(false);
   const {
     isAuthModalOpen,
     authModalTab,
@@ -144,7 +146,7 @@ export default function Navbar() {
   };
 
   const handleNavClick = (item: typeof NAV_ITEMS[number]) => {
-    if ((item.key === 'wallet' || item.key === 'history') && !isAuthenticated) {
+    if ((item.key === 'wallet' || item.key === 'history' || item.key === 'cards') && !isAuthenticated) {
       toast.info(t('Please login to access this feature'));
       openLogin();
       return;
@@ -177,6 +179,33 @@ export default function Navbar() {
         return;
       }
       setWalletOpen(true);
+    } else if (item.key === 'cards') {
+      if (!hasLocationAccess()) {
+        // Request browser location permission
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Permission granted — update store and open cards modal
+              useGeolocationConfigStore.getState().setPermission('granted');
+              useGeolocationConfigStore.getState().setCoordinates(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              setCardsOpen(true);
+            },
+            (error) => {
+              // Permission denied or error
+              useGeolocationConfigStore.getState().setPermission('denied');
+              toast.error(t('Location permission is required to manage cards. Please enable location access in your browser settings and refresh the page.'));
+            },
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+          );
+        } else {
+          toast.error(t('Geolocation is not supported by this browser.'));
+        }
+        return;
+      }
+      setCardsOpen(true);
     } else if (item.key === 'history') {
       const locale = params?.locale || 'en';
       const target = `/${locale}/history`;
@@ -236,8 +265,8 @@ export default function Navbar() {
               {/* Nav Links */}
               <div className="flex gap-3 lg:gap-6">
                   {NAV_ITEMS.filter(item => {
-                    // Hide 'history' and 'wallet' if not authenticated
-                    if (!isAuthenticated && (item.key === 'history' || item.key === 'wallet')) {
+                    // Hide 'history', 'wallet', and 'cards' if not authenticated
+                    if (!isAuthenticated && (item.key === 'history' || item.key === 'wallet' || item.key === 'cards')) {
                       return false;
                     }
                     return true;
@@ -324,8 +353,8 @@ export default function Navbar() {
                 {/* Menu Items */}
                 <div className="flex flex-col p-4 gap-4">
                   {NAV_ITEMS.filter(item => {
-                    // Hide 'history' and 'wallet' if not authenticated
-                    if (!isAuthenticated && (item.key === 'history' || item.key === 'wallet')) {
+                    // Hide 'history', 'wallet', and 'cards' if not authenticated
+                    if (!isAuthenticated && (item.key === 'history' || item.key === 'wallet' || item.key === 'cards')) {
                       return false;
                     }
                     return true;
@@ -408,6 +437,10 @@ export default function Navbar() {
       <WalletDialog
         open={walletOpen}
         onOpenChange={setWalletOpen}
+      />
+      <ManageCardsModal
+        isOpen={cardsOpen}
+        onClose={() => setCardsOpen(false)}
       />
     </>
   );

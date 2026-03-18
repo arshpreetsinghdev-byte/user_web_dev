@@ -28,6 +28,7 @@ export const DEFAULT_LANGUAGE = 'en';
 export const NAV_ITEMS = [
   { key: 'history', label: 'History' },
   { key: 'wallet', label: 'Wallet' },
+  { key: 'cards', label: 'Cards' },
   { key: 'support', label: 'Get Support' }
 ] as const;
 

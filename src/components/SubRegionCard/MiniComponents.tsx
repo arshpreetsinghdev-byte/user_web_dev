@@ -59,20 +59,20 @@ function DescriptionBlock({ text }: { text: string }) {
     );
 }
 
-function PriceBlock({ price, oldPrice, currencySymbol, className }: { price: number; oldPrice?: number; currencySymbol?: string; className?: string }) {
+function PriceBlock({ price, oldPrice, currencySymbol, fareText, oldFareText, className }: { price?: number; oldPrice?: number; currencySymbol?: string; fareText?: string; oldFareText?: string; className?: string }) {
     const defaultSymbol = useOperatorParamsStore.getState().data?.user_web_config?.currency ||
         useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol ||
         '₹';
     const symbol = currencySymbol || defaultSymbol;
     return (
         <div className={cn(className, "text-right")}>
-            {oldPrice && (
+            {(oldFareText || oldPrice) && (
                 <div className="text-xs text-gray-400 line-through">
-                    {symbol}{oldPrice?.toFixed(2)}
+                    {oldFareText || `${symbol}${oldPrice?.toFixed(2)}`}
                 </div>
             )}
             <div className="H3 text-primary!">
-                {symbol}{price?.toFixed(2)}
+                {fareText || `${symbol}${price?.toFixed(2)}`}
             </div>
         </div>
     );

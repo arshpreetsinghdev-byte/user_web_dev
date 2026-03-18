@@ -94,7 +94,7 @@ export default function BookingPage() {
 
   // Use available vehicles from store - no fallbacks
   const regions = availableVehicles;
-  console.log("Regions fare fix:::", regions);
+  console.log("Regions fare fix:::", regions[0]?.region_fare?.fare_text);
   const [vehicleServices, setVehicleServices] = useState<{ id: number; name: string; price: number; eta: number; description: string }[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
@@ -532,12 +532,11 @@ export default function BookingPage() {
                           }
                           subComponent2={
                             <PriceBlock
-                              currencySymbol={useOperatorParamsStore.getState().data?.user_web_config?.currency || useOperatorParamsStore.getState().data?.user_web_config?.currency_symbol || region.region_fare?.currency_symbol || "₹"}
-                              price={isSelected && selectedRegion ? selectedRegion.region_fare?.fare_float : region.region_fare?.fare_float}
-                              oldPrice={
+                              fareText={isSelected && selectedRegion ? selectedRegion.region_fare?.fare_text : region.region_fare?.fare_text}
+                              oldFareText={
                                 region.region_fare?.original_fare_float !==
                                   region.region_fare?.fare_float
-                                  ? region.region_fare?.original_fare_float
+                                  ? region.region_fare?.original_fare_text
                                   : undefined
                               }
                             />
