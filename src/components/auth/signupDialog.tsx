@@ -38,7 +38,7 @@ export function SignupDialog({
   const [email, setEmail] = React.useState("")
   const [age, setAge] = React.useState("")
   const [gender, setGender] = React.useState("")
-  const [countryCode, setCountryCode] = React.useState("IN")
+  const [countryCode, setCountryCode] = React.useState("US")
   const [phoneNumber, setPhoneNumber] = React.useState("")
   const [agreedToTerms, setAgreedToTerms] = React.useState(false)
   const { generateOtp, updateProfile, isLoading } = useAuth()

@@ -22,7 +22,7 @@ export function LoginDialog({
   onProceed,
 }: LoginDialogProps) {
   const { t } = useTranslations()
-  const [countryCode, setCountryCode] = React.useState("IN")
+  const [countryCode, setCountryCode] = React.useState("US")
   const [phoneNumber, setPhoneNumber] = React.useState("")
   const { generateOtp, isLoading } = useAuth()
 

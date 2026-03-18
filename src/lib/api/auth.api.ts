@@ -23,11 +23,11 @@ export const generateCustomerLoginOtp = async (
 ): Promise<GenerateOtpResponse> => {
   console.log('📞 Calling generate_customer_login_otp API');
   console.log('📦 Request data:', data);
-  console.log('🌐 Endpoint:', API_ENDPOINTS.AUTH.GENERATE_CUSTOMER_LOGIN_OTP);
+  console.log('🌐 Endpoint:', API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GENERATE_CUSTOMER_LOGIN_OTP);
 
   try {
     const response = await apiClient.post<GenerateOtpResponse>(
-      API_ENDPOINTS.AUTH.GENERATE_CUSTOMER_LOGIN_OTP,
+      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GENERATE_CUSTOMER_LOGIN_OTP,
       data, { timeout: 10000 }
     );
 
@@ -50,7 +50,7 @@ export const verifyCustomerOtp = async (
 
   try {
     const response = await apiClient.post<VerifyOtpResponse>(
-      API_ENDPOINTS.AUTH.VERIFY_CUSTOMER_OTP,
+      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.VERIFY_CUSTOMER_OTP,
       data
     );
 
@@ -100,7 +100,7 @@ export const updateUserProfile = async (
     }
 
     const response = await apiClient.post<UpdateProfileResponse>(
-      API_ENDPOINTS.AUTH.UPDATE_USER_PROFILE,
+      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.UPDATE_USER_PROFILE,
       formData,
       {
         headers: {
@@ -138,7 +138,7 @@ export const getUserProfile = async (): Promise<GetUserProfileResponse> => {
   console.log('headers', headers);
   try {
     const response = await apiClient.post<GetUserProfileResponse>(
-      API_ENDPOINTS.AUTH.GET_USER_PROFILE,
+      API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GET_USER_PROFILE,
       {}, // Empty body for POST request
       { headers }
     );
