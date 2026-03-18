@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '../globals.css';
+import '@/lib/logger'; // Initialize logger to override console
 import { i18nConfig } from '@/config/i18n.config';
 import { siteConfig } from '@/config/site.config';
 import { TranslationsProvider } from '@/lib/i18n/TranslationsProvider';
@@ -62,6 +63,44 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var level = ${process.env.NEXT_PUBLIC_LOG_LEVEL || 5};
+                var noop = function() {};
+                if (level === 0) {
+                  console.log = noop; 
+                  console.info = noop;
+                  console.warn = noop;
+                  console.error = noop;
+                  console.debug = noop;
+                  console.trace = noop;
+                } else if (level === 1) {
+                  console.log = noop;
+                  console.info = noop;
+                  console.warn = noop;
+                  console.debug = noop;
+                  console.trace = noop;
+                } else if (level === 2) {
+                  console.log = noop;
+                  console.info = noop;
+                  console.debug = noop;
+                  console.trace = noop;
+                } else if (level === 3) {
+                  console.info = noop;
+                  console.debug = noop;
+                  console.trace = noop;
+                } else if (level === 4) {
+                  console.debug = noop;
+                  console.trace = noop;
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
           <HippoProvider />
