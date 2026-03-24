@@ -137,7 +137,7 @@ export function OtpDialog({
       <DialogContent
         className="sm:max-w-[340px] max-w-[calc(100%-2rem)] p-4 max-h-[90vh] flex flex-col gap-1.5"
         showCloseButton={false}
-      >
+      > 
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -181,7 +181,7 @@ export function OtpDialog({
               variant="outline"
               onClick={handleCancel}
               disabled={isLoading}
-              className="flex-[0.3] h-10 text-black bg-white border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50"
+              className="flex-[0.3] h-10 text-black hover:text-gray-500 bg-white border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-90"
             >
               {t("common.cancel")}
             </Button>

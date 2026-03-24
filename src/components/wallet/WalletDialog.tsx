@@ -15,9 +15,10 @@ import { motion } from "framer-motion";
 interface WalletDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    walletEnabled?: boolean;
 }
 
-export function WalletDialog({ open, onOpenChange }: WalletDialogProps) {
+export function WalletDialog({ open, onOpenChange, walletEnabled = true }: WalletDialogProps) {
     const { t } = useTranslations();
     const [amount, setAmount] = useState("");
     const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
@@ -37,7 +38,7 @@ export function WalletDialog({ open, onOpenChange }: WalletDialogProps) {
         if (date.toDateString() === today.toDateString()) {
             return `Today ${format(date, "HH:mm")}`;
         }
-        // If yesterday
+        
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         if (date.toDateString() === yesterday.toDateString()) {
@@ -56,7 +57,8 @@ export function WalletDialog({ open, onOpenChange }: WalletDialogProps) {
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
                     >
-                        <div>
+                        {walletEnabled ? (
+                            <div>
 
                             {/* Header Section with Gradient */}
                             <div className="flex justify-between items-start relative bg-primary from-primary to-primary-light p-6 text-white overflow-hidden">
@@ -121,14 +123,28 @@ export function WalletDialog({ open, onOpenChange }: WalletDialogProps) {
                             </div>
 
                         </div>
+                        ) : (
+                            /* Transactions-only header when wallet is disabled */
+                            <div className="flex justify-between items-center bg-primary p-4 text-white">
+                                <DialogTitle className="text-xl font-bold">{t("Transactions")}</DialogTitle>
+                                <button
+                                    onClick={() => onOpenChange(false)}
+                                    className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                                >
+                                    <X className="h-6 w-6 text-white" />
+                                </button>
+                            </div>
+                        )}
 
                         {/* Transactions List */}
                         <div className="bg-white">
-                            <div className="px-6 py-4 border-b border-gray-100">
-                                <h3 className="font-bold text-lg text-gray-900">{t("Transactions")}</h3>
-                            </div>
+                            {walletEnabled && (
+                                <div className="px-6 py-4 border-b border-gray-100">
+                                    <h3 className="font-bold text-lg text-gray-900">{t("Transactions")}</h3>
+                                </div>
+                            )}
 
-                            <div className="max-h-[250px] overflow-y-auto">
+                            <div className={`overflow-y-auto ${walletEnabled ? 'max-h-[250px]' : 'max-h-[400px]'}`}>
                                 {isLoading ? (
                                     <div className="p-6 space-y-4">
                                         {[1, 2, 3].map((i) => (

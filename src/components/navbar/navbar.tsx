@@ -60,6 +60,9 @@ export default function Navbar() {
     (state) => state.data.operatorDetails?.[0]?.logo_url || null
   );
   const userWebLogo = useOperatorParamsStore(state => state.data.user_web_config?.logo_url || null);
+  const walletEnabled = useOperatorParamsStore(state => state.data.user_web_config?.wallet_enabled);
+  // wallet_enabled could be undefined, true, or false - treat undefined/false as disabled
+  const isWalletEnabled = walletEnabled === true;
   console.log("user web logo::::->", userWebLogo);
   // Handle hydration and custom events
   useEffect(() => {
@@ -277,7 +280,7 @@ export default function Navbar() {
                       onClick={() => handleNavClick(item)}
                       className="text-sm lg:text-base leading-[25.89px] tracking-normal hover:bg-background hover:cursor-pointer hover:scale-105 px-2 lg:px-4"
                     >
-                      {t(item.label)}
+                      {t(item.key === 'wallet' && !isWalletEnabled ? 'Transactions' : item.label)}
                     </Button>
                   ))}
               </div>
@@ -365,7 +368,7 @@ export default function Navbar() {
                       className="justify-start text-base w-full hover:bg-gray-100 transition-colors"
                       onClick={() => handleNavClick(item)}
                     >
-                      {t(item.label)}
+                      {t(item.key === 'wallet' && !isWalletEnabled ? 'Transactions' : item.label)}
                     </Button>
                   ))}
 
@@ -437,6 +440,7 @@ export default function Navbar() {
       <WalletDialog
         open={walletOpen}
         onOpenChange={setWalletOpen}
+        walletEnabled={isWalletEnabled}
       />
       <ManageCardsModal
         isOpen={cardsOpen}

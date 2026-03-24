@@ -24,6 +24,7 @@ import { useAuthStore } from "@/stores/auth.store"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 import type { SignupDialogProps, SignupData } from "@/types"
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore"
 
 export function SignupDialog({
   open,
@@ -34,11 +35,15 @@ export function SignupDialog({
   signupOnboarding = false,
 }: SignupDialogProps) {
   const { t } = useTranslations()
+  const { getUserWebConfig } = useOperatorParamsStore()
+  const config = getUserWebConfig()
   const [name, setName] = React.useState("")
   const [email, setEmail] = React.useState("")
   const [age, setAge] = React.useState("")
   const [gender, setGender] = React.useState("")
-  const [countryCode, setCountryCode] = React.useState("US")
+  const [countryCode, setCountryCode] = React.useState(
+    config?.initial_country || "IN"
+  )
   const [phoneNumber, setPhoneNumber] = React.useState("")
   const [agreedToTerms, setAgreedToTerms] = React.useState(false)
   const { generateOtp, updateProfile, isLoading } = useAuth()
@@ -256,7 +261,7 @@ export function SignupDialog({
               variant="outline"
               onClick={handleCancel}
               disabled={isLoading}
-              className="flex-[0.3] h-12 text-black bg-white border border-gray-300 rounded-lg text-base font-medium hover:bg-gray-50"
+              className="flex-[0.3] h-12 text-black bg-white border hover:text-gray-500 border-gray-300 rounded-lg text-base font-medium hover:bg-gray-50"
             >
               {t("common.cancel")}
             </Button>

@@ -161,8 +161,6 @@ export const useAuthStore = create<AuthState>()(
           try {
             const response = await verifyCustomerOtp(data);
 
-            // console.log('🔐 Verify OTP Response:', response);
-
             if (response.flag === 143) {
               // Extract from top level or from data object (defensive)
               const newUserSessionId = response.session_id || response.data?.session_id;

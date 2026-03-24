@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 import type { LoginDialogProps } from "@/types"
+import { useOperatorParamsStore } from "@/lib/operatorParamsStore"
 
 export function LoginDialog({
   open,
@@ -22,7 +23,11 @@ export function LoginDialog({
   onProceed,
 }: LoginDialogProps) {
   const { t } = useTranslations()
-  const [countryCode, setCountryCode] = React.useState("US")
+  const { getUserWebConfig } = useOperatorParamsStore()
+  const config = getUserWebConfig()
+  const [countryCode, setCountryCode] = React.useState(
+    config?.initial_country || "IN"
+  )
   const [phoneNumber, setPhoneNumber] = React.useState("")
   const { generateOtp, isLoading } = useAuth()
 
@@ -84,7 +89,7 @@ export function LoginDialog({
                     variant="outline"
                     onClick={handleCancel}
                     disabled={isLoading}
-                    className="flex-[0.35] h-10 text-black bg-white border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 hover:text-black"
+                    className="flex-[0.35] h-10 text-black bg-white border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 hover:text-gray-500"
                   >
                     {t("common.cancel")}
                   </Button>
