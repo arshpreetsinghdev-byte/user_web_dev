@@ -137,9 +137,9 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   let subdomain = hostname.split('.')[0];
   console.log("Subdomain::",subdomain);
   if(subdomain === 'localhost:4000'){
-    subdomain = "blackbadge-uwt"
+    subdomain = "magenta-dasik-9633e9"
   }
-
+  
   // Check cache — return cached result if still valid
   const cached = initCache.get(subdomain);
   if (cached && (Date.now() - cached.timestamp) < CACHE_TTL_MS) {
