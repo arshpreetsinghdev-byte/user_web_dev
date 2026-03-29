@@ -4,6 +4,7 @@ import { API_ENDPOINTS } from "./api/endpoints";
 import { DefaultResponse } from "@/types";
 import apiClient from "./api/client";
 import { useOperatorParamsStore } from "./operatorParamsStore";
+import { config as credsConstant } from "./utils/credsConstant";
 const { setData } = useOperatorParamsStore.getState();
 
 export function cn(...inputs: ClassValue[]) {
@@ -90,12 +91,18 @@ export async function fetchOperatorParams(sessionDetails: any): Promise<DefaultR
       const data = response?.data.data;
       
       // Parse user_web_config if it exists
-      if (data?.user_web_config) {
-        const parsedConfig = getUserWebConfig(data.user_web_config);
-        console.log("Parsed Config:::", parsedConfig);
-        data.user_web_config = parsedConfig;
-      }
+      // if (data.user_web_config) {
+      //   const parsedConfig = getUserWebConfig(data.user_web_config);
+      //   // console.log("Parsed Config:::", parsedConfig);
+      //   data.user_web_config = parsedConfig;
+      // }
+      data.user_web_config = credsConstant;
       
+      // if (data?.user_web_config) {
+      //   const parsedConfig = getUserWebConfig(data.user_web_config);
+      //   console.log("Parsed Config:::", parsedConfig);
+      //   data.user_web_config = parsedConfig;
+      // }
       // Store the operator params data
       setData(data);
       return {

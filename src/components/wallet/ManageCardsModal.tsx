@@ -176,7 +176,11 @@ export function ManageCardsModal({ isOpen, onClose }: ManageCardsModalProps) {
     }
   };
 
-  const noPaymentEnabled = !isStripeEnabled && !isSquareEnabled;
+  // Stripe requires publishable key to be present
+  const isStripeAvailable = isStripeEnabled && !!stripePublishableKey;
+  // Square requires application ID and location ID to be present
+  const isSquareAvailable = isSquareEnabled && !!squareApplicationId && !!squareLocationId;
+  const noPaymentEnabled = !isStripeAvailable && !isSquareAvailable;
 
   return (
     <>
@@ -229,7 +233,7 @@ export function ManageCardsModal({ isOpen, onClose }: ManageCardsModalProps) {
                   ) : (
                     <div className="space-y-4">
                       {/* Stripe Cards Section */}
-                      {isStripeEnabled && (
+                      {isStripeAvailable && (
                         <div>
                           <h3 className="text-sm font-semibold text-gray-700 mb-3">
                             {t('Stripe Cards')}
@@ -269,8 +273,8 @@ export function ManageCardsModal({ isOpen, onClose }: ManageCardsModalProps) {
                       )}
 
                       {/* Square Cards Section */}
-                      {isSquareEnabled && (
-                        <div className={isStripeEnabled ? "pt-3 border-t" : ""}>
+                      {isSquareAvailable && (
+                        <div className={isStripeAvailable ? "pt-3 border-t" : ""}>
                           <h3 className="text-sm font-semibold text-gray-700 mb-3">
                             {t('Square Cards')}
                           </h3>

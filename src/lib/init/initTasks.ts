@@ -17,17 +17,17 @@ interface BusinessCredentials {
   business_token: string;
 }
 
-// In-memory cache for init results, keyed by subdomain
+// In-memory cache for init results, keyed by hostname
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const initCache = new Map<string, { result: InitTasksResult; timestamp: number }>();
 
 console.log("INIT TASK RUNNING:", Date.now())
 
-async function fetchBusinessCredentials(subdomain: string , subdomainNamePass: string | undefined): Promise<DefaultResponse & { data?: BusinessCredentials }> {
+async function fetchBusinessCredentials(hostname: string , subdomainNamePass: string | undefined): Promise<DefaultResponse & { data?: BusinessCredentials }> {
   try {
-    console.log("Reaching fetch Business:::::");
+    console.log("Reaching fetch Business:::::", hostname, subdomainNamePass);
     const response = await apiClient.post(API_ENDPOINTS.PRODUCTION.AUTOS_BASE_URL + API_ENDPOINTS.AUTH.GET_SUBDOMAIN_ID, {
-      subdomain_name: subdomain,
+      subdomain_name: hostname,
       password: subdomainNamePass,
     }, {
       headers: {
@@ -130,26 +130,18 @@ async function verifySession(sessionDetails: any): Promise<DefaultResponse> {
 export async function runInitTasks(): Promise<InitTasksResult> {
   // Get hostname from request headers (Next.js server-side)
   const headersList = await headers();
-  const hostname = headersList.get('host') || 'unknown';
+  let hostname = headersList.get('host') || 'unknown';
   const subdomainNamePass = process.env.SUBDOMAIN_PASS;
-  console.log("Subdomain name password:::::",subdomainNamePass)
-  // Extract subdomain from hostname (e.g., "example-subdomain.example.com" -> "example-subdomain")
-  let subdomain = hostname.split('.')[0];
-  console.log("Subdomain::",subdomain);
-  if(subdomain === 'localhost:4000'){
-    subdomain = "magenta-dasik-9633e9"
-  }
-  
-  // Check cache — return cached result if still valid
-  const cached = initCache.get(subdomain);
-  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL_MS) {
-    console.log(`[initTasks] Using cached result for "${subdomain}" (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
-    return cached.result;
+  // console.log("Subdomain name password:::::",subdomainNamePass)
+  // Use full hostname instead of just subdomain
+  console.log("Hostname::",hostname);
+  if(hostname === 'localhost:4000'){
+    hostname = "magenta-dasik-9633e9"
   }
 
   // Fetch business credentials before authorizing
   console.log("Fetch business credentials before authorizing")
-  const credentialsResult = await fetchBusinessCredentials(subdomain, subdomainNamePass);
+  const credentialsResult = await fetchBusinessCredentials(hostname, subdomainNamePass);
   console.log("CREDENTIALS RESULT:::::+++",credentialsResult);
   
   if (!credentialsResult.success || !credentialsResult.data) {
@@ -203,8 +195,8 @@ export async function runInitTasks(): Promise<InitTasksResult> {
   };
 
   // Cache only successful results
-  initCache.set(subdomain, { result, timestamp: Date.now() });
-  console.log(`[initTasks] Cached result for "${subdomain}"`);
+  initCache.set(hostname, { result, timestamp: Date.now() });
+  console.log(`[initTasks] Cached result for "${hostname}"`);
 
   return result;
 }
